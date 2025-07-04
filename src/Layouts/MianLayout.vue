@@ -1,38 +1,8 @@
 <template>
   <v-app>
     <!-- Navigation Drawer -->
-    <v-navigation-drawer
-      app
-      v-model="drawer"
-      :mini-variant.sync="mini"
-      permanent
-      clipped
-    >
+    <v-navigation-drawer app v-model="drawer" permanent clipped>
       <v-list dense>
-        <!-- User Info -->
-        <v-list-item>
-          <v-list-item-avatar>
-            <v-img src="https://randomuser.me/api/portraits/men/85.jpg" />
-          </v-list-item-avatar>
-          <v-list-item-content v-if="!mini">
-            <v-list-item-title class="text-subtitle-1 font-weight-medium">
-              John Leider
-            </v-list-item-title>
-            <v-list-item-subtitle class="text-caption"
-              >Admin</v-list-item-subtitle
-            >
-          </v-list-item-content>
-
-          <v-spacer></v-spacer>
-          <v-btn icon @click.stop="mini = !mini">
-            <v-icon>{{
-              mini ? "mdi-chevron-right" : "mdi-chevron-left"
-            }}</v-icon>
-          </v-btn>
-        </v-list-item>
-
-        <v-divider class="my-2" />
-
         <!-- Navigation Items -->
         <v-list-item
           v-for="item in items"
@@ -45,7 +15,7 @@
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
-          <v-list-item-content v-if="!mini">
+          <v-list-item-content>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -55,6 +25,64 @@
     <!-- Main Content -->
     <v-main>
       <v-container fluid>
+        <!-- Top-right User Menu -->
+        <div class="d-flex justify-end mb-4">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                text
+                color="primary"
+                v-bind="attrs"
+                v-on="on"
+                class="text-capitalize"
+              >
+                {{ user.name || "Loading..." }}
+                <v-icon right>mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
+
+            <v-card width="300">
+              <v-list-item>
+                <v-list-item-avatar>
+                  <v-img
+                    src="https://cdn.vuetifyjs.com/images/john.jpg"
+                    alt="User Avatar"
+                  />
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ user.name }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-divider></v-divider>
+
+              <v-list dense>
+                <v-list-item>
+                  <v-list-item-action>
+                    <v-switch v-model="message" color="purple" />
+                  </v-list-item-action>
+                  <v-list-item-title>Enable messages</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-list-item-action>
+                    <v-switch v-model="hints" color="purple" />
+                  </v-list-item-action>
+                  <v-list-item-title>Enable hints</v-list-item-title>
+                </v-list-item>
+              </v-list>
+
+              <v-divider class="my-2" />
+
+              <v-card-actions>
+                <v-btn block text color="error" @click="logout"> Logout </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-menu>
+        </div>
+
+        <!-- Routed Content -->
         <router-view />
       </v-container>
     </v-main>
@@ -67,13 +95,20 @@
     </v-footer>
   </v-app>
 </template>
-
 <script>
+import api, { setAuthToken } from "@/plugins/axios";
+
 export default {
   data() {
     return {
       drawer: true,
       mini: true,
+      user: {
+        name: "",
+        email: "",
+      },
+      message: true,
+      hints: true,
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard", route: "/" },
         { title: "Orders", icon: "mdi-receipt", route: "/orders" },
@@ -84,11 +119,27 @@ export default {
       ],
     };
   },
+  created() {
+    this.fetchUser();
+  },
+  methods: {
+    async fetchUser() {
+      try {
+        const res = await api.get("/api/provider/me");
+        if (res.data?.data) {
+          const { name, contact_email } = res.data.data;
+          this.user.name = name;
+          this.user.email = contact_email;
+        }
+      } catch (err) {
+        console.error("Failed to fetch user info", err);
+      }
+    },
+    logout() {
+      localStorage.removeItem("authToken");
+      setAuthToken(null);
+      this.$router.replace("/login");
+    },
+  },
 };
 </script>
-
-<style scoped>
-.v-list-item {
-  transition: background-color 0.2s ease;
-}
-</style>
