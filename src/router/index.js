@@ -5,6 +5,8 @@ import Login from "@/views/Login.vue";
 import Orders from "@/views/Orders.vue";
 import Vue from "vue";
 import Router from "vue-router";
+import CustomersList from "@/views/Customers/CustomersList.vue";
+import LocationList from "@/views/LocationList.vue";
 
 Vue.use(Router);
 
@@ -17,6 +19,8 @@ const router = new Router({
       children: [
         { path: "/", name: "Home", component: HomeView },
         { path: "/orders", name: "Order", component: Orders },
+        { path: "/customers", name: "Customer", component: CustomersList },
+        { path: "/locations", name: "Location", component: LocationList },
       ],
     },
     { path: "/login", name: "Login", component: Login },

@@ -1,0 +1,303 @@
+<template>
+  <v-container>
+    <div>
+      <v-row class="align-center">
+        <!-- Left: Title -->
+        <v-col cols="12" md="6">
+          <div class="text-h6 font-weight-bold">Customers ({{ total }})</div>
+        </v-col>
+
+        <!-- Right: Search and Add Button -->
+        <v-col cols="12" md="6">
+          <div class="d-flex justify-end align-center">
+            <v-text-field
+              v-model="searchQuery"
+              append-icon="mdi-magnify"
+              placeholder="Search by name, phone & email.."
+              dense
+              hide-details
+              outlined
+              class="mr-4"
+              @input="onSearchInput"
+              @keyup.enter="fetchCustomers"
+            />
+            <v-btn
+              color="primary"
+              dark
+              @click="openCreateCustomerDialog = true"
+            >
+              <v-icon left>mdi-plus</v-icon>
+              Add Customer
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+
+      <v-card class="rounded-lg my-4" outlined :loading="loading">
+        <v-simple-table>
+          <thead>
+            <tr>
+              <th class="text-left">ID</th>
+              <th class="text-left">Name</th>
+              <th class="text-left">Phone</th>
+              <th class="text-left">Email</th>
+              <th class="text-left">Status</th>
+              <th class="text-left">Created At</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="customer in customers" :key="customer.id">
+              <td>{{ customer.customer_id }}</td>
+              <td>{{ customer.display_name }}</td>
+              <td>{{ customer.user_data?.phone }}</td>
+              <td>{{ customer.email }}</td>
+              <td>
+                <v-chip
+                  :color="getStatusColor(customer.status)"
+                  text-color="white"
+                  small
+                >
+                  {{ customer.status }}
+                </v-chip>
+              </td>
+              <td>{{ customer.created_at | moment }}</td>
+              <td>
+                <v-btn small outlined color="primary">View</v-btn>
+              </td>
+            </tr>
+            <tr v-if="!customers.length">
+              <td colspan="7" class="text-center grey--text">
+                No customers found.
+              </td>
+            </tr>
+          </tbody>
+        </v-simple-table>
+
+        <v-divider></v-divider>
+        <v-card-actions class="justify-center">
+          <v-pagination
+            v-model="page"
+            :length="pageCount"
+            circle
+            total-visible="5"
+            @input="fetchCustomers"
+          />
+        </v-card-actions>
+      </v-card>
+    </div>
+
+    <!-- Add Customer dialog -->
+    <v-dialog v-model="openCreateCustomerDialog" max-width="500px">
+      <v-card :loading="loading">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Add Customer</div>
+            <v-btn icon @click="openCreateCustomerDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+
+          <!-- Form -->
+          <div class="my-4">
+            <v-form ref="form" v-model="formValid">
+              <!-- Name -->
+              <label class="text-subtitle-2">
+                Name <span class="red--text">*</span>
+              </label>
+              <div class="mb-3">
+                <v-text-field
+                  v-model="form.name"
+                  :rules="[rules.required]"
+                  required
+                  outlined
+                  dense
+                  hide-details
+                />
+              </div>
+
+              <!-- Phone -->
+              <label class="text-subtitle-2">
+                Phone <span class="red--text">*</span>
+              </label>
+              <div class="mb-3">
+                <v-text-field
+                  v-model="form.phone"
+                  type="tel"
+                  :rules="[rules.required, rules.numeric]"
+                  required
+                  outlined
+                  dense
+                  hide-details
+                />
+              </div>
+
+              <!-- Email -->
+              <label class="text-subtitle-2">
+                Email <span class="red--text">*</span>
+              </label>
+              <div class="mb-3">
+                <v-text-field
+                  v-model="form.email"
+                  type="email"
+                  :rules="[rules.required, rules.email]"
+                  required
+                  outlined
+                  dense
+                  hide-details
+                />
+              </div>
+
+              <!-- Address -->
+              <label class="text-subtitle-2">Address</label>
+              <div class="mb-3">
+                <v-textarea
+                  v-model="form.address"
+                  outlined
+                  dense
+                  rows="2"
+                  hide-details
+                />
+              </div>
+            </v-form>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-end my-2">
+            <v-btn text @click="openCreateCustomerDialog = false" class="mr-2"
+              >Cancel</v-btn
+            >
+            <v-btn
+              color="primary"
+              :disabled="!formValid"
+              @click="createCustomer"
+            >
+              Create
+            </v-btn>
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
+  </v-container>
+</template>
+
+<script>
+import api from "@/plugins/axios";
+import debounce from "lodash/debounce";
+
+export default {
+  name: "CustomerList",
+  data() {
+    return {
+      loading: false,
+      customers: [],
+      total: 0,
+      page: 1,
+      limit: 10,
+      pageCount: 1,
+      searchQuery: "",
+      openCreateCustomerDialog: false,
+      formValid: false,
+      form: {
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+      },
+      rules: {
+        required: (value) => !!value || "Required.",
+        email: (value) =>
+          !value ||
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
+          "Invalid email.",
+        numeric: (value) =>
+          /^\d{10}$/.test(value) || "Must be exactly 10 digits",
+      },
+    };
+  },
+
+  watch: {
+    searchQuery: {
+      handler: "onSearchInput",
+    },
+  },
+
+  created() {
+    this.onSearchInput = debounce(this.fetchCustomers, 400);
+  },
+
+  mounted() {
+    this.fetchCustomers();
+  },
+
+  methods: {
+    async fetchCustomers() {
+      this.loading = true;
+      const offset = (this.page - 1) * this.limit;
+      try {
+        const { data } = await api.get("/api/customers", {
+          params: {
+            limit: this.limit,
+            offset,
+            search: this.searchQuery || undefined,
+          },
+        });
+
+        this.customers = data?.data?.customers || [];
+        this.total = data?.data?.meta?.count || 0;
+        this.pageCount = Math.ceil(this.total / this.limit) || 1;
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async createCustomer() {
+      if (!this.$refs.form.validate()) return;
+
+      this.loading = true;
+
+      try {
+        const response = await api.post("/api/customer", this.form);
+
+        this.openCreateCustomerDialog = false;
+        this.$refs.form.reset();
+        this.fetchCustomers();
+
+        this.$swal.fire({
+          icon: "success",
+          title: "Customer Created",
+          text: response.data?.message || "Customer Added successfully!",
+          confirmButtonColor: "#1976d2",
+        });
+      } catch (err) {
+        console.error("Add error:", err);
+
+        this.$swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.response?.data?.message || "Something went wrong!",
+          confirmButtonColor: "#d33",
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    getStatusColor(status) {
+      switch (status.toLowerCase()) {
+        case "active":
+          return "green";
+        case "inactive":
+          return "red";
+        default:
+          return "blue";
+      }
+    },
+  },
+};
+</script>
+
+<style scoped></style>
