@@ -1,35 +1,43 @@
 <template>
   <v-container>
     <div>
-      <v-row class="align-center">
-        <!-- Left: Title -->
-        <v-col cols="12" md="6">
+      <v-row align="center" class="mb-4">
+        <!-- Title -->
+        <v-col cols="12" md="4" class="d-flex align-center">
           <div class="text-h6 font-weight-bold">Customers ({{ total }})</div>
         </v-col>
 
-        <!-- Right: Search and Add Button -->
-        <v-col cols="12" md="6">
-          <div class="d-flex justify-end align-center">
-            <v-text-field
-              v-model="searchQuery"
-              append-icon="mdi-magnify"
-              placeholder="Search by name, phone & email.."
-              dense
-              hide-details
-              outlined
-              class="mr-4"
-              @input="onSearchInput"
-              @keyup.enter="fetchCustomers"
-            />
-            <v-btn
-              color="primary"
-              dark
-              @click="openCreateCustomerDialog = true"
-            >
-              <v-icon left>mdi-plus</v-icon>
-              Add Customer
-            </v-btn>
-          </div>
+        <!-- Search Field -->
+        <v-col cols="12" md="4">
+          <v-text-field
+            v-model="searchQuery"
+            append-icon="mdi-magnify"
+            placeholder="Search by name, phone & email..."
+            dense
+            outlined
+            hide-details
+            @input="onSearchInput"
+            @keyup.enter="fetchCustomers"
+          />
+        </v-col>
+
+        <!-- Status Filter + Add Button -->
+        <v-col cols="12" md="4" class="d-flex align-center justify-end">
+          <v-select
+            v-model="selectedStatus"
+            :items="statusOptions"
+            label="Status"
+            outlined
+            dense
+            hide-details
+            class="mr-2"
+            @change="fetchCustomers"
+          />
+
+          <v-btn color="primary" dark @click="openCreateCustomerDialog = true">
+            <v-icon left>mdi-plus</v-icon>
+            Add Customer
+          </v-btn>
         </v-col>
       </v-row>
 
@@ -197,6 +205,12 @@ export default {
       limit: 10,
       pageCount: 1,
       searchQuery: "",
+      selectedStatus: "",
+      statusOptions: [
+        { text: "All Statuses", value: "" },
+        { text: "Active", value: "active" },
+        { text: "Inactive", value: "inactive" },
+      ],
       openCreateCustomerDialog: false,
       formValid: false,
       form: {
@@ -241,6 +255,7 @@ export default {
             limit: this.limit,
             offset,
             search: this.searchQuery || undefined,
+            status: this.selectedStatus,
           },
         });
 
