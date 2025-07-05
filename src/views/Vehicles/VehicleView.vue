@@ -85,7 +85,11 @@
             <v-tabs-items v-model="activeTab">
               <v-tab-item><OverviewTab :vehicle="vehicle" /></v-tab-item>
               <!-- Future Tabs -->
-              <v-tab-item><TraceTab :vehicle="vehicle" /></v-tab-item>
+              <v-tab-item
+                ><TraceTab
+                  :vehicle="vehicle"
+                  :location="vehicle?.location_data"
+              /></v-tab-item>
               <v-tab-item><BookingsTab :vehicle-id="vehicle_id" /></v-tab-item>
               <v-tab-item
                 ><SettingsTab :vehicle="vehicle" @status-updated="loadVehicle"
