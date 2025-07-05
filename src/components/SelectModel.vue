@@ -47,12 +47,7 @@
                 </v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
-                <v-chip
-                  color="green"
-                  text-color="white"
-                  small
-                  v-if="model.available_vehicle_count > 0"
-                >
+                <v-chip color="green" text-color="white" small>
                   {{ model.available_vehicle_count }} available
                 </v-chip>
               </v-list-item-action>
@@ -97,11 +92,9 @@ export default {
   },
   computed: {
     filteredModels() {
-      return this.models
-        .filter((m) => m.status === "active" && m.available_vehicle_count > 0)
-        .filter((m) =>
-          m.model_name.toLowerCase().includes(this.search.toLowerCase())
-        );
+      return this.models.filter((m) =>
+        m.model_name.toLowerCase().includes(this.search.toLowerCase())
+      );
     },
   },
   methods: {
