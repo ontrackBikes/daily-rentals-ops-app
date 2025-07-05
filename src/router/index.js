@@ -46,7 +46,30 @@ const router = new Router({
       name: "Customer View",
       redirect: "/customer/:customer_id/orders",
       component: CustomerView,
-      children: [{ path: "orders", name: "Orders", component: OrdersTab }],
+      children: [
+        { path: "orders", name: "Customer  - Orders", component: OrdersTab },
+      ],
+    },
+    {
+      path: "/orders/:id",
+      component: () => import("@/views/Orders/OrderView.vue"),
+      children: [
+        {
+          path: "",
+          name: "Order - Overview",
+          component: () => import("@/views/Orders/Tabs/OverviewTab.vue"),
+        },
+        {
+          path: "bookings",
+          name: "Order - Bookings",
+          component: () => import("@/views/Orders/Tabs/BookingsTab.vue"),
+        },
+        {
+          path: "payments",
+          name: "Order - Payments",
+          component: () => import("@/views/Orders/Tabs/PaymentsTab.vue"),
+        },
+      ],
     },
     {
       path: "/add-vehicle",

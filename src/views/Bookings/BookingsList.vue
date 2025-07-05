@@ -223,7 +223,7 @@ export default {
             search: this.searchQuery || undefined,
           },
         });
-        this.bookings = data?.data?.Bookings || [];
+        this.bookings = data?.data?.bookings || [];
         this.total = data?.data?.meta?.count || 0;
         this.pageCount = Math.ceil(this.total / this.limit) || 1;
       } catch (err) {

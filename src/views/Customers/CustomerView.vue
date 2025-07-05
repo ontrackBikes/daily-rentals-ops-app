@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <deep-layout>
     <v-container fluid>
       <v-row dense>
         <!-- LEFT: Customer Info -->
@@ -409,16 +409,17 @@
         </v-container>
       </v-card>
     </v-dialog>
-  </v-app>
+  </deep-layout>
 </template>
 
 <script>
 import api from "@/plugins/axios";
 import Swal from "sweetalert2";
 import OrdersTab from "./CustomerTabs/OrdersTab.vue";
+import DeepLayout from "@/Layouts/DeepLayout.vue";
 
 export default {
-  components: { OrdersTab },
+  components: { OrdersTab, DeepLayout },
   data() {
     return {
       customer_id: null,
