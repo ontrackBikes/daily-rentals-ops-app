@@ -10,11 +10,20 @@ import LocationList from "@/views/LocationList.vue";
 import VehiclesList from "@/views/Vehicles/VehiclesList.vue";
 import CustomerView from "@/views/Customers/CustomerView.vue";
 import OrdersTab from "@/views/Customers/CustomerTabs/OrdersTab.vue";
+import HelloWorld from "@/components/HelloWorld.vue";
+import CreateBooking from "@/views/Bookings/CreateBooking.vue";
 
 Vue.use(Router);
 
 const router = new Router({
   routes: [
+    { path: "/hello-world", name: "Login", component: HelloWorld },
+    {
+      path: "/create-booking",
+      name: "Create Booking",
+      component: CreateBooking,
+    },
+
     {
       path: "/",
       name: "Main Layout",
@@ -38,6 +47,7 @@ const router = new Router({
 
     { path: "/login", name: "Login", component: Login },
   ],
+  mode: "history",
 });
 
 // ✅ Navigation guard
