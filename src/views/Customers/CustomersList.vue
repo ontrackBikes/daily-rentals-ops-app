@@ -71,7 +71,14 @@
               </td>
               <td>{{ customer.created_at | moment }}</td>
               <td>
-                <v-btn small outlined color="primary">View</v-btn>
+                <v-btn
+                  small
+                  outlined
+                  color="primary"
+                  @click="viewCustomer(customer.customer_id)"
+                >
+                  View
+                </v-btn>
               </td>
             </tr>
             <tr v-if="!customers.length">
@@ -299,6 +306,10 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    viewCustomer(id) {
+      this.$router.push("/customer/" + id);
     },
 
     getStatusColor(status) {

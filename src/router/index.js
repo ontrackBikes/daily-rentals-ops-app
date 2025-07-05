@@ -8,6 +8,7 @@ import Router from "vue-router";
 import CustomersList from "@/views/Customers/CustomersList.vue";
 import LocationList from "@/views/LocationList.vue";
 import VehiclesList from "@/views/Vehicles/VehiclesList.vue";
+import CustomerView from "@/views/Customers/CustomerView.vue";
 
 Vue.use(Router);
 
@@ -25,6 +26,16 @@ const router = new Router({
         { path: "/locations", name: "Location", component: LocationList },
       ],
     },
+
+    {
+      path: "/customer/:customer_id",
+      name: "Customer View",
+      component: CustomerView,
+      children: [
+        // { path: "/locations", name: "Location", component: LocationList },
+      ],
+    },
+
     { path: "/login", name: "Login", component: Login },
   ],
 });
