@@ -32,7 +32,7 @@
     <v-card
       class="hidden-md-and-down"
       outlined
-      style="position: absolute; right: 40px; top: 40px"
+      style="position: absolute; right: 40px; top: 80px"
       min-width="300px"
     >
       <v-container>
