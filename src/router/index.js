@@ -12,6 +12,8 @@ import CustomerView from "@/views/Customers/CustomerView.vue";
 import OrdersTab from "@/views/Customers/CustomerTabs/OrdersTab.vue";
 import HelloWorld from "@/components/HelloWorld.vue";
 import CreateBooking from "@/views/Bookings/CreateBooking.vue";
+import VehiclesView from "@/views/Vehicles/VehicleView.vue";
+import AddVehicles from "../components/AddVehicles.vue";
 
 Vue.use(Router);
 
@@ -43,6 +45,43 @@ const router = new Router({
       redirect: "/customer/:customer_id/orders",
       component: CustomerView,
       children: [{ path: "orders", name: "Orders", component: OrdersTab }],
+    },
+    {
+      path: "/add-vehicle",
+      name: "Add Vehicle",
+      component: AddVehicles,
+    },
+
+    // Vehicles view with tabs
+    {
+      path: "/vehicles/:vehicle_id",
+      name: "Vehicle Views",
+      redirect: "/vehicles/:vehicle_id/overview",
+      component: VehiclesView,
+      children: [
+        {
+          path: "overview",
+          name: "Vehicle Detail",
+          component: () => import("@/views/Vehicles/VehicleTabs/OverView.vue"),
+        },
+        {
+          path: "trace",
+          name: "Vehicle Trace",
+          component: () => import("../views/Vehicles/VehicleTabs/TraceTab.vue"),
+        },
+        {
+          path: "bookings",
+          name: "Vehicle Bookings",
+          component: () =>
+            import("../views/Vehicles/VehicleTabs/BookingsTab.vue"),
+        },
+        {
+          path: "settings",
+          name: "Vehicle Settings",
+          component: () =>
+            import("@/views/Vehicles/VehicleTabs/SettingsTab.vue"),
+        },
+      ],
     },
 
     { path: "/login", name: "Login", component: Login },
