@@ -6,6 +6,15 @@ import { setAuthToken } from "./plugins/axios";
 import moment from "moment";
 import Swal from "sweetalert2";
 
+import * as VueGoogleMaps from "vue2-google-maps";
+
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: "AIzaSyDucvvoh1OTE5cVUjLLL2lFoXBqTsdVQNo",
+    libraries: "places",
+  },
+});
+
 Vue.config.productionTip = false;
 
 const token = localStorage.getItem("authToken");

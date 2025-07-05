@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <deep-layout>
     <v-container fluid>
       <!-- Loading -->
       <v-row v-if="loading" justify="center" class="my-12">
@@ -231,7 +231,7 @@
         </v-container>
       </v-card>
     </v-dialog>
-  </v-app>
+  </deep-layout>
 </template>
 
 <script>
@@ -241,6 +241,7 @@ import OverviewTab from "../Vehicles/VehicleTabs/OverView.vue";
 import TraceTab from "../Vehicles/VehicleTabs/TraceTab.vue";
 import BookingsTab from "../Vehicles/VehicleTabs/BookingsTab.vue";
 import SettingsTab from "../Vehicles/VehicleTabs/SettingsTab.vue";
+import DeepLayout from "@/Layouts/DeepLayout.vue";
 
 export default {
   name: "VehicleView",
@@ -249,6 +250,7 @@ export default {
     TraceTab,
     BookingsTab,
     SettingsTab,
+    DeepLayout,
   },
   data() {
     return {

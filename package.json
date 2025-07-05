@@ -17,6 +17,7 @@
     "vue": "^2.6.14",
     "vue-js-popover": "^1.2.1",
     "vue-router": "^3.5.1",
+    "vue2-google-maps": "^0.10.7",
     "vuetify": "^2.6.0"
   },
   "devDependencies": {
