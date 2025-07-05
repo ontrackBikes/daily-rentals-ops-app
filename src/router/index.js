@@ -2,7 +2,6 @@
 import MianLayout from "@/Layouts/MianLayout.vue";
 import HomeView from "@/views/HomeView.vue";
 import Login from "@/views/Login.vue";
-import Orders from "@/views/Orders.vue";
 import Vue from "vue";
 import Router from "vue-router";
 import CustomersList from "@/views/Customers/CustomersList.vue";
@@ -10,8 +9,10 @@ import LocationList from "@/views/LocationList.vue";
 import VehiclesList from "@/views/Vehicles/VehiclesList.vue";
 import CustomerView from "@/views/Customers/CustomerView.vue";
 import OrdersTab from "@/views/Customers/CustomerTabs/OrdersTab.vue";
+import BookingsList from "@/views/Bookings/BookingsList.vue";
 import HelloWorld from "@/components/HelloWorld.vue";
 import CreateBooking from "@/views/Bookings/CreateBooking.vue";
+import OrdersList from "@/views/Orders/OrdersList.vue";
 
 Vue.use(Router);
 
@@ -30,7 +31,8 @@ const router = new Router({
       component: MianLayout,
       children: [
         { path: "/", name: "Home", component: HomeView },
-        { path: "/orders", name: "Order", component: Orders },
+        { path: "/orders", name: "Order", component: OrdersList },
+        { path: "/bookings", name: "Booking", component: BookingsList },
         { path: "/vehicles", name: "Vehicle", component: VehiclesList },
         { path: "/customers", name: "Customer", component: CustomersList },
         { path: "/locations", name: "Location", component: LocationList },
