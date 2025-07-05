@@ -79,7 +79,7 @@
                 small
                 outlined
                 color="primary"
-                @click="viewOrder(order.internal_order_id)"
+                @click="viewOrder(order.order_id)"
               >
                 View
               </v-btn>
@@ -176,7 +176,7 @@ export default {
     },
 
     viewOrder(id) {
-      this.$router.push(`/order/${id}`);
+      this.$router.push(`/orders/${id}`);
     },
 
     getBalanceColor(balance) {
