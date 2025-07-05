@@ -15,7 +15,7 @@
         <v-col cols="12" md="3">
           <v-card outlined class="pa-4 rounded-lg">
             <!-- Status -->
-            <div class="d-flex align-center">
+            <div class="d-flex align-center justify-space-between">
               <v-chip
                 small
                 :color="statusColor"
@@ -27,16 +27,40 @@
             </div>
 
             <!-- Registration Number -->
-            <div class="text-subtitle-1 font-weight-bold mt-2">
+            <div
+              class="text-subtitle-1 font-weight-bold mt-2 d-flex align-center"
+            >
               {{ vehicle.registration_number }}
-              <v-btn icon small @click="editVehicleDialog = true">
+              <v-btn icon small @click="editVehicleDialog = true" class="ml-2">
                 <v-icon small color="primary">mdi-pencil</v-icon>
               </v-btn>
             </div>
 
-            <!-- Created Date -->
+            <!-- Location -->
             <div
               class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
+              v-if="vehicle.location_data"
+            >
+              <v-icon small color="indigo" class="mr-1">mdi-map-marker</v-icon>
+              {{ vehicle.location_data.name }}
+            </div>
+
+            <!-- Google Maps Button -->
+            <v-btn
+              v-if="vehicle.location_data"
+              :href="googleMapsUrl"
+              target="_blank"
+              rel="noopener"
+              small
+              outlined
+              class="mt-2"
+            >
+              <v-icon left small>mdi-directions</v-icon> Directions
+            </v-btn>
+
+            <!-- Created Date -->
+            <div
+              class="grey--text text--darken-1 text-body-2 mt-2 d-flex align-center"
             >
               <v-icon small color="indigo" class="mr-1">mdi-calendar</v-icon>
               Created: {{ formatDate(vehicle.created_at) }}
@@ -49,8 +73,34 @@
               <v-icon small color="indigo" class="mr-1">mdi-motorbike</v-icon>
               {{ vehicle.vehicle_type }}
             </div>
+
+            <!-- Model Info -->
+            <div
+              class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
+              v-if="vehicle.model_data"
+            >
+              <v-icon small color="indigo" class="mr-1">mdi-bike</v-icon>
+              {{ vehicle.model_data.make }}
+              {{ vehicle.model_data.model_name }} ({{
+                vehicle.model_data.year
+              }})
+            </div>
+
+            <!-- KM & Service -->
             <v-divider class="my-2" />
-            <!-- Image or Icon -->
+
+            <div class="text-body-2">
+              <div><strong>Current KM:</strong> {{ vehicle.current_km }}</div>
+              <div>
+                <strong>Next Service @:</strong>
+                {{ vehicle.next_service_km }} km
+              </div>
+              <div>
+                <strong>Service Date:</strong> {{ vehicle.next_service_date }}
+              </div>
+            </div>
+
+            <!-- Image -->
             <div class="text-center mt-4">
               <v-img
                 v-if="vehicle.image_url"
