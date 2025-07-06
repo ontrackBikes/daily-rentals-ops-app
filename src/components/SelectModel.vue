@@ -2,10 +2,10 @@
   <div>
     <!-- Trigger Card -->
     <v-card
-      :loading="loading"
       outlined
+      :loading="loading"
       @click="getDataAndOpenDialog"
-      style="cursor: pointer"
+      class="hoverable"
     >
       <div class="pa-4 d-flex justify-space-between align-center">
         <span>{{ value?.model_name || "Select Model" }}</span>
@@ -15,61 +15,78 @@
 
     <!-- Dialog -->
     <v-dialog v-model="dialog" max-width="600px">
-      <v-card :loading="loading" min-height="300px">
-        <v-card-title>
-          <v-text-field
-            v-model="search"
-            prepend-inner-icon="mdi-magnify"
-            label="Search Model"
-            dense
-            outlined
-            hide-details
-            class="flex-grow-1"
-          />
-        </v-card-title>
+      <v-card :loading="loading">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Select Vehicle Model</div>
+            <v-btn icon @click="dialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
 
-        <v-divider />
+          <!-- Search -->
+          <v-form class="my-4">
+            <div class="mb-3">
+              <v-text-field
+                v-model="search"
+                prepend-inner-icon="mdi-magnify"
+                outlined
+                dense
+                hide-details
+                placeholder="Type model name..."
+              />
+            </div>
+          </v-form>
 
-        <v-card-text>
-          <v-list>
-            <v-list-item
-              v-for="model in filteredModels"
-              :key="model.model_id"
-              @click="selectVehicleModel(model)"
-              class="hoverable"
-            >
-              <v-list-item-content>
-                <v-list-item-title class="font-weight-medium">
-                  {{ model.model_name }}
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ model.make }} • {{ model.year }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-chip
-                  color="green"
-                  text-color="white"
-                  small
-                  v-if="model.available_vehicle_count > 0"
-                >
-                  {{ model.available_vehicle_count }} available
-                </v-chip>
-              </v-list-item-action>
-            </v-list-item>
+          <!-- List -->
+          <div>
+            <v-list class="rounded" two-line>
+              <!-- Available Models -->
+              <v-list-item
+                v-for="model in filteredModels"
+                :key="model.model_id"
+                @click="selectVehicleModel(model)"
+                class="hoverable"
+              >
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ model.model_name }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ model.make }} • {{ model.year }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-chip
+                    small
+                    color="green"
+                    text-color="white"
+                    v-if="model.available_vehicle_count > 0"
+                  >
+                    {{ model.available_vehicle_count }} available
+                  </v-chip>
+                </v-list-item-action>
+              </v-list-item>
 
-            <v-list-item v-if="!filteredModels.length && !loading">
-              <v-list-item-content>
-                <v-list-item-title>No vehicles found</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
+              <!-- No Result -->
+              <div
+                v-if="!filteredModels.length && !loading"
+                class="text-center pa-4"
+              >
+                <v-icon size="36" color="grey lighten-1">mdi-car-off</v-icon>
+                <div class="mt-2 font-weight-medium grey--text">
+                  No models found
+                </div>
+              </div>
+            </v-list>
+          </div>
 
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
-        </v-card-actions>
+          <!-- Actions -->
+          <div class="d-flex justify-end my-2">
+            <v-btn text @click="dialog = false" class="mr-2">Cancel</v-btn>
+          </div>
+        </v-container>
       </v-card>
     </v-dialog>
   </div>
@@ -123,7 +140,7 @@ export default {
       }
     },
     selectVehicleModel(model) {
-      this.$emit("input", model); // v-model support
+      this.$emit("input", model);
       this.dialog = false;
     },
   },

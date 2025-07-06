@@ -3,96 +3,111 @@
     <!-- Trigger -->
     <v-card
       outlined
-      class="pa-4 d-flex justify-space-between align-center"
+      class="pa-4 d-flex justify-space-between align-center hoverable"
+      :loading="loading"
       @click="openDialog"
-      style="cursor: pointer"
     >
-      <span>{{
-        value?.registration_number || "Select Available Vehicle"
-      }}</span>
+      <span>
+        {{ value?.registration_number || "Select Available Vehicle" }}
+      </span>
       <v-icon right>mdi-chevron-down</v-icon>
     </v-card>
 
     <!-- Dialog -->
-    <v-dialog v-model="dialog" max-width="700px">
+    <v-dialog v-model="dialog" max-width="600px">
       <v-card :loading="loading">
-        <v-card-title>
-          <v-text-field
-            v-model="localSearch"
-            prepend-inner-icon="mdi-magnify"
-            label="Search"
-            dense
-            outlined
-            hide-details
-            class="flex-grow-1"
-          />
-        </v-card-title>
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Select Vehicle</div>
+            <v-btn icon @click="dialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
 
-        <v-divider />
+          <!-- Search -->
+          <v-form class="my-4">
+            <div class="mb-3">
+              <v-text-field
+                v-model="localSearch"
+                prepend-inner-icon="mdi-magnify"
+                outlined
+                dense
+                hide-details
+                placeholder="Search by model or registration number"
+              />
+            </div>
+          </v-form>
 
-        <v-card-text style="max-height: 400px; overflow-y: auto">
-          <v-list>
-            <v-list-item
-              v-for="vehicle in filteredVehicles"
-              :key="vehicle.vehicle_id"
-              @click="selectVehicle(vehicle)"
-              class="hoverable"
+          <!-- Vehicle List -->
+          <div style="max-height: 400px; overflow-y: auto">
+            <v-list>
+              <v-list-item
+                v-for="vehicle in filteredVehicles"
+                :key="vehicle.vehicle_id"
+                @click="selectVehicle(vehicle)"
+                class="hoverable"
+              >
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ vehicle.model_data?.model_name || "Unknown" }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ vehicle.registration_number }} •
+                    {{ vehicle.model_data?.make || "-" }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-chip
+                    small
+                    color="indigo"
+                    text-color="white"
+                    v-if="vehicle.status"
+                  >
+                    {{ vehicle.status }}
+                  </v-chip>
+                </v-list-item-action>
+              </v-list-item>
+
+              <!-- No Result -->
+              <div
+                v-if="!filteredVehicles.length && !loading"
+                class="text-center pa-4"
+              >
+                <v-icon size="36" color="grey lighten-1">mdi-car-off</v-icon>
+                <div class="mt-2 font-weight-medium grey--text">
+                  No vehicles found
+                </div>
+              </div>
+            </v-list>
+
+            <!-- Infinite scroll -->
+            <div
+              v-if="!allLoaded && filteredVehicles.length"
+              v-intersect="{
+                handler: loadMore,
+                options: { threshold: 0.5 },
+              }"
+              class="text-center py-2"
             >
-              <v-list-item-content>
-                <v-list-item-title class="font-weight-medium">
-                  {{ vehicle.model_data?.model_name || "Unknown" }}
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ vehicle.registration_number }} •
-                  {{ vehicle.model_data?.make || "-" }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-chip
-                  small
-                  color="indigo"
-                  text-color="white"
-                  v-if="vehicle.status"
-                >
-                  {{ vehicle.status }}
-                </v-chip>
-              </v-list-item-action>
-            </v-list-item>
-
-            <v-list-item v-if="!filteredVehicles.length && !loading">
-              <v-list-item-content>
-                <v-list-item-title>No vehicles found</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-
-          <!-- Infinite scroll (v-intersect) -->
-          <div
-            v-if="!allLoaded && filteredVehicles.length"
-            v-intersect="{
-              handler: loadMore,
-              options: { threshold: 0.5 },
-            }"
-          >
-            <div class="text-center py-2">
               <v-progress-circular
                 indeterminate
                 color="primary"
                 v-if="loadingMore"
               />
             </div>
+
+            <!-- Load More fallback -->
+            <div class="text-center" v-if="!allLoaded && !loadingMore">
+              <v-btn small @click="loadMore">Load More</v-btn>
+            </div>
           </div>
 
-          <!-- Load More Fallback Button -->
-          <div class="text-center" v-if="!allLoaded && !loadingMore">
-            <v-btn small @click="loadMore">Load More</v-btn>
+          <!-- Actions -->
+          <div class="d-flex justify-end my-2">
+            <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
           </div>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
-        </v-card-actions>
+        </v-container>
       </v-card>
     </v-dialog>
   </div>
@@ -193,7 +208,7 @@ export default {
       }
     },
     selectVehicle(vehicle) {
-      this.$emit("input", vehicle); // v-model support
+      this.$emit("input", vehicle);
       this.dialog = false;
     },
   },

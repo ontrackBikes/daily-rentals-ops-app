@@ -1,37 +1,44 @@
 <template>
   <div>
-    <!-- Trigger -->
+    <!-- Trigger Card -->
     <v-card
       outlined
       @click="dialog = true"
+      class="pa-4 d-flex justify-space-between align-center"
       :loading="loading"
       style="cursor: pointer"
     >
-      <div class="pa-4 d-flex justify-space-between align-center">
-        <span>{{ value?.display_name || "Select Customer" }}</span>
-        <v-icon right>mdi-account-search</v-icon>
-      </div>
+      <span>{{ value?.display_name || "Select Customer" }}</span>
+      <v-icon right>mdi-account-search</v-icon>
     </v-card>
 
-    <!-- Dialog -->
+    <!-- Customer Selection Dialog -->
     <v-dialog v-model="dialog" max-width="600px">
-      <v-card min-height="300px">
-        <v-card-title>
+      <v-card>
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="text-h6 font-weight-bold">Select Customer</div>
+            <v-btn icon @click="dialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
+          </div>
+
+          <!-- Search -->
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
-            label="Search Customer"
-            dense
+            placeholder="Search by name or phone..."
             outlined
+            dense
             hide-details
-            class="flex-grow-1"
+            class="mb-2"
           />
-        </v-card-title>
 
-        <v-divider />
+          <v-divider class="mb-2" />
 
-        <v-card-text>
-          <v-list>
+          <!-- List -->
+          <v-list dense>
             <v-list-item
               v-for="customer in customers"
               :key="customer.customer_id"
@@ -39,27 +46,30 @@
               class="hoverable"
             >
               <v-list-item-content>
-                <v-list-item-title>{{
-                  customer.display_name
-                }}</v-list-item-title>
+                <v-list-item-title class="font-weight-medium">
+                  {{ customer.display_name }}
+                </v-list-item-title>
                 <v-list-item-subtitle>
                   {{ customer.user_data?.phone || "N/A" }} •
-                  {{ customer.email || "No email" }}
+                  {{ customer.email || "No Email" }}
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
 
-            <!-- No Result -->
-            <v-list-item v-if="!loading && customers.length === 0">
-              <v-list-item-content>
-                <v-list-item-title>No customer found</v-list-item-title>
-                <v-list-item-subtitle>
-                  <v-btn small color="primary" @click="openCreateDialog">
-                    Create new: {{ search }}
-                  </v-btn>
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
+            <!-- No Results -->
+            <div
+              v-if="!loading && customers.length === 0"
+              class="text-center pa-6 d-flex flex-column align-center justify-center"
+            >
+              <v-icon color="grey" size="48">mdi-account-off-outline</v-icon>
+              <div class="text-subtitle-1 mt-2">No customers found</div>
+              <div class="text-caption mb-3">
+                Try refining your search or create a new customer.
+              </div>
+              <v-btn color="primary" small @click="openCreateDialog">
+                Create New "{{ search }}"
+              </v-btn>
+            </div>
           </v-list>
 
           <!-- Load More -->
@@ -69,10 +79,9 @@
             text
             :loading="loading"
             @click="fetchCustomers"
+            >Load More</v-btn
           >
-            Load More
-          </v-btn>
-        </v-card-text>
+        </v-container>
 
         <v-card-actions>
           <v-spacer />
@@ -81,29 +90,84 @@
       </v-card>
     </v-dialog>
 
-    <!-- Create Dialog -->
+    <!-- Create Customer Dialog -->
     <v-dialog v-model="createDialog" max-width="500px">
       <v-card>
-        <v-card-title>Create New Customer</v-card-title>
-        <v-card-text>
-          <v-form ref="form" lazy-validation>
-            <v-text-field v-model="newCustomer.name" label="Name" required />
-            <v-text-field v-model="newCustomer.phone" label="Phone" required />
-            <v-text-field v-model="newCustomer.email" label="Email" />
-            <v-text-field v-model="newCustomer.address" label="Address" />
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="text-h6 font-weight-bold">Create New Customer</div>
+            <v-btn icon @click="createDialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
+          </div>
+
+          <v-form ref="form" v-model="formValid" lazy-validation>
+            <!-- Name -->
+            <div class="mb-2">
+              <label class="text-subtitle-2">
+                Name <span class="red--text">*</span>
+              </label>
+              <v-text-field
+                v-model="newCustomer.name"
+                outlined
+                dense
+                :rules="[rules.required]"
+                hide-details
+              />
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-2">
+              <label class="text-subtitle-2">
+                Phone <span class="red--text">*</span>
+              </label>
+              <v-text-field
+                v-model="newCustomer.phone"
+                outlined
+                dense
+                :rules="[rules.required, rules.phoneOrEmail]"
+                hide-details
+              />
+            </div>
+
+            <!-- Email -->
+            <div class="mb-2">
+              <label class="text-subtitle-2">
+                Email <span class="red--text">*</span>
+              </label>
+              <v-text-field
+                v-model="newCustomer.email"
+                outlined
+                dense
+                :rules="[rules.required, rules.phoneOrEmail]"
+                hide-details
+              />
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label class="text-subtitle-2">Address</label>
+              <v-text-field
+                v-model="newCustomer.address"
+                outlined
+                dense
+                hide-details
+              />
+            </div>
           </v-form>
-        </v-card-text>
+        </v-container>
+
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            text
-            color="primary"
-            @click="createCustomer"
-            :loading="creating"
-          >
-            Create
-          </v-btn>
           <v-btn text @click="createDialog = false">Cancel</v-btn>
+          <v-btn
+            color="primary"
+            :loading="creating"
+            :disabled="!formValid"
+            @click="createCustomer"
+            >Create</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -117,31 +181,39 @@ import throttle from "lodash/throttle";
 export default {
   name: "SelectCustomer",
   props: {
-    value: {
-      type: Object,
-      default: null,
-    },
-    params: {
-      type: Object,
-      default: () => ({}),
-    },
+    value: { type: Object, default: null },
+    params: { type: Object, default: () => ({}) },
   },
   data() {
     return {
       dialog: false,
       createDialog: false,
-      loading: false,
-      creating: false,
       customers: [],
+      search: "",
       offset: 0,
       limit: 20,
       total: 0,
-      search: "",
+      loading: false,
+      creating: false,
+      formValid: false,
       newCustomer: {
         name: "",
         phone: "",
         email: "",
         address: "",
+      },
+      rules: {
+        required: (v) => !!v || "This field is required",
+        phoneOrEmail: (v) => {
+          if (!v) return "This field is required";
+
+          const phoneRegex = /^\d{10}$/;
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+          return phoneRegex.test(v) || emailRegex.test(v)
+            ? true
+            : "Enter a valid 10-digit phone or valid email";
+        },
       },
     };
   },
@@ -156,7 +228,7 @@ export default {
     },
   },
   created() {
-    this.throttledResetFetch = throttle(this.resetFetch, 500);
+    this.throttledResetFetch = throttle(this.resetFetch, 400);
   },
   methods: {
     resetFetch() {
@@ -181,7 +253,7 @@ export default {
         this.customers.push(...data.customers);
         this.offset += this.limit;
       } catch (err) {
-        console.error("Failed to fetch customers", err);
+        console.error("Error fetching customers:", err);
       } finally {
         this.loading = false;
       }
@@ -201,6 +273,9 @@ export default {
       };
     },
     async createCustomer() {
+      const isValid = await this.$refs.form.validate();
+      if (!isValid) return;
+
       this.creating = true;
       try {
         const res = await api.post("/api/customer", this.newCustomer);
@@ -218,12 +293,10 @@ export default {
       } catch (err) {
         const message =
           err.response?.data?.message || "Failed to create customer";
-
         this.$swal.fire({
           icon: "error",
           title: "Error",
           text: message,
-          width: 600,
         });
       } finally {
         this.creating = false;
