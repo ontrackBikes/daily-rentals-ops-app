@@ -22,9 +22,9 @@ if (token) {
   setAuthToken(token);
 }
 
-Vue.filter("moment", function (value) {
+Vue.filter("moment", function (value, format = "DD MMM YYYY, hh:mm A") {
   if (!value) return "";
-  return moment(value).format("DD MMM YYYY, hh:mm A");
+  return moment(value).format(format);
 });
 
 Vue.prototype.$swal = Swal;

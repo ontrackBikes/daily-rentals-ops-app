@@ -2,28 +2,42 @@
   <v-container>
     <!-- Header Row -->
     <v-row align="center" class="mb-4">
+      <!-- Title -->
       <v-col cols="12" md="4" class="d-flex align-center">
         <div class="text-h6 font-weight-bold">Bookings ({{ total }})</div>
       </v-col>
 
-      <v-col cols="12" md="8">
-        <div class="d-flex flex-wrap gap-2">
-          <v-text-field
-            v-model="searchQuery"
-            append-icon="mdi-magnify"
-            placeholder="Search by name, phone, reg. no., model, location..."
-            dense
-            outlined
-            hide-details
-            class="mr-2 flex-grow-1"
-            @input="onSearchInput"
-            @keyup.enter="fetchBookings"
-          />
-          <v-btn color="primary" dark @click="openCreateBookingDialog = true">
-            <v-icon left>mdi-plus</v-icon>
-            Add Booking
-          </v-btn>
-        </div>
+      <!-- Search Field -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="searchQuery"
+          append-icon="mdi-magnify"
+          placeholder="Search by name, phone, reg. no., model, location..."
+          dense
+          outlined
+          hide-details
+          class="mr-2 flex-grow-1"
+          @input="onSearchInput"
+          @keyup.enter="fetchBookings"
+        />
+      </v-col>
+
+      <!-- Filter & Sort -->
+      <v-col cols="12" md="4" class="d-flex align-center justify-end">
+        <v-select
+          v-model="selectedSourceType"
+          :items="sourceTypeOptions"
+          label="Source Type"
+          outlined
+          dense
+          hide-details
+          class="mr-2"
+          @change="fetchBookings"
+        />
+        <v-btn color="primary" dark to="/create-booking">
+          <v-icon left>mdi-plus</v-icon>
+          Add Booking
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -32,11 +46,12 @@
       <v-simple-table>
         <thead>
           <tr>
-            <th class="text-left">ID</th>
-            <th class="text-left">Name</th>
-            <th class="text-left">Phone</th>
-            <th class="text-left">Email</th>
+            <th class="text-left">Booking ID</th>
+            <th class="text-left">Regn No.</th>
+            <th class="text-left">Model</th>
+            <th class="text-left">Customer</th>
             <th class="text-left">Status</th>
+            <th class="text-left">Source</th>
             <th class="text-left">Created At</th>
             <th class="text-left">Actions</th>
           </tr>
@@ -44,9 +59,10 @@
         <tbody>
           <tr v-for="booking in bookings" :key="booking.id">
             <td>{{ booking.booking_id }}</td>
-            <td>{{ booking.display_name }}</td>
-            <td>{{ booking.user_data?.phone }}</td>
-            <td>{{ booking.email }}</td>
+            <td>{{ booking.vehicle_data?.registration_number }}</td>
+            <td>{{ booking.model_data?.model_name }}</td>
+            <td>{{ booking.order_data?.customer_data?.display_name }}</td>
+
             <td>
               <v-chip
                 :color="getStatusColor(booking.status)"
@@ -56,6 +72,7 @@
                 {{ booking.status }}
               </v-chip>
             </td>
+            <td>{{ booking.source_type }}</td>
             <td>{{ booking.created_at | moment }}</td>
             <td>
               <v-btn
@@ -87,87 +104,6 @@
         />
       </v-card-actions>
     </v-card>
-
-    <!-- Add Booking Dialog -->
-    <v-dialog v-model="openCreateBookingDialog" max-width="500px">
-      <v-card :loading="loading">
-        <v-container>
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">Add Booking</div>
-            <v-btn icon @click="openCreateBookingDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
-
-          <v-form ref="form" v-model="formValid" class="my-4">
-            <!-- Name -->
-            <label class="text-subtitle-2"
-              >Name <span class="red--text">*</span></label
-            >
-            <v-text-field
-              v-model="form.name"
-              :rules="[rules.required]"
-              outlined
-              dense
-              hide-details
-              class="mb-3"
-              required
-            />
-
-            <!-- Phone -->
-            <label class="text-subtitle-2"
-              >Phone <span class="red--text">*</span></label
-            >
-            <v-text-field
-              v-model="form.phone"
-              type="tel"
-              :rules="[rules.required, rules.numeric]"
-              outlined
-              dense
-              hide-details
-              class="mb-3"
-              required
-            />
-
-            <!-- Email -->
-            <label class="text-subtitle-2"
-              >Email <span class="red--text">*</span></label
-            >
-            <v-text-field
-              v-model="form.email"
-              type="email"
-              :rules="[rules.required, rules.email]"
-              outlined
-              dense
-              hide-details
-              class="mb-3"
-              required
-            />
-
-            <!-- Address -->
-            <label class="text-subtitle-2">Address</label>
-            <v-textarea
-              v-model="form.address"
-              outlined
-              dense
-              rows="2"
-              hide-details
-              class="mb-2"
-            />
-          </v-form>
-
-          <!-- Actions -->
-          <div class="d-flex justify-end">
-            <v-btn text class="mr-2" @click="openCreateBookingDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn color="primary" :disabled="!formValid" @click="createBooking"
-              >Create</v-btn
-            >
-          </div>
-        </v-container>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -186,7 +122,13 @@ export default {
       limit: 20,
       pageCount: 1,
       searchQuery: "",
-      openCreateBookingDialog: false,
+      selectedSourceType: "",
+      sourceTypeOptions: [
+        { text: "All", value: "" },
+        { text: "New", value: "new" },
+        { text: "Extend", value: "extend" },
+        { text: "Exchange", value: "exchange" },
+      ],
       formValid: false,
       form: {
         name: "",
@@ -221,10 +163,11 @@ export default {
             limit: this.limit,
             offset,
             search: this.searchQuery || undefined,
+            source_type: this.selectedSourceType,
           },
         });
         this.bookings = data?.data?.bookings || [];
-        this.total = data?.data?.meta?.count || 0;
+        this.total = data?.data?.meta?.total || 0;
         this.pageCount = Math.ceil(this.total / this.limit) || 1;
       } catch (err) {
         console.error("Fetch error:", err);
@@ -232,35 +175,11 @@ export default {
         this.loading = false;
       }
     },
-    async createBooking() {
-      if (!this.$refs.form.validate()) return;
-      this.loading = true;
-      try {
-        const response = await api.post("/api/booking", this.form);
-        this.openCreateBookingDialog = false;
-        this.$refs.form.reset();
-        this.fetchBookings();
-        this.$swal.fire({
-          icon: "success",
-          title: "Booking Created",
-          text: response.data?.message || "Booking added successfully!",
-          confirmButtonColor: "#1976d2",
-        });
-      } catch (err) {
-        console.error("Add error:", err);
-        this.$swal.fire({
-          icon: "error",
-          title: "Error",
-          text: err.response?.data?.message || "Something went wrong!",
-          confirmButtonColor: "#d33",
-        });
-      } finally {
-        this.loading = false;
-      }
-    },
+
     viewBooking(id) {
       this.$router.push(`/booking/${id}`);
     },
+
     getStatusColor(status) {
       switch (status?.toLowerCase()) {
         case "active":

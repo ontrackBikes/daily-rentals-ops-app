@@ -50,6 +50,39 @@ const router = new Router({
         { path: "orders", name: "Customer  - Orders", component: OrdersTab },
       ],
     },
+
+    {
+      path: "/booking/:booking_id",
+      component: () => import("@/views/Bookings/BookingView.vue"),
+      children: [
+        { path: "", redirect: "overview" },
+        {
+          path: "overview",
+          name: "Booking  - Overview",
+          component: () => import("@/views/Bookings/Tabs/OverviewTab.vue"),
+        },
+        {
+          path: "payments",
+          name: "Booking  - Payments",
+          component: () => import("@/views/Bookings/Tabs/PaymentsTab.vue"),
+        },
+        {
+          path: "images",
+          name: "Booking  - Images",
+          component: () => import("@/views/Bookings/Tabs/ImagesTab.vue"),
+        },
+        {
+          path: "vehicle",
+          name: "Booking  - Vehicle",
+          component: () => import("@/views/Bookings/Tabs/VehicleTab.vue"),
+        },
+        {
+          path: "extensions",
+          name: "Booking  - Extensions",
+          component: () => import("@/views/Bookings/Tabs/ExtensionTab.vue"),
+        },
+      ],
+    },
     {
       path: "/orders/:id",
       component: () => import("@/views/Orders/OrderView.vue"),
