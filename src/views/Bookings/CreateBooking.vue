@@ -1,74 +1,103 @@
 <template>
-  <v-app>
+  <deep-layout>
     <v-container>
-      <v-card class="pa-6" elevation="2">
-        <v-card-title>Create Booking</v-card-title>
+      <v-card class="pa-4 rounded-lg" outlined>
         <v-card-text>
           <v-form ref="form" lazy-validation>
             <!-- Customer Selection -->
             <div class="mb-4">
-              <label class="font-weight-medium">Select Customer</label>
+              <!-- <label class="font-weight-medium">Select Customer</label> -->
               <SelectCustomer v-model="formData.customer" />
             </div>
 
             <div v-if="formData.customer">
-              <!-- Start/End Date & Time -->
+              <!-- Start/End Date -->
               <v-row dense>
                 <v-col cols="6">
+                  <label class="font-weight-medium">
+                    Start Date <span class="red--text">*</span>
+                  </label>
                   <v-text-field
-                    label="Start Date"
-                    type="date"
                     v-model="formData.start_date"
-                    required
+                    type="date"
+                    :min="today"
+                    outlined
+                    dense
+                    :rules="[rules.required]"
+                    hide-details
+                    class="mb-3"
                   />
                 </v-col>
+
                 <v-col cols="6">
+                  <label class="font-weight-medium">
+                    End Date <span class="red--text">*</span>
+                  </label>
                   <v-text-field
-                    label="End Date"
-                    type="date"
                     v-model="formData.end_date"
-                    required
+                    type="date"
+                    :min="formData.start_date || today"
+                    outlined
+                    dense
+                    :rules="[rules.required]"
+                    hide-details
+                    class="mb-3"
                   />
                 </v-col>
               </v-row>
 
+              <!-- Start/End Time -->
               <v-row dense>
                 <v-col cols="6">
+                  <label class="font-weight-medium">
+                    Start Time <span class="red--text">*</span>
+                  </label>
                   <v-text-field
-                    label="Start Time"
-                    type="time"
                     v-model="formData.start_time"
-                    required
+                    type="time"
+                    outlined
+                    dense
+                    :rules="[rules.required]"
+                    hide-details
+                    class="mb-3"
                   />
                 </v-col>
                 <v-col cols="6">
+                  <label class="font-weight-medium">
+                    End Time <span class="red--text">*</span>
+                  </label>
                   <v-text-field
-                    label="End Time"
-                    type="time"
                     v-model="formData.end_time"
-                    required
+                    type="time"
+                    outlined
+                    dense
+                    :rules="[rules.required]"
+                    hide-details
+                    class="mb-3"
                   />
                 </v-col>
               </v-row>
 
               <!-- Model Selection -->
               <div class="mb-4">
-                <label class="font-weight-medium">Select Model</label>
+                <label class="font-weight-medium">
+                  Select Model <span class="red--text">*</span>
+                </label>
                 <SelectModel v-model="formData.model" />
               </div>
 
-              <div v-if="formData.model">
-                <!-- Vehicle Selection -->
-                <div class="mb-4">
-                  <label class="font-weight-medium">Select Vehicle</label>
-                  <SelectVehicle
-                    v-model="formData.vehicle"
-                    :params="{
-                      status: 'available',
-                      model_id: formData.model.model_id,
-                    }"
-                  />
-                </div>
+              <!-- Vehicle Selection -->
+              <div v-if="formData.model" class="mb-4">
+                <label class="font-weight-medium">
+                  Select Vehicle <span class="red--text">*</span>
+                </label>
+                <SelectVehicle
+                  v-model="formData.vehicle"
+                  :params="{
+                    status: 'available',
+                    model_id: formData.model.model_id,
+                  }"
+                />
               </div>
             </div>
           </v-form>
@@ -82,7 +111,7 @@
         </v-card-actions>
       </v-card>
     </v-container>
-  </v-app>
+  </deep-layout>
 </template>
 
 <script>
@@ -90,10 +119,11 @@ import SelectModel from "@/components/SelectModel.vue";
 import SelectVehicle from "@/components/SelectVehicle.vue";
 import SelectCustomer from "@/components/SelectCustomer.vue";
 import api from "@/plugins/axios";
+import DeepLayout from "@/Layouts/DeepLayout.vue";
 
 export default {
   name: "CreateBooking",
-  components: { SelectModel, SelectVehicle, SelectCustomer },
+  components: { SelectModel, SelectVehicle, SelectCustomer, DeepLayout },
   data() {
     return {
       loading: false,
@@ -106,6 +136,10 @@ export default {
         start_time: "",
         end_time: "",
       },
+      rules: {
+        required: (v) => !!v || "Required",
+      },
+      today: new Date().toISOString().substr(0, 10),
     };
   },
   methods: {
@@ -159,6 +193,8 @@ export default {
 
         // Optionally reset form or redirect
         this.resetForm();
+
+        this.$router.push("/orders");
       } catch (err) {
         const message =
           err.response?.data?.message || "Failed to create booking";

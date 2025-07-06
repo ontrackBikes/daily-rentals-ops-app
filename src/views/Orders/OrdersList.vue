@@ -2,7 +2,7 @@
   <v-container>
     <v-row align="center" class="mb-4">
       <!-- Title -->
-      <v-col cols="12" md="4" class="d-flex align-center">
+      <v-col cols="12" md="2" class="d-flex align-center">
         <div class="text-h6 font-weight-bold">Orders ({{ total }})</div>
       </v-col>
 
@@ -21,7 +21,7 @@
       </v-col>
 
       <!-- Filter & Sort -->
-      <v-col cols="12" md="4" class="d-flex align-center justify-end">
+      <v-col cols="12" md="6" class="d-flex align-center justify-end">
         <v-select
           v-model="selectedBalanceFilter"
           :items="orderBalanceOptions"
@@ -39,8 +39,14 @@
           outlined
           dense
           hide-details
+          class="mr-2"
           @change="fetchOrders"
         />
+
+        <v-btn color="primary" dark to="/create-booking">
+          <v-icon left>mdi-plus</v-icon>
+          Add Order
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -71,7 +77,7 @@
                 {{ getBalanceLabel(order.order_balance) }}
               </v-chip>
             </td>
-            <td>{{ order.customer_name || "N/A" }}</td>
+            <td>{{ order.customer_data?.display_name || "N/A" }}</td>
             <td>{{ order.source || "N/A" }}</td>
             <td>{{ order.created_at | moment }}</td>
             <td>
