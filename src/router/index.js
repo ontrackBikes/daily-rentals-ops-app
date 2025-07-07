@@ -86,12 +86,13 @@ const router = new Router({
     {
       path: "/orders/:id",
       component: () => import("@/views/Orders/OrderView.vue"),
+      redirect: "/orders/:id/bookings",
       children: [
-        {
-          path: "",
-          name: "Order - Overview",
-          component: () => import("@/views/Orders/Tabs/OverviewTab.vue"),
-        },
+        // {
+        //   path: "",
+        //   name: "Order - Overview",
+        //   component: () => import("@/views/Orders/Tabs/OverviewTab.vue"),
+        // },
         {
           path: "bookings",
           name: "Order - Bookings",

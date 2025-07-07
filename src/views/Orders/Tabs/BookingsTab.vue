@@ -1,13 +1,13 @@
 <template>
-  <v-card outlined class="rounded-lg">
+  <v-card outlined class="rounded-lg my-2">
     <v-simple-table>
       <thead>
         <tr>
           <th>Booking ID</th>
           <th>Regn No</th>
-          <th>Model</th>
-          <th>Customer</th>
-          <th>Source</th>
+          <!-- <th>Model</th> -->
+          <th>Amount</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -30,17 +30,17 @@
           </td>
 
           <!-- Model -->
-          <td>
+          <!-- <td>
             <ModelViewer :model="item.model_data">
               {{ item.model_data?.model_name || "-" }}
             </ModelViewer>
-          </td>
+          </td> -->
 
-          <!-- Customer -->
-          <td>{{ item.order_data?.customer_data?.display_name || "-" }}</td>
+          <!-- Amount -->
+          <td>{{ item.net_amount || "-" }}</td>
 
-          <!-- Source -->
-          <td>{{ item.source_type || "-" }}</td>
+          <!-- Status -->
+          <td>{{ item.status || "-" }}</td>
 
           <!-- Action -->
           <td>
@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import ModelViewer from "@/components/ModelViewer.vue";
+// import ModelViewer from "@/components/ModelViewer.vue";
 import VehicleViewer from "@/components/VehicleViewer.vue";
 import api from "@/plugins/axios";
 
@@ -85,7 +85,7 @@ export default {
   name: "BookingsTab",
   components: {
     VehicleViewer,
-    ModelViewer,
+    // ModelViewer,
   },
   data() {
     return {
