@@ -158,7 +158,7 @@ export default {
       this.loading = true;
       const offset = (this.page - 1) * this.limit;
       try {
-        const { data } = await api.get(`/api/order/1/bookings`, {
+        const { data } = await api.get(`/api/bookings`, {
           params: {
             limit: this.limit,
             offset,
