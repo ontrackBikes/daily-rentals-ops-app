@@ -1,86 +1,144 @@
 <template>
-  <v-container fluid class="mt-4">
-    <div v-if="vehicle && vehicle.booking_data && vehicle.booking_data.length">
-      <v-card elevation="2">
-        <v-card-title>
-          <v-icon left class="mr-2" color="primary">mdi-calendar-check</v-icon>
-          Bookings
-        </v-card-title>
+  <v-container>
+    <v-card class="rounded-lg my-4" outlined>
+      <!-- Loading Skeleton -->
+      <v-skeleton-loader
+        v-if="loading"
+        type="table"
+        class="mx-4 mt-4"
+        :loading="loading"
+      ></v-skeleton-loader>
 
-        <v-card-text class="pa-0">
-          <v-simple-table dense>
-            <thead>
-              <tr>
-                <th class="text-left">Booking ID</th>
-                <th class="text-left">Registration Number</th>
-                <th class="text-left">Model</th>
-                <th class="text-left">Customer</th>
-                <th class="text-left">Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="booking in vehicle.booking_data"
-                :key="booking.booking_id"
-              >
-                <td>{{ booking.booking_id }}</td>
-                <td>{{ vehicle.registration_number }}</td>
-                <td>{{ vehicle.model_data?.model_name }}</td>
-                <td>
-                  {{ booking.order_data.customer_data.first_name }}
-                  {{ booking.order_data.customer_data.last_name }}
-                </td>
-                <td>{{ vehicle.provider_data?.source || "N/A" }}</td>
-              </tr>
-            </tbody>
-          </v-simple-table>
-        </v-card-text>
-      </v-card>
-    </div>
+      <!-- Table when not loading -->
+      <div v-else>
+        <v-simple-table>
+          <thead>
+            <tr>
+              <th class="text-left">Booking ID</th>
+              <th class="text-left">Reg. Number</th>
+              <th class="text-left">Model</th>
+              <th class="text-left">Customer</th>
+              <th class="text-left">Status</th>
+              <th class="text-left">Created At</th>
+              <th class="text-left">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="booking in vehicleBookings" :key="booking.booking_id">
+              <td>{{ booking.booking_id }}</td>
+              <td>{{ vehicle.registration_number }}</td>
+              <td>{{ vehicle.model_data?.model_name }}</td>
+              <td>
+                {{
+                  booking.order_data?.customer_data?.user_data?.name || "N/A"
+                }}
+              </td>
+              <td>
+                <v-chip
+                  small
+                  :color="getStatusColor(booking.status)"
+                  text-color="white"
+                >
+                  {{ booking.status }}
+                </v-chip>
+              </td>
+              <td>{{ formatDate(booking.created_at) }}</td>
+              <td>{{ booking.source_type || "N/A" }}</td>
+            </tr>
+            <tr v-if="!vehicleBookings.length">
+              <td colspan="8" class="text-center grey--text">
+                No bookings found.
+              </td>
+            </tr>
+          </tbody>
+        </v-simple-table>
 
-    <div v-else-if="vehicle" class="text-center my-5">
-      <v-icon color="grey" large class="mb-2">mdi-information</v-icon>
-      <div class="grey--text">No booking data found for this vehicle.</div>
-    </div>
+        <v-divider></v-divider>
+
+        <!-- Pagination Placeholder -->
+        <v-card-actions class="justify-center">
+          <v-pagination
+            v-model="page"
+            :length="pageCount"
+            circle
+            total-visible="5"
+            @input="fetchBookings"
+          />
+        </v-card-actions>
+      </div>
+    </v-card>
   </v-container>
 </template>
 
 <script>
 import HTTP from "@/plugins/axios";
 import Swal from "sweetalert2";
+import moment from "moment";
 
 export default {
   name: "BookingsTab",
   data() {
     return {
+      loading: true,
       vehicle: null,
-      limit: 1,
-      offset: 0,
+      vehicleBookings: [],
+      page: 1,
+      limit: 5,
+      pageCount: 1,
       vehicle_id: this.$route.params.vehicle_id,
     };
   },
   created() {
-    this.loadVehicle();
+    this.fetchBookings();
   },
   methods: {
-    async loadVehicle() {
+    async fetchBookings() {
+      this.loading = true;
       try {
-        const { data } = await HTTP.get("/api/vehicles", {
-          params: {
-            limit: this.limit,
-            offset: this.offset,
-            vehicle_id: this.vehicle_id,
-          },
-        });
-        this.vehicle = data.data.vehicles;
+        const { data } = await HTTP.get(
+          `/api/vehicle/${this.vehicle_id}/bookings`,
+          {
+            params: {
+              limit: this.limit,
+              offset: (this.page - 1) * this.limit,
+              vehicle_id: this.vehicle_id,
+            },
+          }
+        );
+
+        const result = data.data.data;
+        this.vehicle = result.vehicle;
+        this.vehicleBookings = result.bookings;
+        this.pageCount = Math.ceil(data.data.meta.total / this.limit);
       } catch (err) {
         console.error("Error loading vehicle:", err);
         Swal.fire({
           title: "Error",
-          text: "Failed to load vehicle details",
+          text: "Failed to load vehicle bookings",
           icon: "error",
         });
+      } finally {
+        this.loading = false;
       }
+    },
+    getStatusColor(status) {
+      switch (status?.toLowerCase()) {
+        case "upcoming":
+          return "blue";
+        case "completed":
+          return "green";
+        case "cancelled":
+          return "red";
+        default:
+          return "grey";
+      }
+    },
+    formatDate(date) {
+      return moment(date).format("DD MMM YYYY, hh:mm A");
+    },
+    viewBooking(bookingId) {
+      console.log("Viewing booking:", bookingId);
+      // You can route to a detailed booking page or open a dialog
     },
   },
 };

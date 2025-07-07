@@ -278,7 +278,10 @@
             <v-btn text @click="editVehicleDialog = false" class="mr-2"
               >Cancel</v-btn
             >
-            <v-btn color="primary" :disabled="!formValid" @click="updateVehicle"
+            <v-btn
+              color="primary"
+              :disabled="!formValid || !isVehicleChanged"
+              @click="updateVehicle"
               >Update</v-btn
             >
           </div>
@@ -313,6 +316,7 @@ export default {
       loading: false,
       activeTab: 0,
       editVehicleDialog: false,
+      originalVehicle: {},
       formValid: false,
       models: [],
       locations: [],
@@ -367,6 +371,27 @@ export default {
           return "grey";
       }
     },
+    isVehicleChanged() {
+      return (
+        this.editVehicle.model_id !== this.originalVehicle.model_id ||
+        this.editVehicle.registration_number !==
+          this.originalVehicle.registration_number ||
+        this.editVehicle.chassis_number !==
+          this.originalVehicle.chassis_number ||
+        this.editVehicle.engine_number !== this.originalVehicle.engine_number ||
+        this.editVehicle.status !== this.originalVehicle.status ||
+        this.editVehicle.vehicle_type !== this.originalVehicle.vehicle_type ||
+        this.editVehicle.location_id !== this.originalVehicle.location_id
+      );
+    },
+  },
+  watch: {
+    editVehicleDialog(val) {
+      if (val) {
+        // Store original values when dialog opens
+        this.originalVehicle = JSON.parse(JSON.stringify(this.editVehicle));
+      }
+    },
   },
   created() {
     this.getVehicleModels();
@@ -406,7 +431,7 @@ export default {
 
       this.loading = true;
       try {
-        await HTTP.put(`/vehicle/${this.vehicle.vehicle_id}`, {
+        await HTTP.put(`/api/vehicle/${this.vehicle.vehicle_id}`, {
           model_id: Number(this.editVehicle.model_id),
           registration_number: this.editVehicle.registration_number,
           chassis_number: this.editVehicle.chassis_number,
