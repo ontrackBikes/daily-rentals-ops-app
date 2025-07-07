@@ -6,7 +6,9 @@
           <v-form ref="form" lazy-validation>
             <!-- Customer Selection -->
             <div class="mb-4">
-              <!-- <label class="font-weight-medium">Select Customer</label> -->
+              <label class="font-weight-medium">
+                Select Customer <span class="red--text">*</span>
+              </label>
               <SelectCustomer v-model="formData.customer" />
             </div>
 
@@ -99,6 +101,59 @@
                   }"
                 />
               </div>
+
+              <!-- Addons -->
+              <div class="mb-4" v-if="addons.length">
+                <label class="font-weight-medium">Addons</label>
+
+                <v-row>
+                  <v-col
+                    v-for="(addon, index) in addons"
+                    :key="addon._id || index"
+                    cols="6"
+                    md="3"
+                  >
+                    <v-card
+                      outlined
+                      class="pa-4 d-flex flex-column align-center text-center"
+                    >
+                      <v-icon size="40" class="mb-2">mdi-helmet</v-icon>
+
+                      <div class="font-weight-medium">{{ addon.name }}</div>
+                      <div class="text-subtitle-2 font-weight-bold">
+                        Rs {{ addon.price }}
+                      </div>
+
+                      <div class="mt-3">
+                        <v-btn-toggle
+                          v-if="addon.quantity > 0"
+                          class="elevation-0"
+                          dense
+                        >
+                          <v-btn small icon @click="decrementQty(addon)">
+                            <v-icon>mdi-minus</v-icon>
+                          </v-btn>
+                          <span class="px-2">{{ addon.quantity }}</span>
+                          <v-btn small icon @click="incrementQty(addon)">
+                            <v-icon>mdi-plus</v-icon>
+                          </v-btn>
+                        </v-btn-toggle>
+
+                        <v-btn
+                          v-else
+                          icon
+                          small
+                          color="primary"
+                          class="elevation-1"
+                          @click="incrementQty(addon)"
+                        >
+                          <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                      </div>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </div>
             </div>
           </v-form>
         </v-card-text>
@@ -140,7 +195,16 @@ export default {
         required: (v) => !!v || "Required",
       },
       today: new Date().toISOString().substr(0, 10),
+      addons: [],
+      limit: 10,
+      page: 1,
+      searchQuery: "",
+      total: 0,
+      pageCount: 1,
     };
+  },
+  mounted() {
+    this.fetchAddons();
   },
   methods: {
     async createBooking() {
@@ -170,6 +234,13 @@ export default {
         return;
       }
 
+      const selectedAddons = this.addons
+        .filter((addon) => addon.quantity && addon.quantity > 0)
+        .map((addon) => ({
+          addon_id: addon._id,
+          quantity: addon.quantity,
+        }));
+
       this.loading = true;
       try {
         const payload = {
@@ -180,7 +251,7 @@ export default {
           end_date,
           start_time,
           end_time,
-          addons: [], // Skip for now
+          addons: selectedAddons,
         };
 
         const res = await api.post("/api/booking", payload);
@@ -191,9 +262,7 @@ export default {
           text: res.data.message,
         });
 
-        // Optionally reset form or redirect
         this.resetForm();
-
         this.$router.push("/orders");
       } catch (err) {
         const message =
@@ -212,6 +281,41 @@ export default {
       }
     },
 
+    async fetchAddons() {
+      this.loading = true;
+      const offset = (this.page - 1) * this.limit;
+
+      try {
+        const { data } = await api.get("/api/addons", {
+          params: {
+            limit: this.limit,
+            offset,
+            available: true,
+            search: this.searchQuery || undefined,
+          },
+        });
+
+        this.addons = (data?.data?.addons || []).map((addon) => ({
+          ...addon,
+          quantity: 0,
+        }));
+        this.total = data?.data?.metadata?.total || 0;
+        this.pageCount = Math.ceil(this.total / this.limit) || 1;
+      } catch (err) {
+        console.error("Addon fetch error:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    incrementQty(addon) {
+      addon.quantity = (addon.quantity || 0) + 1;
+    },
+
+    decrementQty(addon) {
+      if (addon.quantity > 0) addon.quantity--;
+    },
+
     resetForm() {
       this.formData = {
         model: null,
@@ -222,6 +326,9 @@ export default {
         start_time: "",
         end_time: "",
       };
+      this.addons.forEach((addon) => {
+        addon.quantity = 0;
+      });
     },
   },
 };
