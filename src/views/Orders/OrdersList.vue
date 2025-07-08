@@ -64,8 +64,15 @@
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id">
-            <td>{{ order.internal_order_id }}</td>
-
+            <td>
+              <dialog-layout>
+                {{ order.internal_order_id || "N/A" }}
+                <template #title> View Order </template>
+                <template #content>
+                  <order-info :order="order"></order-info>
+                </template>
+              </dialog-layout>
+            </td>
             <td>
               {{ order.order_balance }}
             </td>
@@ -79,7 +86,17 @@
               </v-chip>
             </td>
 
-            <td>{{ order.customer_data?.display_name || "N/A" }}</td>
+            <td>
+              <dialog-layout>
+                {{ order.customer_data?.display_name || "N/A" }}
+                <template #title> <div>View Customer</div> </template>
+                <template #content>
+                  <customer-info
+                    :customerId="order.customer_data.customer_id"
+                  ></customer-info>
+                </template>
+              </dialog-layout>
+            </td>
 
             <td>{{ order.created_at | moment }}</td>
 
@@ -118,6 +135,9 @@
 import api from "@/plugins/axios";
 import StatusService from "@/plugins/statusColor";
 import debounce from "lodash/debounce";
+import CustomerInfo from "@/components/Info_cards/CustomerInfo.vue";
+import OrderInfo from "@/components/Info_cards/OrderInfo.vue";
+import DialogLayout from "@/components/popup_layouts/DialogLayout.vue";
 
 export default {
   name: "OrderList",
@@ -144,7 +164,7 @@ export default {
       ],
     };
   },
-
+  components: { CustomerInfo, OrderInfo, DialogLayout },
   watch: {
     searchQuery: {
       handler: "onSearchInput",
