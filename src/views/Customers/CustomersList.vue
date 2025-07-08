@@ -62,8 +62,7 @@
               <td>{{ customer.email }}</td>
               <td>
                 <v-chip
-                  :color="getStatusColor(customer.status)"
-                  text-color="white"
+                  :color="getStatusColor(customer.status, 'customer')"
                   small
                 >
                   {{ customer.status }}
@@ -199,6 +198,7 @@
 
 <script>
 import api from "@/plugins/axios";
+import StatusService from "@/plugins/statusColor";
 import debounce from "lodash/debounce";
 
 export default {
@@ -312,15 +312,8 @@ export default {
       this.$router.push("/customer/" + id);
     },
 
-    getStatusColor(status) {
-      switch (status.toLowerCase()) {
-        case "active":
-          return "green";
-        case "inactive":
-          return "red";
-        default:
-          return "blue";
-      }
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 };

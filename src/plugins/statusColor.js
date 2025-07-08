@@ -2,7 +2,7 @@ const statusMap = {
   // 🔸 Customer main status
   customer: [
     { name: "Active", value: "active", color: "success" },
-    { name: "Inactive", value: "inactive", color: "grey" },
+    { name: "Inactive", value: "inactive", color: "error" },
   ],
 
   // 🔸 Vehicle status
@@ -11,24 +11,28 @@ const statusMap = {
     { name: "On Hold", value: "on_hold", color: "warning" },
     { name: "Rented", value: "rented", color: "info" },
     { name: "Maintenance", value: "maintenance", color: "error" },
-    { name: "Hidden", value: "hidden", color: "grey" },
+    { name: "Hidden", value: "hidden", color: "dark" },
   ],
 
   // 🔸 Booking status
   booking: [
     { name: "Upcoming", value: "upcoming", color: "info" },
-    { name: "New", value: "new", color: "indigo" },
-    { name: "Extend", value: "extend", color: "primary" },
-    { name: "Exchange", value: "exchange", color: "purple" },
+    { name: "Active", value: "active", color: "primary" },
+    { name: "Completed", value: "completed", color: "success" },
+    { name: "Cancelled", value: "cancelled", color: "error" },
   ],
 
   // 🔸 Payment status
-  payment: [
+  payment_status: [
     { name: "Pending", value: "pending", color: "warning" },
-    { name: "Partial Paid", value: "partial_paid", color: "warning" },
     { name: "Paid", value: "paid", color: "success" },
+    { name: "Partial Paid", value: "partial_paid", color: "warning" },
+    { name: "Unpaid", value: "unpaid", color: "error" },
+    { name: "Over Paid", value: "over_paid", color: "info" },
+    { name: "Captured", value: "captured", color: "primary" },
     { name: "Failed", value: "failed", color: "error" },
     { name: "Refunded", value: "refunded", color: "info" },
+    { name: "Partial Refunded", value: "partial_refunded", color: "info" },
   ],
 
   // Default fallback

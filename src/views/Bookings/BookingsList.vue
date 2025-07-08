@@ -51,7 +51,6 @@
             <th class="text-left">Model</th>
             <th class="text-left">Customer</th>
             <th class="text-left">Status</th>
-            <th class="text-left">Source</th>
             <th class="text-left">Created At</th>
             <th class="text-left">Actions</th>
           </tr>
@@ -60,19 +59,14 @@
           <tr v-for="booking in bookings" :key="booking.id">
             <td>{{ booking.booking_id }}</td>
             <td>{{ booking.vehicle_data?.registration_number }}</td>
-            <td>{{ booking.model_data?.model_name }}</td>
+            <td>{{ booking.vehicle_data?.model_data?.model_name }}</td>
             <td>{{ booking.order_data?.customer_data?.display_name }}</td>
 
             <td>
-              <v-chip
-                :color="getStatusColor(booking.status)"
-                text-color="white"
-                small
-              >
+              <v-chip :color="getStatusColor(booking.status, 'booking')" small>
                 {{ booking.status }}
               </v-chip>
             </td>
-            <td>{{ booking.source_type }}</td>
             <td>{{ booking.created_at | moment }}</td>
             <td>
               <v-btn
@@ -109,6 +103,7 @@
 
 <script>
 import api from "@/plugins/axios";
+import StatusService from "@/plugins/statusColor";
 import debounce from "lodash/debounce";
 
 export default {
@@ -180,15 +175,8 @@ export default {
       this.$router.push(`/booking/${id}`);
     },
 
-    getStatusColor(status) {
-      switch (status?.toLowerCase()) {
-        case "active":
-          return "green";
-        case "inactive":
-          return "red";
-        default:
-          return "blue";
-      }
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 };

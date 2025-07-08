@@ -70,7 +70,14 @@
               {{ order.order_balance }}
             </td>
 
-            <td>{{ order.payment_status }}</td>
+            <td>
+              <v-chip
+                :color="getStatusColor(order.payment_status, 'payment_status')"
+                small
+              >
+                {{ order.payment_status }}
+              </v-chip>
+            </td>
 
             <td>{{ order.customer_data?.display_name || "N/A" }}</td>
 
@@ -109,6 +116,7 @@
 
 <script>
 import api from "@/plugins/axios";
+import StatusService from "@/plugins/statusColor";
 import debounce from "lodash/debounce";
 
 export default {
@@ -179,6 +187,10 @@ export default {
 
     viewOrder(id) {
       this.$router.push(`/orders/${id}`);
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
 
     getBalanceColor(balance) {
