@@ -93,7 +93,7 @@
               <v-col cols="12" md="6">
                 <label class="text-subtitle-2">Amount</label>
                 <v-text-field
-                  v-model="form.amount"
+                  v-model="paymentForm.amount"
                   placeholder="Amount paid"
                   dense
                   outlined
@@ -106,7 +106,7 @@
               <v-col cols="12" md="6">
                 <label class="text-subtitle-2">Gateway Provider</label>
                 <v-select
-                  v-model="form.gateway_provider"
+                  v-model="paymentForm.gateway_provider"
                   :items="['razorpay', 'cash', 'others']"
                   dense
                   outlined
@@ -116,18 +116,34 @@
                 />
               </v-col>
 
-              <!-- Conditional Fields -->
+              <!-- Razorpay Specific -->
+              <v-col
+                cols="12"
+                v-if="paymentForm.gateway_provider === 'razorpay'"
+              >
+                <label class="text-subtitle-2">Provider Payment ID</label>
+                <v-text-field
+                  v-model="paymentForm.provider_payment_id"
+                  placeholder="Razorpay Payment ID"
+                  dense
+                  outlined
+                  hide-details
+                  :rules="[rules.required]"
+                />
+              </v-col>
+
+              <!-- Cash/Others Fields -->
               <template
                 v-if="
-                  form.gateway_provider === 'cash' ||
-                  form.gateway_provider === 'others'
+                  paymentForm.gateway_provider === 'cash' ||
+                  paymentForm.gateway_provider === 'others'
                 "
               >
                 <!-- Method -->
                 <v-col cols="12" md="6">
                   <label class="text-subtitle-2">Method</label>
                   <v-select
-                    v-model="form.method"
+                    v-model="paymentForm.method"
                     :items="['cash', 'upi', 'scanner', 'bank_transfer', 'card']"
                     dense
                     outlined
@@ -141,7 +157,7 @@
                 <v-col cols="12" md="6">
                   <label class="text-subtitle-2">Collection Location</label>
                   <v-text-field
-                    v-model="form.collection_location"
+                    v-model="paymentForm.collection_location"
                     placeholder="e.g. Koramangala Hub"
                     dense
                     outlined
@@ -153,7 +169,7 @@
                 <v-col cols="12">
                   <label class="text-subtitle-2">Notes</label>
                   <v-textarea
-                    v-model="form.notes"
+                    v-model="paymentForm.notes"
                     placeholder="Optional notes"
                     outlined
                     dense
@@ -163,26 +179,11 @@
                 </v-col>
               </template>
 
-              <template v-else>
-                <!-- Provider Payment ID -->
-                <v-col cols="12" md="12">
-                  <label class="text-subtitle-2">Provider Payment ID</label>
-                  <v-text-field
-                    v-model="form.provider_payment_id"
-                    placeholder="123ABC456"
-                    dense
-                    outlined
-                    hide-details
-                    :rules="[rules.required]"
-                  />
-                </v-col>
-              </template>
-
-              <!-- Date (common) -->
+              <!-- Payment Date -->
               <v-col cols="12">
                 <label class="text-subtitle-2">Payment Date</label>
                 <v-text-field
-                  v-model="form.date"
+                  v-model="paymentForm.date"
                   type="date"
                   dense
                   outlined
@@ -326,7 +327,7 @@ export default {
       openRefundPaymentDialog: false,
       loading: false,
       formValid: false,
-      form: {
+      paymentForm: {
         amount: "",
         method: "",
         referenceId: "",
@@ -377,28 +378,39 @@ export default {
       }
     },
 
-    confirmPayment() {
+    async confirmPayment() {
       this.$refs.form.validate();
       if (!this.formValid) return;
 
-      this.loading = true;
+      try {
+        this.loading = true;
 
-      setTimeout(() => {
-        this.loading = false;
-        this.openAddPaymentDialog = false;
+        const payload = {
+          ...this.paymentForm,
+          order_id: this.orderId,
+        };
 
-        // Show Payment Captured alert
+        const response = await api.post("/api/payments", payload);
+
         this.$swal.fire({
           icon: "success",
-          title: "Payment Captured",
-          text: "We have verified the payment and the order balance has been updated",
-          confirmButtonColor: "#7C4DFF",
-          confirmButtonText: "Done",
+          title: "Payment added",
+          text: response.data.message || "Payment was successfully added.",
         });
 
-        // Optionally reload payment data
+        this.openAddPaymentDialog = false;
+        this.$emit("payment-success"); // Optional: emit to parent
         this.loadPayments();
-      }, 1000);
+      } catch (err) {
+        this.$swal.fire({
+          icon: "error",
+          title: "Error",
+          text:
+            err.response?.data?.error || err.message || "Failed to add payment",
+        });
+      } finally {
+        this.loading = false;
+      }
     },
 
     async confirmRefund() {

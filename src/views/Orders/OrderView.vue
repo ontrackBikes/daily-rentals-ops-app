@@ -144,12 +144,14 @@ export default {
     this.$nextTick(() => {
       if (this.$refs.routerView && this.$refs.routerView.$on) {
         this.$refs.routerView.$on("refund-success", this.getOrderData);
+        this.$refs.routerView.$on("payment-success", this.getOrderData);
       }
     });
   },
   beforeDestroy() {
     if (this.$refs.routerView && this.$refs.routerView.$off) {
       this.$refs.routerView.$off("refund-success", this.getOrderData);
+      this.$refs.routerView.$on("payment-success", this.getOrderData);
     }
   },
   methods: {
