@@ -84,11 +84,11 @@
             </td>
             <td>
               <v-chip
-                :color="statusColor(vehicle.status)"
-                text-color="white"
                 small
+                dark
+                :color="getStatusColor(vehicle.status, 'vehicle')"
               >
-                {{ formatStatus(vehicle.status) }}
+                {{ vehicle.status }}
               </v-chip>
             </td>
             <td>{{ vehicle.location_data.name }}</td>
@@ -151,6 +151,7 @@
 
 <script>
 import api from "@/plugins/axios";
+import StatusService from "@/plugins/statusColor";
 import { debounce } from "lodash";
 import AddVehicle from "@/components/AddVehicles.vue";
 export default {
@@ -219,21 +220,8 @@ export default {
     formatStatus(status) {
       return status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     },
-    statusColor(status) {
-      switch (status) {
-        case "available":
-          return "green";
-        case "rented":
-          return "red";
-        case "maintenance":
-          return "orange";
-        case "on_hold":
-          return "info";
-        case "hidden":
-          return "secondary";
-        default:
-          return "grey";
-      }
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
     openDialog() {
       this.AddVehiclesDialog = true;

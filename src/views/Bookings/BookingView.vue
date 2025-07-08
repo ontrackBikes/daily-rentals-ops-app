@@ -30,11 +30,6 @@
               {{ booking.vehicle_data?.registration_number }}
             </div>
 
-            <!-- Source -->
-            <div class="grey--text text--darken-1 mt-1 text-body-2">
-              Source - {{ booking.source_type }}
-            </div>
-
             <!-- Booking Date -->
             <div class="grey--text text--darken-1 text-body-2">
               {{ booking.created_at | moment("DD MMM YYYY") }}
@@ -52,7 +47,7 @@
               text-color="white"
               class="font-weight-medium"
             >
-              {{ booking.payment_status || "N/A" }}
+              {{ booking.order_data?.payment_status || "N/A" }}
             </v-chip>
 
             <!-- Upcoming → Show Start Booking -->

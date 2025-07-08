@@ -20,7 +20,11 @@
         </tr>
 
         <tr v-for="(item, index) in bookings" :key="index">
-          <td>{{ item.internal_booking_id || "-" }}</td>
+          <td>
+            <BookingViewer :booking="item">
+              {{ item.internal_booking_id || "-" }}
+            </BookingViewer>
+          </td>
 
           <!-- Regn No -->
           <td>
@@ -37,7 +41,11 @@
           </td> -->
 
           <!-- Amount -->
-          <td>{{ item.net_amount || "-" }}</td>
+          <td>
+            <BookingViewer :booking="item">
+              {{ item.net_amount || "-" }}
+            </BookingViewer>
+          </td>
 
           <!-- Status -->
           <td>{{ item.status || "-" }}</td>
@@ -79,6 +87,8 @@
 <script>
 // import ModelViewer from "@/components/ModelViewer.vue";
 import VehicleViewer from "@/components/VehicleViewer.vue";
+import BookingViewer from "@/components/BookingViewer.vue";
+
 import api from "@/plugins/axios";
 
 export default {
@@ -86,6 +96,7 @@ export default {
   components: {
     VehicleViewer,
     // ModelViewer,
+    BookingViewer,
   },
   data() {
     return {

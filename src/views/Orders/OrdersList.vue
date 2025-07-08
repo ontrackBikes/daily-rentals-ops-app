@@ -58,7 +58,6 @@
             <th class="text-left">Order Balance</th>
             <th class="text-left">Payment Status</th>
             <th class="text-left">Customer</th>
-            <th class="text-left">Source</th>
             <th class="text-left">Created At</th>
             <th class="text-left">Actions</th>
           </tr>
@@ -68,19 +67,15 @@
             <td>{{ order.internal_order_id }}</td>
 
             <td>
-              <v-chip
-                small
-                :color="getBalanceColor(order.order_balance)"
-                text-color="white"
-              >
-                {{ getBalanceLabel(order.order_balance) }}
-              </v-chip>
+              {{ order.order_balance }}
             </td>
 
             <td>{{ order.payment_status }}</td>
+
             <td>{{ order.customer_data?.display_name || "N/A" }}</td>
-            <td>{{ order.source || "N/A" }}</td>
+
             <td>{{ order.created_at | moment }}</td>
+
             <td>
               <v-btn
                 small
