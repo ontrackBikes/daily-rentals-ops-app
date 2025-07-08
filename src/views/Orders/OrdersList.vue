@@ -66,7 +66,6 @@
         <tbody>
           <tr v-for="order in orders" :key="order.id">
             <td>{{ order.internal_order_id }}</td>
-            <td>{{ order.order_balance }}</td>
 
             <td>
               <v-chip
@@ -77,6 +76,8 @@
                 {{ getBalanceLabel(order.order_balance) }}
               </v-chip>
             </td>
+
+            <td>{{ order.payment_status }}</td>
             <td>{{ order.customer_data?.display_name || "N/A" }}</td>
             <td>{{ order.source || "N/A" }}</td>
             <td>{{ order.created_at | moment }}</td>

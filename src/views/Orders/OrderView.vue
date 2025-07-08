@@ -96,7 +96,7 @@
           </v-tabs>
 
           <!-- Nested View -->
-          <router-view :order="order" />
+          <router-view ref="routerView" />
         </v-col>
       </v-row>
     </v-container>
@@ -113,6 +113,7 @@ export default {
   name: "OrderView",
   data() {
     return {
+      orderId: null,
       order: [],
       tab: null,
       selectedCustomer: null,
@@ -136,14 +137,31 @@ export default {
     },
   },
   async created() {
-    const orderId = this.$route.params.id;
-    try {
-      const res = await api.get(`/api/order/${orderId}`);
-      this.order = res.data.data;
-      this.selectedCustomer = res.data?.data?.customer_data;
-    } catch (e) {
-      console.error("Failed to load order", e);
+    this.orderId = this.$route.params.id;
+    this.getOrderData();
+  },
+  mounted() {
+    this.$nextTick(() => {
+      if (this.$refs.routerView && this.$refs.routerView.$on) {
+        this.$refs.routerView.$on("refund-success", this.getOrderData);
+      }
+    });
+  },
+  beforeDestroy() {
+    if (this.$refs.routerView && this.$refs.routerView.$off) {
+      this.$refs.routerView.$off("refund-success", this.getOrderData);
     }
+  },
+  methods: {
+    async getOrderData() {
+      try {
+        const res = await api.get(`/api/order/${this.orderId}`);
+        this.order = res.data.data;
+        this.selectedCustomer = res.data?.data?.customer_data;
+      } catch (e) {
+        console.error("Failed to load order", e);
+      }
+    },
   },
 };
 </script>
