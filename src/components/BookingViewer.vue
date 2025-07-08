@@ -59,15 +59,19 @@
       <v-divider class="my-2" />
 
       <!-- Pricing Details -->
+
       <div>
         <div class="text-subtitle-2 font-weight-bold mb-2">Pricing Details</div>
-        <div class="d-flex justify-space-between">
-          <span>Per day rentals x 3</span>
-          <strong>₹{{ perDayRental }}</strong>
-        </div>
-        <div class="d-flex justify-space-between">
-          <span>Helmet ISI Full x 2</span>
-          <strong>₹1800.00</strong>
+        <div
+          v-for="(data, index) in booking.booking_line_item_data"
+          :key="index"
+        >
+          <div class="d-flex justify-space-between">
+            <span>{{ data.product_name }} X {{ data.quantity }}</span>
+            <strong
+              >₹{{ data.net_total }} <del>{{ data.gross_total }}</del></strong
+            >
+          </div>
         </div>
       </div>
 
