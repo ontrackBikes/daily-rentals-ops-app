@@ -114,29 +114,29 @@ const router = new Router({
     // Vehicles view with tabs
     {
       path: "/vehicles/:vehicle_id",
-      name: "Vehicle Views",
-      redirect: "/vehicles/:vehicle_id/overview",
+
       component: VehiclesView,
       children: [
+        { path: "", redirect: "overview" },
         {
           path: "overview",
-          name: "Vehicle Detail",
+          name: "Vehicle - Overview",
           component: () => import("@/views/Vehicles/VehicleTabs/OverView.vue"),
         },
         {
           path: "trace",
-          name: "Vehicle Trace",
+          name: "Vehicle - Trace",
           component: () => import("../views/Vehicles/VehicleTabs/TraceTab.vue"),
         },
         {
           path: "bookings",
-          name: "Vehicle Bookings",
+          name: "Vehicle - Bookings",
           component: () =>
             import("../views/Vehicles/VehicleTabs/BookingsTab.vue"),
         },
         {
           path: "settings",
-          name: "Vehicle Settings",
+          name: "Vehicle - Settings",
           component: () =>
             import("@/views/Vehicles/VehicleTabs/SettingsTab.vue"),
         },

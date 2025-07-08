@@ -119,32 +119,28 @@
 
         <!-- RIGHT: Tab Section -->
         <v-col cols="12" md="9">
-          <!-- Tabs -->
           <v-card flat>
+            <!-- Tab Navigation -->
             <v-tabs
               v-model="activeTab"
               background-color="transparent"
-              color="primary"
+              show-arrows
+              slider-color="primary"
             >
-              <v-tab> Overview</v-tab>
-              <v-tab> Trace</v-tab>
-              <v-tab> Bookings</v-tab>
-              <v-tab> Settings</v-tab>
+              <v-tab :to="`/vehicles/${vehicle_id}/overview`">Overview</v-tab>
+              <v-tab :to="`/vehicles/${vehicle_id}/trace`">Trace</v-tab>
+              <v-tab :to="`/vehicles/${vehicle_id}/bookings`">Bookings</v-tab>
+              <v-tab :to="`/vehicles/${vehicle_id}/settings`">Settings</v-tab>
             </v-tabs>
 
-            <v-tabs-items v-model="activeTab">
-              <v-tab-item><OverviewTab :vehicle="vehicle" /></v-tab-item>
-              <!-- Future Tabs -->
-              <v-tab-item
-                ><TraceTab
-                  :vehicle="vehicle"
-                  :location="vehicle?.location_data"
-              /></v-tab-item>
-              <v-tab-item><BookingsTab :vehicle-id="vehicle_id" /></v-tab-item>
-              <v-tab-item
-                ><SettingsTab :vehicle="vehicle" @status-updated="loadVehicle"
-              /></v-tab-item>
-            </v-tabs-items>
+            <!-- Tab content (router-view) -->
+            <v-card flat>
+              <router-view
+                :vehicle="vehicle"
+                :location="vehicle?.location_data"
+                @status-updated="loadVehicle"
+              />
+            </v-card>
           </v-card>
         </v-col>
       </v-row>
@@ -294,19 +290,12 @@
 <script>
 import HTTP from "@/plugins/axios";
 import Swal from "sweetalert2";
-import OverviewTab from "../Vehicles/VehicleTabs/OverView.vue";
-import TraceTab from "../Vehicles/VehicleTabs/TraceTab.vue";
-import BookingsTab from "../Vehicles/VehicleTabs/BookingsTab.vue";
-import SettingsTab from "../Vehicles/VehicleTabs/SettingsTab.vue";
+
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 
 export default {
   name: "VehicleView",
   components: {
-    OverviewTab,
-    TraceTab,
-    BookingsTab,
-    SettingsTab,
     DeepLayout,
   },
   data() {
@@ -314,7 +303,6 @@ export default {
       vehicle_id: "",
       vehicle: null,
       loading: false,
-      activeTab: 0,
       editVehicleDialog: false,
       originalVehicle: {},
       formValid: false,
@@ -383,6 +371,14 @@ export default {
         this.editVehicle.vehicle_type !== this.originalVehicle.vehicle_type ||
         this.editVehicle.location_id !== this.originalVehicle.location_id
       );
+    },
+    activeTab: {
+      get() {
+        return this.$route.path;
+      },
+      set(val) {
+        this.$router.push(val);
+      },
     },
   },
   watch: {

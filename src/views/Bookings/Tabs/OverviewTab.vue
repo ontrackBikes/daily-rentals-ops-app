@@ -3,7 +3,7 @@
     <!-- Customer Info -->
     <div class="mb-2 d-flex align-center">
       <div class="font-weight-medium">
-        {{ booking.order_data?.customer_name || "N/A" }}
+        {{ booking.order_data?.customer_data.display_name || "N/A" }}
       </div>
       <v-icon
         small
@@ -14,8 +14,8 @@
         mdi-open-in-new
       </v-icon>
     </div>
-    <div>{{ booking.order_data?.customer_email || "N/A" }}</div>
-    <div>{{ booking.order_data?.customer_mobile || "N/A" }}</div>
+    <div>{{ booking.order_data?.customer_data.email || "N/A" }}</div>
+    <div>{{ booking.order_data?.customer_data.user_data.phone || "N/A" }}</div>
 
     <!-- Pickup Location -->
     <div class="mt-4">
