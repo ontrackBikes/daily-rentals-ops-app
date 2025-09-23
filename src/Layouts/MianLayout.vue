@@ -116,6 +116,7 @@ export default {
         { title: "Vehicles", icon: "mdi-motorbike", route: "/vehicles" },
         { title: "Customers", icon: "mdi-account-group", route: "/customers" },
         { title: "Locations", icon: "mdi-map-marker", route: "/locations" },
+        { title: "Models", icon: "mdi-bike", route: "/models" },
       ],
     };
   },

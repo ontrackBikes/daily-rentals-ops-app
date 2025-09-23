@@ -15,6 +15,8 @@ import CreateBooking from "@/views/Bookings/CreateBooking.vue";
 import OrdersList from "@/views/Orders/OrdersList.vue";
 import VehiclesView from "@/views/Vehicles/VehicleView.vue";
 import AddVehicles from "../components/AddVehicles.vue";
+import ModelsList from "@/views/Models/ModelsList.vue";
+import ModelView from "@/views/Models/ModelView.vue";
 
 Vue.use(Router);
 
@@ -38,6 +40,7 @@ const router = new Router({
         { path: "/vehicles", name: "Vehicle", component: VehiclesList },
         { path: "/customers", name: "Customer", component: CustomersList },
         { path: "/locations", name: "Location", component: LocationList },
+        { path: "/models", name: "Model", component: ModelsList },
       ],
     },
 
@@ -141,6 +144,12 @@ const router = new Router({
             import("@/views/Vehicles/VehicleTabs/SettingsTab.vue"),
         },
       ],
+    },
+    // Model view with tabs
+    {
+      path: "/models/:model_id",
+      name: "Model View",
+      component: ModelView,
     },
 
     { path: "/login", name: "Login", component: Login },

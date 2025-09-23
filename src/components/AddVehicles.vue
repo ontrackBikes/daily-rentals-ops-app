@@ -277,7 +277,7 @@ export default {
     async getVehicleModels() {
       try {
         const { data } = await HTTP.get("/api/vehicle-models", {
-          params: { limit: 20, offset: 0 },
+          params: { limit: 1000, offset: 0 },
         });
         this.models = data.data.models;
       } catch (error) {
