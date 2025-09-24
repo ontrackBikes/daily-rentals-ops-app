@@ -7,9 +7,9 @@
         type="table"
         class="mx-4 mt-4"
         :loading="loading"
-      ></v-skeleton-loader>
+      />
 
-      <!-- Table when not loading -->
+      <!-- Table -->
       <div v-else>
         <v-simple-table>
           <thead>
@@ -17,26 +17,28 @@
               <th class="text-left">Order ID</th>
               <th class="text-left">Order Balance</th>
               <th class="text-left">Payment Status</th>
-              <th class="text-left">Source</th>
+              <th class="text-left">Order Status</th>
               <th class="text-left">Created At</th>
               <th class="text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="order in orders" :key="order.id">
-              <td>{{ order.order_id }}</td>
-              <td>{{ order.order_balance }}</td>
+            <tr v-for="order in orders" :key="order.order_id">
+              <td>{{ order.internal_order_id }}</td>
+              <td>₹{{ order.order_balance }}</td>
               <td>
                 <v-chip
-                  :color="getStatusColor(order.payment_status)"
-                  text-color="white"
+                  :color="
+                    getStatusColor(order.payment_status, 'payment_status')
+                  "
+                  dark
                   small
                 >
-                  {{ order.status }}
+                  {{ order.payment_status }}
                 </v-chip>
               </td>
-              <td>{{ order.source }}</td>
-              <td>{{ order.created_at | moment }}</td>
+              <td>{{ order.order_status }}</td>
+              <td>{{ formatDate(order.created_at) }}</td>
               <td>
                 <v-btn
                   small
@@ -65,7 +67,7 @@
             :length="pageCount"
             circle
             total-visible="5"
-            @input="fetchorders"
+            @input="fetchOrders"
           />
         </v-card-actions>
       </div>
@@ -74,66 +76,64 @@
 </template>
 
 <script>
+import api from "@/plugins/axios";
+import StatusService from "@/plugins/statusColor";
 export default {
   data() {
     return {
       loading: false,
       page: 1,
       pageCount: 1,
-      orders: [
-        {
-          id: 1,
-          order_id: "ORD123456",
-          order_balance: "₹1,200",
-          payment_status: "paid",
-          status: "Paid",
-          source: "Website",
-          created_at: "2025-07-01T10:00:00Z",
-        },
-        {
-          id: 2,
-          order_id: "ORD123457",
-          order_balance: "₹500",
-          payment_status: "pending",
-          status: "Pending",
-          source: "Mobile App",
-          created_at: "2025-07-03T15:30:00Z",
-        },
-        {
-          id: 3,
-          order_id: "ORD123458",
-          order_balance: "₹0",
-          payment_status: "failed",
-          status: "Failed",
-          source: "Admin Panel",
-          created_at: "2025-07-02T08:45:00Z",
-        },
-      ],
+      limit: 5, // limit per page
+      orders: [],
     };
   },
+  mounted() {
+    this.fetchOrders();
+  },
   methods: {
-    viewOrder(orderId) {
-      console.log("View order clicked:", orderId);
-      // You can route to order detail page here if needed
-    },
-    getStatusColor(status) {
-      switch (status.toLowerCase()) {
-        case "paid":
-          return "green";
-        case "pending":
-          return "orange";
-        case "failed":
-          return "red";
-        default:
-          return "grey";
+    async fetchOrders() {
+      try {
+        this.loading = true;
+        const offset = (this.page - 1) * this.limit;
+        const customerId = this.$route.params.customer_id;
+
+        const res = await api.get(`/api/customer/${customerId}/orders`, {
+          params: {
+            limit: this.limit,
+            offset,
+            // Optional filter example:
+            // order_balance: "settled"
+          },
+        });
+
+        if (res.data.success) {
+          this.orders = res.data.data.orders;
+          const total = res.data.data.metadata.total;
+          this.pageCount = Math.ceil(total / this.limit);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        this.loading = false;
       }
     },
-    fetchorders() {
-      // Placeholder for future API call
-      console.log("Fetching orders for page:", this.page);
+    viewOrder(orderId) {
+      this.$router.push(`/orders/${orderId}/bookings`);
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
+    },
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     },
   },
 };
 </script>
-
-<style scoped></style>

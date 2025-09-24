@@ -1,4 +1,10 @@
 const statusMap = {
+  // Model status
+  model: [
+    { name: "Active", value: "active", color: "success" },
+    { name: "Inactive", value: "inactive", color: "warning" },
+  ],
+
   // 🔸 Customer main status
   customer: [
     { name: "Active", value: "active", color: "success" },
