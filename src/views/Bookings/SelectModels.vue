@@ -300,8 +300,7 @@ export default {
 
     bookNow(vehicle) {
       this.$router.push({
-        path: "/subscription",
-        query: { model_id: vehicle.model_id },
+        path: `/select-subscription/${vehicle.model_id}`,
       });
     },
 

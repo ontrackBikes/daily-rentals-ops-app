@@ -17,6 +17,7 @@ import VehiclesView from "@/views/Vehicles/VehicleView.vue";
 import AddVehicles from "../components/AddVehicles.vue";
 import ModelsList from "@/views/Models/ModelsList.vue";
 import ModelView from "@/views/Models/ModelView.vue";
+import SelectSubscription from "@/views/Bookings/SelectSubscription.vue";
 import SelectModels from "@/views/Bookings/SelectModels.vue";
 
 Vue.use(Router);
@@ -157,6 +158,11 @@ const router = new Router({
       path: "/models/:model_id",
       name: "Model View",
       component: ModelView,
+    },
+    {
+      path: "/select-subscription/:model_id",
+      name: "Select Subscription",
+      component: SelectSubscription,
     },
 
     { path: "/login", name: "Login", component: Login },
