@@ -32,7 +32,7 @@ const router = new Router({
 
     {
       path: "/create-booking",
-      name: "Create Booking",
+      name: "Select Models",
       component: SelectModels,
     },
 
