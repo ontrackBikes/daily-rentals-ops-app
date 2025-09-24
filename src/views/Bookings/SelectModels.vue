@@ -46,7 +46,25 @@
               gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.6)"
               class="white--text"
             >
-              <v-row class="fill-height ma-0 pa-2" align="start" justify="end">
+              <v-row
+                class="fill-height ma-0 pa-2"
+                align="start"
+                justify="space-between"
+              >
+                <v-col cols="auto" class="pa-0">
+                  <v-chip
+                    :color="
+                      vehicle.status.toLowerCase() === 'active'
+                        ? 'green'
+                        : 'grey'
+                    "
+                    dark
+                    small
+                  >
+                    {{ vehicle.status }}
+                  </v-chip>
+                </v-col>
+
                 <v-col cols="auto" class="pa-0">
                   <v-card-title class="black--text pa-0">
                     {{ vehicle.model_name }}
@@ -54,85 +72,87 @@
                 </v-col>
               </v-row>
             </v-img>
+
             <v-container>
               <div class="mb-2">
-                <v-chip color="blue lighten-4" small class="mr-1">
+                <v-chip color="blue" outlined small class="mr-1">
                   {{ vehicle.body_type }}
                 </v-chip>
-                <v-chip color="green lighten-4" small class="mr-1">
+                <v-chip color="green " outlined small class="mr-1">
                   {{ vehicle.engine_type }}
                 </v-chip>
-                <v-chip color="orange lighten-4" small>
+                <v-chip color="orange" outlined small>
                   {{ vehicle.start_type }}
                 </v-chip>
               </div>
 
-              <div class="mb-2">
-                <span class="font-weight-bold text-subtitle-2">
-                  ₹{{ vehicle.offer_daily_rate }}/day
-                </span>
-                <span
-                  v-if="
-                    vehicle.base_daily_rate &&
-                    vehicle.base_daily_rate !== vehicle.offer_daily_rate
-                  "
-                  class="text-caption grey--text text-decoration-line-through"
+              <!-- Pricing Section -->
+              <div
+                class="mb-2"
+                v-if="vehicle.vehicle_model_pricing_data.length"
+              >
+                <div
+                  v-for="plan in vehicle.vehicle_model_pricing_data"
+                  :key="plan.pricing_id"
+                  class="mb-1"
                 >
-                  ₹{{ vehicle.base_daily_rate }}
-                </span>
-                <v-chip
-                  v-if="
-                    vehicle.base_daily_rate &&
-                    vehicle.base_daily_rate !== vehicle.offer_daily_rate
-                  "
-                  color="red"
-                  small
-                >
-                  {{
-                    Math.round(
-                      ((vehicle.base_daily_rate - vehicle.offer_daily_rate) /
-                        vehicle.base_daily_rate) *
-                        100
-                    )
-                  }}% OFF
-                </v-chip>
+                  <span class="font-weight-bold text-subtitle-2">
+                    ₹{{ plan.offer_rate }}
+                    <span
+                      v-if="plan.model_pricing_plan_data.plan_type === 'daily'"
+                      >/day</span
+                    >
+                    <span
+                      v-else-if="
+                        plan.model_pricing_plan_data.plan_type === 'weekly'
+                      "
+                      >/week</span
+                    >
+                    <span
+                      v-else-if="
+                        plan.model_pricing_plan_data.plan_type === 'monthly'
+                      "
+                      >/month</span
+                    >
+                  </span>
+                  <span
+                    v-if="plan.base_rate && plan.base_rate !== plan.offer_rate"
+                    class="text-caption grey--text text-decoration-line-through mx-2"
+                  >
+                    ₹{{ plan.base_rate }}
+                  </span>
+                  <v-chip
+                    v-if="plan.base_rate && plan.base_rate !== plan.offer_rate"
+                    color="green lighten-4"
+                    small
+                  >
+                    {{
+                      Math.round(
+                        ((plan.base_rate - plan.offer_rate) / plan.base_rate) *
+                          100
+                      )
+                    }}% OFF
+                  </v-chip>
+                </div>
+              </div>
+
+              <!-- No Pricing -->
+              <div v-else class="mb-2 text-caption grey--text align-center">
+                <v-icon x-small color="grey">mdi-circle-off-outline</v-icon>
+                <span class="ml-1">No plan available</span>
               </div>
 
               <div class="mb-2">
-                <span class="font-weight-bold text-subtitle-2">
-                  ₹{{ vehicle.offer_weekly_rate }}/week
-                </span>
-                <span
-                  v-if="
-                    vehicle.base_weekly_rate &&
-                    vehicle.base_weekly_rate !== vehicle.offer_weekly_rate
-                  "
-                  class="text-caption grey--text text-decoration-line-through"
+                <v-icon small color="grey darken-1">mdi-seat</v-icon>
+                <span class="caption ml-1"
+                  >{{ vehicle.seat_capacity }} Seats</span
                 >
-                  ₹{{ vehicle.base_weekly_rate }}
-                </span>
-              </div>
-
-              <div class="mb-2">
-                <span class="font-weight-bold text-subtitle-2">
-                  ₹{{ vehicle.offer_monthly_rate }}/month
-                </span>
-                <span
-                  v-if="
-                    vehicle.base_monthly_rate &&
-                    vehicle.base_monthly_rate !== vehicle.offer_monthly_rate
-                  "
-                  class="text-caption grey--text text-decoration-line-through"
+                <v-icon small color="grey darken-1" class="ml-3"
+                  >mdi-fuel</v-icon
                 >
-                  ₹{{ vehicle.base_monthly_rate }}
-                </span>
-              </div>
-
-              <div class="mb-2">
-                <v-icon small color="grey darken-1">mdi-fuel</v-icon>
-                <span class="caption ml-1">
-                  {{ vehicle.fuel_capacity }}L Fuel
-                </span>
+                <span class="caption ml-1"
+                  >{{ vehicle.fuel_capacity }}L Fuel</span
+                >
               </div>
 
               <div class="my-2 align-center">
@@ -175,7 +195,10 @@
                 <v-btn
                   small
                   color="success"
-                  :disabled="vehicle.available_vehicle_count === 0"
+                  :disabled="
+                    vehicle.available_vehicle_count === 0 ||
+                    vehicle.vehicle_model_pricing_data.length === 0
+                  "
                   @click="bookNow(vehicle)"
                 >
                   <v-icon left small>mdi-calendar-check</v-icon> Book
