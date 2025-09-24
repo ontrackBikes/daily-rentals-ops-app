@@ -17,6 +17,7 @@ import VehiclesView from "@/views/Vehicles/VehicleView.vue";
 import AddVehicles from "../components/AddVehicles.vue";
 import ModelsList from "@/views/Models/ModelsList.vue";
 import ModelView from "@/views/Models/ModelView.vue";
+import SelectModels from "@/views/Bookings/SelectModels.vue";
 
 Vue.use(Router);
 
@@ -24,9 +25,15 @@ const router = new Router({
   routes: [
     { path: "/hello-world", name: "Login", component: HelloWorld },
     {
-      path: "/create-booking",
+      path: "/create",
       name: "Create Booking",
       component: CreateBooking,
+    },
+
+    {
+      path: "/create-booking",
+      name: "Create Booking",
+      component: SelectModels,
     },
 
     {
