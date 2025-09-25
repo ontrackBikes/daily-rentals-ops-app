@@ -39,7 +39,7 @@
           md="4"
           lg="3"
         >
-          <v-card class="mx-auto" rounded="lg" outlined hover>
+          <v-card class="mx-auto" rounded="lg" outlined hover height="100%">
             <v-img
               :src="vehicle.image_url"
               height="220"
@@ -243,7 +243,7 @@ import DeepLayout from "@/Layouts/DeepLayout.vue";
 import api from "@/plugins/axios";
 
 export default {
-  name: "VehicleList",
+  name: "SelectModels",
   components: { DeepLayout },
   data() {
     return {

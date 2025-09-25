@@ -1,302 +1,285 @@
 <template>
-  <v-app dark>
-    <v-main>
-      <v-container class="pa-6">
-        <div class="text-center mb-8">
-          <h1 class="display-1 font-weight-light mb-4">
-            Choose Your Rental Plan
-          </h1>
-        </div>
+  <deep-layout>
+    <v-overlay :value="loading" absolute>
+      <v-progress-circular indeterminate size="64" color="primary" />
+    </v-overlay>
 
-        <div v-if="loading" class="text-center py-12">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="64"
-          ></v-progress-circular>
-          <p class="mt-4 text--secondary">Loading vehicle information...</p>
-        </div>
+    <v-container>
+      <div class="text-center mb-4">
+        <h1 class="font-weight-light">Choose Your Rental Plan</h1>
+      </div>
 
-        <div v-else-if="model">
-          <v-row justify="center" class="mb-6">
-            <v-col cols="12" md="10" lg="8">
-              <v-card elevation="2">
-                <v-row no-gutters>
-                  <v-col cols="12" md="3">
-                    <v-img :src="model.image_url" height="150" cover>
-                      <template v-slot:placeholder>
-                        <v-row
-                          class="fill-height ma-0"
-                          align="center"
-                          justify="center"
-                        >
-                          <v-progress-circular
-                            indeterminate
-                            color="primary"
-                          ></v-progress-circular>
-                        </v-row>
-                      </template>
-                    </v-img>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-card-text class="pa-2">
-                      <div class="overline text--secondary">
-                        {{ model.make?.toUpperCase() }}
-                      </div>
-                      <h3 class="font-weight-medium">
-                        {{ model.model_name }}
-                      </h3>
-                      <div>
-                        <v-chip
-                          small
-                          class="mr-2 mb-1"
-                          color="success"
-                          outlined
-                        >
-                          <v-icon small left>mdi-leaf</v-icon>
-                          {{ model.vehicle_type }}
-                        </v-chip>
-                        <v-chip small class="mr-2 mb-2" outlined>
-                          <v-icon small left>mdi-account-multiple</v-icon>
-                          {{ model.seat_capacity }} Seats
-                        </v-chip>
-                        <v-chip small class="mb-2" outlined>
-                          <v-icon small left>mdi-speedometer</v-icon>
-                          {{ model.range_km }}km Range
-                        </v-chip>
-                      </div>
-                      <p class="text--secondary">
-                        {{ model.description?.substring(0, 150) }}...
-                      </p>
-                    </v-card-text>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <v-radio-group v-model="form.plan" row>
-            <v-row class="mb-8" justify="center">
-              <v-col
-                cols="12"
-                md="4"
-                v-for="pricing in model.vehicle_model_pricing_data"
-                :key="pricing.pricing_id"
-              >
-                <v-card
-                  @click="form.plan = pricing.model_pricing_plan_data.plan_type"
-                  class="cursor-pointer"
-                  elevation="2"
-                  height="100%"
+      <v-row>
+        <!-- Left Side: Subscription Plans + Addons -->
+        <v-col cols="12" md="7">
+          <v-card outlined class="px-4 rounded-lg">
+            <!-- Subscription Plans -->
+            <v-radio-group v-model="form.plan">
+              <v-row dense>
+                <v-col
+                  cols="12"
+                  md="6"
+                  v-for="pricing in model?.vehicle_model_pricing_data || []"
+                  :key="pricing.pricing_id"
                 >
-                  <v-card-text class="pa-6">
-                    <div class="d-flex align-center mb-4">
-                      <v-radio
-                        :value="pricing.model_pricing_plan_data.plan_type"
-                        color="primary"
-                        class="mr-3"
-                      ></v-radio>
-                      <div>
-                        <h3 class="title font-weight-medium">
-                          {{
-                            pricing.model_pricing_plan_data.plan_name.replace(
-                              "Rental Plan",
-                              ""
-                            )
-                          }}
-                        </h3>
-                        <p class="caption mb-0">
-                          {{ pricing.model_pricing_plan_data.plan_description }}
-                        </p>
+                  <v-card
+                    flat
+                    color="grey lighten-4"
+                    class="cursor-pointer rounded-lg"
+                    @click="
+                      form.plan = pricing.model_pricing_plan_data.plan_type
+                    "
+                  >
+                    <v-card-text class="pa-4">
+                      <!-- Radio + Title -->
+                      <div class="d-flex align-center mb-3">
+                        <v-radio
+                          :value="pricing.model_pricing_plan_data.plan_type"
+                          color="primary"
+                          class="mr-3"
+                        />
+                        <div>
+                          <h3 class="subtitle-1 font-weight-bold">
+                            {{
+                              pricing.model_pricing_plan_data.plan_name.replace(
+                                "Rental Plan",
+                                ""
+                              )
+                            }}
+                          </h3>
+                          <p class="caption text--secondary mb-0">
+                            {{
+                              pricing.model_pricing_plan_data.plan_description
+                            }}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div class="d-flex align-baseline mb-4">
-                      <span class="display-1 font-weight-light">
-                        ₹{{
-                          Number(
-                            pricing.offer_rate || pricing.base_rate
-                          ).toFixed(2)
-                        }}
-                      </span>
-                      <span class="body-2 ml-2">
-                        /
-                        {{
-                          pricing.model_pricing_plan_data.plan_type === "weekly"
-                            ? "week"
-                            : "month"
-                        }}
-                      </span>
-                    </div>
-                    <v-divider class="mb-4"></v-divider>
-                    <div>
+
+                      <!-- Price -->
+                      <div class="d-flex align-baseline mb-3">
+                        <span class="headline font-weight-bold primary--text">
+                          ₹{{
+                            Number(
+                              pricing.offer_rate || pricing.base_rate
+                            ).toFixed(2)
+                          }}
+                        </span>
+                        <span class="body-2 ml-2 text--secondary">
+                          /
+                          {{
+                            pricing.model_pricing_plan_data.plan_type ===
+                            "weekly"
+                              ? "week"
+                              : "month"
+                          }}
+                        </span>
+                      </div>
+
+                      <!-- Terms -->
+                      <v-divider class="my-3" />
                       <p
-                        class="body-2"
+                        class="caption text--secondary"
                         v-html="pricing.model_pricing_plan_data.plan_terms"
                       ></p>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-radio-group>
+
+            <!-- Location Select -->
+            <div v-if="model">
+              <h4 class="font-weight-medium my-2 d-flex align-center">
+                <v-icon small class="mr-2">mdi-map-marker</v-icon>
+                Select Pickup Location
+              </h4>
+
+              <v-select
+                v-model="form.location"
+                :items="locations"
+                item-text="name"
+                item-value="location_id"
+                placeholder="Choose your preferred location"
+                outlined
+                :loading="locationsLoading"
+                :disabled="locationsLoading"
+              >
+                <template v-slot:item="{ item }">
+                  <div class="pa-2">
+                    <div class="font-weight-medium">{{ item.name }}</div>
+                    <div class="caption text--secondary">
+                      {{ item.address }} •
+                      {{ item.available_vehicle_count }} vehicles available
                     </div>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-radio-group>
-
-          <v-row justify="center">
-            <v-col cols="12" md="12">
-              <v-card elevation="2">
-                <v-card-text class="pa-4">
-                  <h3 class="font-weight-medium mb-2">
-                    <v-icon class="mr-2">mdi-map-marker</v-icon>
-                    Select Pickup Location
-                  </h3>
-                  <v-select
-                    v-model="form.location"
-                    :items="locations"
-                    item-text="name"
-                    item-value="location_id"
-                    label="Choose your preferred location"
-                    outlined
-                    :loading="locationsLoading"
-                    :disabled="locationsLoading"
-                  >
-                    <template v-slot:item="{ item }">
-                      <div class="pa-2">
-                        <div class="font-weight-medium">
-                          {{ item.name }}
-                        </div>
-                        <div class="caption text--secondary">
-                          {{ item.address }} •
-                          {{ item.available_vehicle_count }} vehicles available
-                        </div>
-                      </div>
-                    </template>
-                    <template v-slot:selection="{ item }">
-                      <div>
-                        <span class="font-weight-medium">{{ item.name }}</span>
-                        <span class="text--secondary ml-2"
-                          >• {{ item.available_vehicle_count }} available</span
-                        >
-                      </div>
-                    </template>
-                  </v-select>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <v-row justify="center" class="mb-8">
-            <v-col cols="12" md="12">
-              <v-card elevation="2">
-                <v-card-text class="pa-4">
-                  <h3 class="font-weight-medium mb-3 d-flex align-center">
-                    <v-icon small class="mr-2">mdi-plus-circle</v-icon>
-                    Enhance Your Experience
-                  </h3>
-
-                  <v-row dense>
-                    <v-col
-                      cols="12"
-                      v-for="addon in addons"
-                      :key="addon.value"
-                      class="mb-2"
+                  </div>
+                </template>
+                <template v-slot:selection="{ item }">
+                  <div>
+                    <span class="font-weight-medium">{{ item.name }}</span>
+                    <span class="text--secondary ml-2"
+                      >• {{ item.available_vehicle_count }} available</span
                     >
-                      <v-card
-                        :color="
-                          form.addons.includes(addon.value) ? 'primary' : ''
-                        "
-                        :dark="form.addons.includes(addon.value)"
-                        @click="toggleAddon(addon.value)"
-                        outlined
-                        class="cursor-pointer"
-                        height="auto"
-                        max-width="100%"
-                      >
-                        <v-card-text class="pa-3 d-flex align-center">
-                          <v-icon
-                            size="20"
-                            class="mr-3"
-                            :color="
-                              form.addons.includes(addon.value)
-                                ? 'white'
-                                : 'grey'
-                            "
-                          >
-                            {{ addon.icon }}
-                          </v-icon>
-                          <div class="text-left flex-grow-1">
-                            <div class="font-weight-medium">
-                              {{ addon.label }}
-                            </div>
-                            <div
-                              class="caption"
-                              :class="
-                                form.addons.includes(addon.value)
-                                  ? 'white--text'
-                                  : 'text--secondary'
-                              "
-                            >
-                              {{ addon.description }}
-                            </div>
-                          </div>
-                          <div
-                            class="font-weight-medium ml-3"
-                            :class="
-                              form.addons.includes(addon.value)
-                                ? 'white--text'
-                                : 'primary--text'
-                            "
-                          >
-                            +₹{{ addon.price }}
-                          </div>
-                        </v-card-text>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
+                  </div>
+                </template>
+              </v-select>
 
-          <v-row justify="center">
-            <v-col cols="12" md="10" lg="8">
-              <div class="d-flex justify-space-between align-center">
-                <v-btn text large @click="goBack" class="text-capitalize">
-                  <v-icon left>mdi-arrow-left</v-icon>
-                  Back to Models
-                </v-btn>
-                <v-btn
-                  large
-                  color="primary"
-                  :disabled="!form.location"
-                  @click="goToPayment"
-                  class="text-capitalize px-8"
-                  elevation="2"
+              <!-- Addons -->
+              <h4 class="font-weight-medium my-2 d-flex align-center">
+                <v-icon small class="mr-2">mdi-plus-circle</v-icon>
+                Enhance Your Experience
+              </h4>
+
+              <v-row dense>
+                <v-col
+                  cols="12"
+                  v-for="addon in addons"
+                  :key="addon.value"
+                  class="mb-2"
                 >
-                  Continue ₹{{ grandTotal }}
-                  <v-icon right>mdi-arrow-right</v-icon>
-                </v-btn>
-              </div>
-            </v-col>
-          </v-row>
-        </div>
+                  <v-card
+                    outlined
+                    class="cursor-pointer rounded-lg"
+                    :color="form.addons.includes(addon.value) ? 'primary' : ''"
+                    :dark="form.addons.includes(addon.value)"
+                    @click="toggleAddon(addon.value)"
+                  >
+                    <v-card-text class="pa-3 d-flex align-center">
+                      <v-icon
+                        size="20"
+                        class="mr-3"
+                        :color="
+                          form.addons.includes(addon.value) ? 'white' : 'grey'
+                        "
+                      >
+                        {{ addon.icon }}
+                      </v-icon>
+                      <div class="text-left flex-grow-1">
+                        <div class="font-weight-medium">{{ addon.label }}</div>
+                        <div
+                          class="caption"
+                          :class="
+                            form.addons.includes(addon.value)
+                              ? 'white--text'
+                              : 'text--secondary'
+                          "
+                        >
+                          {{ addon.description }}
+                        </div>
+                      </div>
+                      <div
+                        class="font-weight-medium ml-3"
+                        :class="
+                          form.addons.includes(addon.value)
+                            ? 'white--text'
+                            : 'primary--text'
+                        "
+                      >
+                        +₹{{ addon.price }}
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </div>
 
-        <div v-else class="text-center py-12">
-          <v-icon size="64" color="error">mdi-alert-circle</v-icon>
-          <h3 class="headline mt-4 mb-2">Failed to load vehicle information</h3>
-          <p class="text--secondary mb-4">
-            Please try again or contact support
-          </p>
-          <v-btn color="primary" @click="loadModel(model_id)">Retry</v-btn>
-        </div>
-      </v-container>
-    </v-main>
-  </v-app>
+            <!-- Error State -->
+            <div v-if="!model && !loading" class="text-center py-12">
+              <v-icon size="64" color="error">mdi-alert-circle</v-icon>
+              <h3 class="headline mt-4 mb-2">
+                Failed to load vehicle information
+              </h3>
+              <p class="text--secondary mb-4">
+                Please try again or contact support
+              </p>
+              <v-btn color="primary" @click="loadModel(model_id)" depressed>
+                Retry
+              </v-btn>
+            </div>
+          </v-card>
+        </v-col>
+
+        <!-- Right Side: Model Details -->
+        <v-col cols="12" md="5">
+          <v-card outlined class="pa-4 rounded-lg">
+            <v-img
+              :src="model?.image_url"
+              height="200"
+              class="rounded-lg mb-3"
+              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.3)"
+              contain
+            >
+              <template v-slot:placeholder>
+                <v-row class="fill-height ma-0" align="center" justify="center">
+                  <v-progress-circular indeterminate color="primary" />
+                </v-row>
+              </template>
+            </v-img>
+
+            <!-- Model Info -->
+            <div class="overline text--secondary mb-1">
+              {{ model?.make?.toUpperCase() }}
+            </div>
+            <h2 class="subtitle-1 font-weight-bold mb-2">
+              {{ model?.model_name }}
+            </h2>
+
+            <!-- Chips -->
+            <div class="mb-3">
+              <v-chip small class="mr-2 mb-1" color="success" outlined>
+                <v-icon small left>mdi-leaf</v-icon>
+                {{ model?.vehicle_type }}
+              </v-chip>
+              <v-chip small class="mr-2 mb-1" outlined>
+                <v-icon small left>mdi-account-multiple</v-icon>
+                {{ model?.seat_capacity }} Seats
+              </v-chip>
+              <v-chip small class="mb-1" outlined>
+                <v-icon small left>mdi-speedometer</v-icon>
+                {{ model?.range_km }} km Range
+              </v-chip>
+            </div>
+
+            <!-- Description -->
+            <p class="body-2 text--secondary">
+              {{ model?.description?.substring(0, 120) }}...
+            </p>
+
+            <!-- Pricing Summary -->
+            <v-divider class="my-3" />
+            <div class="d-flex justify-space-between align-center">
+              <span class="subtitle-2 text--secondary">Selected Plan</span>
+              <span class="subtitle-1 font-weight-bold primary--text">
+                ₹{{ subscriptionPrice }}
+              </span>
+            </div>
+          </v-card>
+
+          <!-- Continue Button -->
+          <v-btn
+            large
+            block
+            color="primary"
+            class="rounded-xl text-capitalize my-4"
+            elevation="2"
+            :disabled="!form.location"
+            @click="goToPayment"
+          >
+            Continue ₹{{ grandTotal }}
+            <v-icon right>mdi-arrow-right</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
+  </deep-layout>
 </template>
 
 <script>
 import api from "@/plugins/axios";
+import DeepLayout from "@/Layouts/DeepLayout.vue";
 
 export default {
   name: "SubscriptionPlan",
+  components: { DeepLayout },
   data() {
     return {
       model_id: this.$route.params.model_id,
@@ -398,13 +381,5 @@ export default {
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
-}
-
-.position-relative {
-  position: relative;
-}
-
-.position-absolute {
-  position: absolute;
 }
 </style>
