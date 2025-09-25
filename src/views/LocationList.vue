@@ -42,7 +42,10 @@
           <tbody>
             <tr v-for="location in locations" :key="location.location_id">
               <td>{{ location.location_id }}</td>
-              <td>{{ location.name }}</td>
+              <td>
+                <LocationViewer :location="location" />
+              </td>
+
               <td>{{ location.contact_number }}</td>
               <td>{{ location.address }}</td>
               <td>{{ location.created_at | moment }}</td>
@@ -329,9 +332,11 @@
 <script>
 import api from "@/plugins/axios";
 import debounce from "lodash/debounce";
+import LocationViewer from "@/components/LocationViewer.vue";
 
 export default {
   name: "locationList",
+  components: { LocationViewer },
   data() {
     return {
       loading: false,
