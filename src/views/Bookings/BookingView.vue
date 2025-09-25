@@ -459,14 +459,24 @@ export default {
       if (!this.startFormValid) return;
       try {
         this.loading = true;
-        await api.post("/api/booking/start", {
+        const resp = await api.post("/api/booking/start", {
           booking_id: this.booking.booking_id,
-          odometer: this.startForm.odometer,
+          pre_odometer_reading: this.startForm.odometer,
         });
-        this.$toast?.success("Booking started successfully");
+
+        Swal.fire({
+          icon: "success",
+          title: "Started",
+          text: resp.data.message,
+        });
+
         this.openStartBookingDialog = false;
       } catch (e) {
-        this.$toast?.error("Error starting booking");
+        Swal.fire({
+          icon: "error",
+          title: "error",
+          text: e.response?.data?.message || "Some error occured!",
+        });
       } finally {
         this.loading = false;
       }

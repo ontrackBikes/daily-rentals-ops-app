@@ -5,13 +5,13 @@
       <v-row dense>
         <!-- Image cards -->
         <v-col
-          v-for="(image, index) in booking.images || []"
+          v-for="(image, index) in bookingImages || []"
           :key="index"
           cols="6"
           sm="3"
         >
           <v-img
-            :src="image.url"
+            :src="image.image_url"
             aspect-ratio="1"
             class="rounded-lg elevation-1"
             contain
@@ -122,7 +122,7 @@ export default {
       formValid: false,
       typeOptions: [
         { text: "Drop", value: "drop" },
-        { text: "Pick", value: "pick" },
+        { text: "Pick", value: "pickup" },
       ],
       form: {
         type: "",
@@ -131,32 +131,52 @@ export default {
       rules: {
         required: (v) => !!v || "This field is required",
       },
+      bookingImages: [],
     };
   },
+  mounted() {
+    this.fetchBookingImages();
+  },
   methods: {
+    async fetchBookingImages() {
+      if (!this.booking?.booking_id) return;
+
+      try {
+        const res = await api.get(
+          `/api/bookings/${this.booking.booking_id}/images`
+        );
+        this.bookingImages = res.data.images || [];
+      } catch (err) {
+        console.error("Failed to fetch booking images:", err);
+        this.bookingImages = [];
+      }
+    },
+
     async uploadImage() {
-      const valid = await this.$refs.form.validate();
+      const valid = this.$refs.form.validate();
       if (!valid) return;
 
       this.loading = true;
       const formData = new FormData();
       formData.append("booking_id", this.booking.booking_id);
       formData.append("type", this.form.type);
-      formData.append("image", this.form.image);
+      formData.append("image", this.form.image, this.form.image.name);
 
       try {
-        const { data } = await api.post("/api/bookings/images", formData);
-
-        // Update booking image list
-        // eslint-disable-next-line vue/no-mutating-props
-        this.booking.images = [...(this.booking.images || []), data.image];
+        const res = await api.post("/api/bookings/upload-image", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
         // Reset form and close
         this.form = { type: "", image: null };
         this.$refs.form.reset();
         this.openImageUploadDialog = false;
-
-        this.$toast?.success("Image uploaded successfully!");
+        this.fetchBookingImages();
+        this.$swal.fire({
+          icon: "success",
+          title: "Image uploaded successfully!",
+          text: res.data.message,
+        });
       } catch (err) {
         console.error("Upload failed:", err);
         alert("Failed to upload image.");
