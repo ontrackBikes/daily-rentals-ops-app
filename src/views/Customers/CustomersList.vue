@@ -59,7 +59,13 @@
               <td>{{ customer.customer_id }}</td>
               <td>{{ customer.display_name }}</td>
               <td>{{ customer.user_data?.phone }}</td>
-              <td>{{ customer.email }}</td>
+              <td>
+                {{
+                  customer.customer_contact_data?.find(
+                    (c) => c.type === "email" && c.is_primary
+                  )?.value || "—"
+                }}
+              </td>
               <td>
                 <v-chip
                   :color="getStatusColor(customer.status, 'customer')"

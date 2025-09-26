@@ -138,20 +138,60 @@
                   <!-- Pricing -->
                   <div class="mb-4">
                     <h4 class="font-weight-bold mb-2">Pricing</h4>
-                    <div>
-                      <strong>Hourly:</strong> ₹{{ model.base_hourly_rate }}
-                    </div>
-                    <div>
-                      <strong>Daily:</strong> ₹{{ model.base_daily_rate }}
-                    </div>
-                    <div>
-                      <strong>Weekly:</strong> ₹{{ model.base_weekly_rate }}
-                    </div>
-                    <div>
-                      <strong>Monthly:</strong> ₹{{ model.base_monthly_rate }}
-                    </div>
+                    <v-row>
+                      <v-col
+                        v-for="plan in model.vehicle_model_pricing_data"
+                        :key="plan.pricing_id"
+                        cols="12"
+                        md="6"
+                      >
+                        <v-card outlined class="pa-3 rounded-lg">
+                          <div class="font-weight-bold text-subtitle-1 mb-2">
+                            {{ plan.model_pricing_plan_data.plan_name }}
+                          </div>
+                          <div>
+                            <strong>Rate:</strong>
+                            <span
+                              v-if="
+                                plan.offer_rate &&
+                                plan.offer_rate < plan.base_rate
+                              "
+                            >
+                              <s>₹{{ plan.base_rate }}</s>
+                              <span class="red--text ml-2"
+                                >₹{{ plan.offer_rate }}</span
+                              >
+                            </span>
+                            <span v-else>₹{{ plan.base_rate }}</span>
+                          </div>
+                          <div>
+                            <strong>KM Cap:</strong>
+                            {{ plan.model_pricing_plan_data.km_cap }} km
+                          </div>
+                          <div>
+                            <strong>Extra KM Rate:</strong> ₹{{
+                              plan.model_pricing_plan_data.extra_km_rate
+                            }}
+                          </div>
+                          <div>
+                            <strong>Security Deposit:</strong> ₹{{
+                              plan.model_pricing_plan_data.security_deposit
+                            }}
+                          </div>
+                          <div>
+                            <strong>Late Fee (per hr):</strong> ₹{{
+                              plan.model_pricing_plan_data.late_fee_per_hour
+                            }}
+                          </div>
+                          <div
+                            class="mt-2 grey--text text--darken-1 text-body-2"
+                          >
+                            {{ plan.model_pricing_plan_data.plan_description }}
+                          </div>
+                        </v-card>
+                      </v-col>
+                    </v-row>
                   </div>
-
                   <!-- Description -->
                   <div>
                     <h4 class="font-weight-bold mb-2">Description</h4>
@@ -353,7 +393,7 @@ export default {
         { text: "Reg. Number", value: "registration_number" },
         { text: "Color", value: "color" },
         { text: "Status", value: "status" },
-        { text: "Type", value: "vehicle_type" },
+        // { text: "Type", value: "vehicle_type" },
         { text: "Location", value: "location" },
         { text: "Current KM", value: "current_km" },
         { text: "Next Service", value: "next_service_km" },

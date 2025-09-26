@@ -19,6 +19,7 @@ import ModelsList from "@/views/Models/ModelsList.vue";
 import ModelView from "@/views/Models/ModelView.vue";
 import SelectSubscription from "@/views/Bookings/SelectSubscription.vue";
 import SelectModels from "@/views/Bookings/SelectModels.vue";
+import CustomerDetails from "@/views/Bookings/CustomerDetails.vue";
 
 Vue.use(Router);
 
@@ -163,6 +164,11 @@ const router = new Router({
       path: "/select-subscription/:model_id",
       name: "Select Subscription",
       component: SelectSubscription,
+    },
+    {
+      path: "/customer-details",
+      name: "Customer Details",
+      component: CustomerDetails,
     },
 
     { path: "/login", name: "Login", component: Login },

@@ -262,7 +262,7 @@
             class="rounded-xl text-capitalize my-4"
             elevation="2"
             :disabled="!form.location"
-            @click="goToPayment"
+            @click="goToCustomerDetails()"
           >
             Continue ₹{{ grandTotal }}
             <v-icon right>mdi-arrow-right</v-icon>
@@ -373,6 +373,17 @@ export default {
     },
     goToPayment() {
       console.log("Proceeding to payment with:", this.form);
+    },
+    goToCustomerDetails() {
+      this.$router.push({
+        path: "/customer-details",
+        query: {
+          modelId: this.model_id,
+          total: this.grandTotal,
+          subscription: this.form.plan,
+          addons: JSON.stringify(this.form.addons),
+        },
+      });
     },
   },
 };
