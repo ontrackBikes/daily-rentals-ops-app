@@ -89,19 +89,6 @@
           <!-- Form -->
           <v-form ref="form" v-model="formValid" class="mt-4">
             <v-row dense>
-              <!-- Amount -->
-              <v-col cols="12" md="6">
-                <label class="text-subtitle-2">Amount</label>
-                <v-text-field
-                  v-model="paymentForm.amount"
-                  placeholder="Amount paid"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required]"
-                />
-              </v-col>
-
               <!-- Gateway Provider -->
               <v-col cols="12" md="6">
                 <label class="text-subtitle-2">Gateway Provider</label>
@@ -117,6 +104,139 @@
               </v-col>
 
               <!-- Razorpay Specific -->
+              <template v-if="paymentForm.gateway_provider === 'razorpay'">
+                <v-col cols="12">
+                  <label class="text-subtitle-2">Provider Payment ID</label>
+                  <v-text-field
+                    v-model="paymentForm.provider_payment_id"
+                    placeholder="Razorpay Payment ID"
+                    dense
+                    outlined
+                    hide-details
+                    :rules="[razorpayRule]"
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <label class="text-subtitle-2"
+                    >Provider Payment Link ID</label
+                  >
+                  <v-text-field
+                    v-model="paymentForm.provider_payment_link_id"
+                    placeholder="Razorpay Payment Link ID"
+                    dense
+                    outlined
+                    hide-details
+                    :rules="[razorpayRule]"
+                  />
+                </v-col>
+              </template>
+
+              <!-- Cash/Others -->
+              <template v-if="paymentForm.gateway_provider !== 'razorpay'">
+                <v-col cols="12" md="6">
+                  <label class="text-subtitle-2">Amount</label>
+                  <v-text-field
+                    v-model="paymentForm.amount"
+                    placeholder="Amount paid"
+                    dense
+                    outlined
+                    hide-details
+                    type="number"
+                    :rules="[rules.required]"
+                  />
+                </v-col>
+
+                <v-col cols="12" md="6">
+                  <label class="text-subtitle-2">Method</label>
+                  <v-select
+                    v-model="paymentForm.method"
+                    :items="['cash', 'upi', 'scanner', 'bank_transfer', 'card']"
+                    dense
+                    outlined
+                    hide-details
+                    :rules="[rules.required]"
+                    placeholder="Select method"
+                  />
+                </v-col>
+
+                <v-col cols="12">
+                  <label class="text-subtitle-2">Comment</label>
+                  <v-textarea
+                    v-model="paymentForm.comment"
+                    placeholder="Mandatory comment"
+                    outlined
+                    dense
+                    rows="2"
+                    hide-details
+                    :rules="[rules.required]"
+                  />
+                </v-col>
+              </template>
+            </v-row>
+          </v-form>
+
+          <!-- Action -->
+          <div class="d-flex justify-end mt-4">
+            <v-btn
+              color="primary"
+              :disabled="!isPaymentFormValid"
+              @click="confirmPayment"
+            >
+              Confirm
+            </v-btn>
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add Payment Dialog -->
+    <!-- <v-dialog v-model="openAddPaymentDialog" max-width="550px">
+      <v-card :loading="loading">
+        <v-container>
+       
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Add Payment</div>
+            <v-btn icon @click="openAddPaymentDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+
+         
+          <div class="mt-2 text-subtitle-2">
+            <strong>Order ID:</strong> {{ orderId }}
+          </div>
+
+        
+          <v-form ref="form" v-model="formValid" class="mt-4">
+            <v-row dense>
+            
+              <v-col cols="12" md="6">
+                <label class="text-subtitle-2">Amount</label>
+                <v-text-field
+                  v-model="paymentForm.amount"
+                  placeholder="Amount paid"
+                  dense
+                  outlined
+                  hide-details
+                  :rules="[rules.required]"
+                />
+              </v-col>
+
+        
+              <v-col cols="12" md="6">
+                <label class="text-subtitle-2">Gateway Provider</label>
+                <v-select
+                  v-model="paymentForm.gateway_provider"
+                  :items="['razorpay', 'cash', 'others']"
+                  dense
+                  outlined
+                  hide-details
+                  :rules="[rules.required]"
+                  placeholder="Select gateway"
+                />
+              </v-col>
+
+           
               <v-col
                 cols="12"
                 v-if="paymentForm.gateway_provider === 'razorpay'"
@@ -132,14 +252,14 @@
                 />
               </v-col>
 
-              <!-- Cash/Others Fields -->
+             
               <template
                 v-if="
                   paymentForm.gateway_provider === 'cash' ||
                   paymentForm.gateway_provider === 'others'
                 "
               >
-                <!-- Method -->
+               
                 <v-col cols="12" md="6">
                   <label class="text-subtitle-2">Method</label>
                   <v-select
@@ -153,7 +273,7 @@
                   />
                 </v-col>
 
-                <!-- Collection Location -->
+              
                 <v-col cols="12" md="6">
                   <label class="text-subtitle-2">Collection Location</label>
                   <v-text-field
@@ -165,7 +285,7 @@
                   />
                 </v-col>
 
-                <!-- Notes -->
+        
                 <v-col cols="12">
                   <label class="text-subtitle-2">Notes</label>
                   <v-textarea
@@ -179,7 +299,7 @@
                 </v-col>
               </template>
 
-              <!-- Payment Date -->
+         
               <v-col cols="12">
                 <label class="text-subtitle-2">Payment Date</label>
                 <v-text-field
@@ -194,7 +314,7 @@
             </v-row>
           </v-form>
 
-          <!-- Action -->
+  
           <div class="d-flex justify-end mt-4">
             <v-btn
               color="primary"
@@ -206,7 +326,7 @@
           </div>
         </v-container>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
 
     <!-- Refund Payment Dailog -->
     <v-dialog v-model="openRefundPaymentDialog" max-width="500px">
@@ -327,13 +447,15 @@ export default {
       openRefundPaymentDialog: false,
       loading: false,
       formValid: false,
+
+      // Updated payment form according to API
       paymentForm: {
-        amount: "",
-        method: "",
-        referenceId: "",
-        gateway: "",
-        date: "",
-        notes: "",
+        gateway_provider: "", // e.g. "razorpay", "cash", "others" (mandatory)
+        provider_payment_id: "", // required only if gateway_provider = razorpay
+        provider_payment_link_id: "", // required only if gateway_provider = razorpay
+        amount: "", // required if gateway_provider != razorpay
+        method: "", // required if gateway_provider != razorpay
+        comment: "", // required if gateway_provider != razorpay
       },
 
       refundFormValid: false,
@@ -344,14 +466,42 @@ export default {
         reason: "Customer overpaid booking",
         method: "back_to_source",
       },
+
       rules: {
         required: (v) => !!v || "This field is required",
+        razorpayRule: () => {
+          if (this.paymentForm.gateway_provider !== "razorpay") return true;
+          return (
+            this.paymentForm.provider_payment_id ||
+            this.paymentForm.provider_payment_link_id ||
+            "Either Payment ID or Payment Link ID is required"
+          );
+        },
       },
     };
   },
+
   computed: {
     orderId() {
       return this.$route.params.id;
+    },
+    isPaymentFormValid() {
+      if (this.paymentForm.gateway_provider === "razorpay") {
+        return (
+          this.paymentForm.provider_payment_id.trim() !== "" ||
+          this.paymentForm.provider_payment_link_id.trim() !== ""
+        );
+      } else if (
+        this.paymentForm.gateway_provider === "cash" ||
+        this.paymentForm.gateway_provider === "others"
+      ) {
+        return (
+          this.paymentForm.amount &&
+          this.paymentForm.method &&
+          this.paymentForm.comment
+        );
+      }
+      return false;
     },
   },
   mounted() {
@@ -378,6 +528,40 @@ export default {
       }
     },
 
+    // async confirmPayment() {
+    //   this.$refs.form.validate();
+    //   if (!this.formValid) return;
+
+    //   try {
+    //     this.loading = true;
+
+    //     const payload = {
+    //       ...this.paymentForm,
+    //       order_id: this.orderId,
+    //     };
+
+    //     const response = await api.post("/api/payments", payload);
+
+    //     this.$swal.fire({
+    //       icon: "success",
+    //       title: "Payment added",
+    //       text: response.data.message || "Payment was successfully added.",
+    //     });
+
+    //     this.openAddPaymentDialog = false;
+    //     this.$emit("payment-success"); // Optional: emit to parent
+    //     this.loadPayments();
+    //   } catch (err) {
+    //     this.$swal.fire({
+    //       icon: "error",
+    //       title: "Error",
+    //       text:
+    //         err.response?.data?.error || err.message || "Failed to add payment",
+    //     });
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
     async confirmPayment() {
       this.$refs.form.validate();
       if (!this.formValid) return;
@@ -386,11 +570,37 @@ export default {
         this.loading = true;
 
         const payload = {
-          ...this.paymentForm,
-          order_id: this.orderId,
+          gateway_provider: this.paymentForm.gateway_provider,
         };
 
-        const response = await api.post("/api/payments", payload);
+        if (this.paymentForm.gateway_provider === "razorpay") {
+          if (
+            !this.paymentForm.provider_payment_id &&
+            !this.paymentForm.provider_payment_link_id
+          ) {
+            this.$swal.fire({
+              icon: "warning",
+              title: "Missing Payment Reference",
+              text: "Please provide either Provider Payment ID or Provider Payment Link ID.",
+            });
+            this.loading = false;
+            return;
+          }
+
+          payload.provider_payment_id =
+            this.paymentForm.provider_payment_id || null;
+          payload.provider_payment_link_id =
+            this.paymentForm.provider_payment_link_id || null;
+        } else {
+          payload.amount = Number(this.paymentForm.amount);
+          payload.method = this.paymentForm.method;
+          payload.notes = this.paymentForm.comment;
+        }
+
+        const response = await api.post(
+          `/api/order/${this.orderId}/process-payment`,
+          payload
+        );
 
         this.$swal.fire({
           icon: "success",
@@ -399,18 +609,36 @@ export default {
         });
 
         this.openAddPaymentDialog = false;
-        this.$emit("payment-success"); // Optional: emit to parent
+
+        // ✅ Reset form after success
+        this.resetPaymentForm();
+
+        this.$emit("payment-success");
         this.loadPayments();
       } catch (err) {
         this.$swal.fire({
           icon: "error",
           title: "Error",
           text:
-            err.response?.data?.error || err.message || "Failed to add payment",
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            "Failed to add payment",
         });
       } finally {
         this.loading = false;
       }
+    },
+    resetPaymentForm() {
+      this.paymentForm = {
+        gateway_provider: "",
+        provider_payment_id: "",
+        provider_payment_link_id: "",
+        amount: "",
+        method: "",
+        comment: "",
+      };
+      this.formValid = false;
+      if (this.$refs.form) this.$refs.form.reset();
     },
 
     async confirmRefund() {

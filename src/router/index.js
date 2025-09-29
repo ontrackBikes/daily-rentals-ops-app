@@ -115,6 +115,11 @@ const router = new Router({
           name: "Order - Payments",
           component: () => import("@/views/Orders/Tabs/PaymentsTab.vue"),
         },
+        {
+          path: "payments-links",
+          name: "Order - Payment Links",
+          component: () => import("@/views/Orders/Tabs/PaymentLinksTab.vue"),
+        },
       ],
     },
     {

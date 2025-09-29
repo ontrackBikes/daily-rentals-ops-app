@@ -93,6 +93,9 @@
             <!-- <v-tab :to="`/orders/${$route.params.id}`">Overview</v-tab> -->
             <v-tab :to="`/orders/${$route.params.id}/bookings`">Bookings</v-tab>
             <v-tab :to="`/orders/${$route.params.id}/payments`">Payments</v-tab>
+            <v-tab :to="`/orders/${$route.params.id}/payments-links`"
+              >Payments Links</v-tab
+            >
           </v-tabs>
 
           <!-- Nested View -->
