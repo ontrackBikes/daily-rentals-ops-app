@@ -254,6 +254,19 @@
             </div>
           </v-card>
 
+          <v-select
+            v-model="form.vehicle"
+            :items="availableVehicles"
+            item-text="registration_number"
+            item-value="vehicle_id"
+            label="Select Vehicle"
+            outlined
+            dense
+            class="mt-4"
+            :disabled="!form.location || availableVehicles.length === 0"
+            placeholder="Choose a vehicle"
+          />
+
           <!-- Continue Button -->
           <v-btn
             large
@@ -287,6 +300,7 @@ export default {
         plan: "monthly",
         location: null,
         addons: [],
+        vehicle: null,
       },
       model: null, // Changed to null initially, will be loaded from API
       locations: [], // Changed to empty array initially, will be loaded from API
@@ -318,6 +332,12 @@ export default {
     }
   },
   computed: {
+    availableVehicles() {
+      if (!this.model || !this.form.location) return [];
+      return this.model.vehicle_data.filter(
+        (v) => v.location_id === this.form.location && v.status === "available"
+      );
+    },
     subscriptionPrice() {
       if (!this.model || !this.form.plan) return 0;
       const plan = this.model.vehicle_model_pricing_data.find(
@@ -375,13 +395,21 @@ export default {
       console.log("Proceeding to payment with:", this.form);
     },
     goToCustomerDetails() {
+      // Find the selected plan object
+      const selectedPlan = this.model.vehicle_model_pricing_data.find(
+        (p) => p.model_pricing_plan_data.plan_type === this.form.plan
+      );
+
+      const pricingId = selectedPlan ? selectedPlan.pricing_id : null;
       this.$router.push({
         path: "/customer-details",
         query: {
           modelId: this.model_id,
           total: this.grandTotal,
           subscription: this.form.plan,
+          pricingId: pricingId,
           addons: JSON.stringify(this.form.addons),
+          vehicleId: this.form.vehicle,
         },
       });
     },

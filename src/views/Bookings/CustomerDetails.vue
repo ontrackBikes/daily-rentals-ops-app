@@ -4,29 +4,35 @@
       <v-row>
         <!-- Left Column - Form -->
         <v-col cols="12" md="8">
-          <!-- Customer Form -->
           <v-card elevation="2">
             <v-card-title class="grey white--text">
               <v-icon left color="white">mdi-account-edit</v-icon>
               Customer Information
             </v-card-title>
+
             <v-card-text class="pa-6">
               <v-form ref="form" v-model="formValid" lazy-validation>
-                <!-- Existing Customer Selection -->
+                <!-- Existing Customer -->
                 <div class="mb-6">
                   <v-subheader class="px-0 text-subtitle-1 font-weight-bold">
                     <v-icon left>mdi-account-search</v-icon>
-                    Select Existing Customer (Optional)
+                    Select Existing Customer (Required)
                   </v-subheader>
                   <SelectCustomer
                     v-model="selectedCustomer"
                     @input="populateCustomer"
                   />
+                  <div
+                    v-if="!selectedCustomer && triedToSubmit"
+                    class="red--text text-caption mt-2"
+                  >
+                    Please select or create a customer before booking.
+                  </div>
                 </div>
 
                 <v-divider class="my-6"></v-divider>
 
-                <!-- Personal Details -->
+                <!-- Personal Details (kept editable for guest/updates) -->
                 <v-subheader class="px-0 text-subtitle-1 font-weight-bold mb-4">
                   <v-icon left>mdi-account</v-icon>
                   Personal Details
@@ -41,6 +47,7 @@
                       dense
                       :rules="[rules.required]"
                       prepend-inner-icon="mdi-account"
+                      :disabled="true"
                     />
                   </v-col>
                   <v-col cols="12" sm="6">
@@ -51,6 +58,7 @@
                       dense
                       :rules="[rules.required, rules.phone]"
                       prepend-inner-icon="mdi-phone"
+                      :disabled="true"
                     />
                   </v-col>
                 </v-row>
@@ -96,33 +104,27 @@
               </template>
             </v-img>
 
-            <!-- Model Info -->
-            <!-- <div class="overline text--secondary mb-1">
-                {{ model?.make?.toUpperCase() }}
-              </div> -->
             <div class="subtitle-1 font-weight-bold mb-2">
-              {{ model?.model_name }}
+              {{ model?.model_name || "Vehicle model" }}
             </div>
 
-            <!-- Chips -->
             <div class="mb-3">
               <v-chip small class="mr-2 mb-1" color="success" outlined>
                 <v-icon small left>mdi-leaf</v-icon>
-                {{ model?.vehicle_type }}
+                {{ model?.vehicle_type || "—" }}
               </v-chip>
               <v-chip small class="mr-2 mb-1" outlined>
                 <v-icon small left>mdi-account-multiple</v-icon>
-                {{ model?.seat_capacity }} Seats
+                {{ model?.seat_capacity || "—" }} Seats
               </v-chip>
               <v-chip small class="mb-1" outlined>
                 <v-icon small left>mdi-speedometer</v-icon>
-                {{ model?.range_km }} km Range
+                {{ model?.range_km || "—" }} km Range
               </v-chip>
             </div>
 
-            <!-- Description -->
             <p class="body-2 text--secondary">
-              {{ model?.description?.substring(0, 120) }}...
+              {{ (model?.description || "").substring(0, 120) }}...
             </p>
 
             <v-divider class="my-4"></v-divider>
@@ -132,31 +134,29 @@
                 <span class="text-subtitle-2">Subscription Plan</span>
                 <span class="font-weight-bold">{{ subscription }}</span>
               </div>
-              <div
-                v-if="addons.length > 0"
-                class="d-flex justify-space-between align-center mb-3"
-              >
-                <span class="text-subtitle-2"
-                  >Add-ons ({{ addons.length }})
+
+              <div v-if="addons && addons.length > 0" class="mb-3">
+                <span class="text-subtitle-2">Add-ons</span>
+                <div class="mt-2">
                   <v-chip
                     v-for="(addon, i) in addons"
                     :key="i"
                     class="ma-1"
-                    color="primary"
                     outlined
                     small
                   >
                     <v-icon left small>mdi-check</v-icon>
-                    {{ addon }}
-                  </v-chip></span
-                >
-                <span class="font-weight-bold">Included</span>
+                    {{ addon.name || addon.title || addon }}
+                  </v-chip>
+                </div>
               </div>
+
               <v-divider class="my-4"></v-divider>
+
               <div class="d-flex justify-space-between align-center mb-4">
                 <span class="text-h6 font-weight-bold">Total Amount</span>
                 <span class="text-h5 success--text font-weight-bold"
-                  >₹{{ total }}</span
+                  >₹{{ formatAmount(total) }}</span
                 >
               </div>
 
@@ -165,18 +165,191 @@
                 large
                 block
                 rounded
-                :disabled="!formValid"
-                :loading="submitting"
-                @click="submitForm"
+                :disabled="!formValid || previewLoading"
+                :loading="previewLoading"
+                @click="previewBooking"
                 class="py-6"
               >
-                Proceed to Payment
+                Preview & Confirm
               </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- Overlay while any global action runs -->
+    <v-overlay :value="globalLoading" absolute>
+      <v-progress-circular indeterminate size="64" />
+    </v-overlay>
+
+    <!-- Booking Preview Dialog -->
+    <v-dialog v-model="previewDialog" max-width="800px">
+      <v-card>
+        <v-card-title class="headline"> Booking Preview </v-card-title>
+
+        <v-card-text>
+          <div v-if="previewError" class="mb-4">
+            <v-alert type="error" dense text>
+              {{ previewError }}
+            </v-alert>
+          </div>
+
+          <div v-if="!bookingPreview && !previewError" class="text-center pa-8">
+            <v-progress-circular indeterminate />
+            <div class="mt-2">Loading preview...</div>
+          </div>
+
+          <div v-if="bookingPreview">
+            <div class="mb-3">
+              <strong>Plan:</strong>
+              {{
+                bookingPreview?.modelDetails?.plan_name ||
+                bookingPreview?.modelDetails?.plan_type
+              }}
+            </div>
+
+            <div class="mb-3">
+              <strong>Dates:</strong>
+              {{
+                bookingPreview?.bookingDates?.start_date | moment("DD/MM/YYYY")
+              }}
+              →
+              {{
+                bookingPreview?.bookingDates?.end_date | moment("DD/MM/YYYY")
+              }}
+              <span class="grey--text text--darken-1"
+                >({{ bookingPreview?.bookingDates?.plan_type }})</span
+              >
+            </div>
+
+            <v-divider class="my-3"></v-divider>
+
+            <div>
+              <strong>Items</strong>
+              <v-simple-table class="mt-2">
+                <thead>
+                  <tr>
+                    <th class="text-left">Item</th>
+                    <th class="text-left">Qty</th>
+                    <th class="text-right">Unit</th>
+                    <th class="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(li, idx) in bookingPreview?.lineItems || []"
+                    :key="idx"
+                  >
+                    <td>{{ li.product_name }}</td>
+                    <td>{{ li.quantity }}</td>
+                    <td class="text-right">
+                      ₹{{ formatAmount(li.unit_final_price) }}
+                    </td>
+                    <td class="text-right">
+                      ₹{{ formatAmount(li.net_total || li.gross_total) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </v-simple-table>
+            </div>
+
+            <v-divider class="my-3"></v-divider>
+
+            <div class="d-flex justify-space-between">
+              <span>Plan Rate</span>
+              <span
+                >₹{{
+                  formatAmount(bookingPreview?.pricingBreakdown?.planRate)
+                }}</span
+              >
+            </div>
+            <div class="d-flex justify-space-between">
+              <span>Add-on Total</span>
+              <span
+                >₹{{
+                  formatAmount(bookingPreview?.pricingBreakdown?.addonTotal)
+                }}</span
+              >
+            </div>
+            <div
+              class="d-flex justify-space-between font-weight-bold text-h6 mt-2"
+            >
+              <span>Total Payable</span>
+              <span
+                >₹{{
+                  formatAmount(bookingPreview?.pricingBreakdown?.totalPayable)
+                }}</span
+              >
+            </div>
+
+            <div class="mt-4">
+              <small class="grey--text">
+                Model: {{ bookingPreview?.modelDetails?.model_name }} • Plan:
+                {{
+                  bookingPreview?.modelDetails?.plan_name ||
+                  bookingPreview?.modelDetails?.plan_type
+                }}
+              </small>
+            </div>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="closePreview">Cancel</v-btn>
+          <v-btn
+            color="primary"
+            :disabled="!bookingPreview || confirmLoading"
+            :loading="confirmLoading"
+            @click="confirmBookingFromPreview"
+          >
+            Confirm & Create Booking
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Booking Success Dialog -->
+    <v-dialog v-model="bookingDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="headline">Booking Created</v-card-title>
+        <v-card-text>
+          <div v-if="bookingResponse">
+            <div class="mb-2">
+              <strong>Booking ID:</strong>
+              {{ bookingResponse.booking.booking_id }}
+            </div>
+            <div class="mb-2">
+              <strong>Order:</strong>
+              {{ bookingResponse.order.internal_order_id }}
+            </div>
+            <div class="mb-2">
+              <strong>Total:</strong> ₹{{
+                formatAmount(bookingResponse.order.order_total)
+              }}
+            </div>
+            <div class="mb-2">
+              <strong>Assigned Vehicle:</strong>
+              {{
+                bookingResponse.assignedVehicle?.registration_number ||
+                "Not Assigned"
+              }}
+            </div>
+            <div class="mb-2">
+              <strong>Status:</strong> {{ bookingResponse.booking.status }}
+            </div>
+          </div>
+          <div v-else class="text-center pa-6">
+            <v-progress-circular indeterminate />
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer /> <v-btn text @click="closeBookingDialog">Close</v-btn>
+          <v-btn color="primary" @click="proceedToPayment">View Bookings</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </deep-layout>
 </template>
 
@@ -192,19 +365,17 @@ export default {
     return {
       model: null,
       loading: false,
+      globalLoading: false,
       selectedCustomer: null,
       form: {
         name: "",
         email: "",
         phone: "",
         address: "",
-        dl_number: "",
-        dl_file: null,
       },
       formValid: false,
+      triedToSubmit: false,
 
-      verifying: false,
-      submitting: false,
       rules: {
         required: (v) => !!v || "This field is required",
         email: (v) =>
@@ -212,25 +383,48 @@ export default {
         phone: (v) =>
           /^[6-9]\d{9}$/.test(v) || "Enter a valid 10-digit phone number",
       },
+
       total: null,
       subscription: null,
       addons: [],
-      model_id: null, // Added model_id to component data
+      model_id: null,
+      pricing_id: null,
+      vehicle_id: null,
+
+      // Preview & booking states
+      previewDialog: false,
+      bookingPreview: null,
+      previewLoading: false,
+      previewError: null,
+
+      confirmLoading: false,
+      bookingDialog: false,
+      bookingResponse: null,
     };
   },
-  async created() {
-    this.model_id = this.$route.query.modelId || null;
-    this.total = this.$route.query.total || 0;
-    this.subscription = this.$route.query.subscription || "N/A";
-    this.addons = this.$route.query.addons
-      ? JSON.parse(this.$route.query.addons)
-      : [];
 
-    // Load model data if model_id is available
+  async created() {
+    // read query params
+    this.model_id = this.$route.query.modelId || null;
+    this.total = parseFloat(this.$route.query.total || 0);
+    this.pricing_id = this.$route.query.pricingId || null;
+    this.vehicle_id = this.$route.query.vehicleId || null;
+    this.subscription = this.$route.query.subscription || "N/A";
+
+    try {
+      this.addons = this.$route.query.addons
+        ? JSON.parse(this.$route.query.addons)
+        : [];
+    } catch (e) {
+      // if addons is a simple string or already array, normalize
+      this.addons = this.$route.query.addons || [];
+    }
+
     if (this.model_id) {
       await this.loadModel(this.model_id);
     }
   },
+
   methods: {
     async loadModel(modelId) {
       this.loading = true;
@@ -244,53 +438,184 @@ export default {
         this.loading = false;
       }
     },
+
     populateCustomer(customer) {
+      this.selectedCustomer = customer;
       if (customer) {
-        this.form.name = customer.display_name || customer.name;
-        this.form.email = customer.email || "";
-        this.form.phone = customer.user_data?.phone || "";
-        this.form.address = customer.address || "";
+        this.form.name =
+          customer.display_name || customer.name || this.form.name;
+        const emailContact = customer.customer_contact_data?.find(
+          (c) => c.type === "email" && c.is_primary
+        );
+        this.form.email = emailContact?.value || "";
+        this.form.phone = customer.user_data?.phone || this.form.phone || "";
+        this.form.address = customer.address || this.form.address || "";
       }
     },
 
-    async submitForm() {
-      const isValid = await this.$refs.form.validate();
-      if (!isValid) return;
+    formatAmount(v) {
+      if (v === null || v === undefined) return "0";
+      const num = Number(v);
+      if (Number.isNaN(num)) return v;
+      return num.toLocaleString("en-IN");
+    },
 
-      this.submitting = true;
-      try {
-        const payload = {
-          ...this.form,
-          model_id: this.model_id,
-          subscription: this.subscription,
-          addons: this.addons,
-          total: this.total,
-        };
-        console.log("Submitting booking:", payload);
+    // Build addons payload: accept various shapes
+    buildAddonsPayload() {
+      if (!this.addons || this.addons.length === 0) return [];
+      return this.addons.map((a) => {
+        // Keep it robust: if addon already contains addon_id & qty, use it
+        if (a.addon_id) return { addon_id: a.addon_id, qty: a.qty || 1 };
+        if (a.id) return { addon_id: a.id, qty: a.qty || 1 };
+        // fallback: if addon is primitive (string/number) we cannot map id -> send as-is is risky
+        return { addon_id: a.addonId || a.id || a.addon_id || a, qty: 1 };
+      });
+    },
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Preview booking call
+    async previewBooking() {
+      // validate form before preview
+      this.triedToSubmit = true;
+      const valid = await this.$refs.form.validate();
+      if (!valid) return;
 
-        this.$swal.fire({
-          title: "Booking Confirmed!",
-          text: "Redirecting to payment...",
-          icon: "success",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-
-        // Redirect to payment page
-        setTimeout(() => {
-          this.$router.push({
-            path: "/payment",
-            query: { ...this.$route.query, bookingId: "BK" + Date.now() },
-          });
-        }, 2000);
-      } catch (err) {
-        this.$swal.fire("Error", "Failed to submit booking", "error");
-      } finally {
-        this.submitting = false;
+      // require pricing id
+      if (!this.pricing_id) {
+        this.$swal.fire(
+          "Missing data",
+          "Pricing ID is required to preview booking.",
+          "warning"
+        );
+        return;
       }
+
+      // ensure a customer is selected (backend expects customer_id mandatory for create; preview might not, but we enforce)
+      if (!this.selectedCustomer) {
+        // let user preview anyway? In this implementation, we require customer selection for consistent flow
+        this.$swal.fire({
+          title: "No customer selected",
+          text: "Please select an existing customer before previewing the booking.",
+          icon: "warning",
+        });
+        return;
+      }
+
+      this.previewLoading = true;
+      this.globalLoading = true;
+      this.previewError = null;
+      this.bookingPreview = null;
+
+      const payload = {
+        pricing_id: this.pricing_id,
+        addons: this.buildAddonsPayload(),
+      };
+
+      try {
+        const { data } = await api.post("/api/booking/preview", payload);
+        if (data?.success) {
+          this.bookingPreview = data.data;
+          this.previewDialog = true;
+        } else {
+          this.previewError =
+            data?.message || "Failed to generate booking preview";
+          this.$swal.fire("Preview Failed", this.previewError, "error");
+        }
+      } catch (err) {
+        console.error("Preview error:", err);
+        const message =
+          err?.response?.data?.message ||
+          err.message ||
+          "Network error during preview";
+        this.previewError = message;
+        this.$swal.fire("Preview Error", message, "error");
+      } finally {
+        this.previewLoading = false;
+        this.globalLoading = false;
+      }
+    },
+
+    closePreview() {
+      this.previewDialog = false;
+      this.bookingPreview = null;
+      this.previewError = null;
+    },
+
+    // Confirm booking from preview dialog
+    async confirmBookingFromPreview() {
+      // quick guard: preview must exist
+      if (!this.bookingPreview) {
+        this.$swal.fire(
+          "No preview",
+          "Please generate a preview before confirming.",
+          "warning"
+        );
+        return;
+      }
+
+      // ensure required data
+      if (!this.selectedCustomer) {
+        this.$swal.fire(
+          "Missing customer",
+          "Please select a customer before confirming booking.",
+          "warning"
+        );
+        return;
+      }
+
+      this.confirmLoading = true;
+      this.globalLoading = true;
+
+      const payload = {
+        pricing_id: this.pricing_id,
+        customer_id: this.selectedCustomer?.customer_id,
+        addons: this.buildAddonsPayload(),
+        vehicle_id: this.vehicle_id || null,
+      };
+
+      try {
+        const { data } = await api.post("/api/booking/v2", payload);
+
+        if (data?.success) {
+          this.bookingResponse = data.data;
+          // close preview & open booking dialog
+          this.previewDialog = false;
+          this.bookingDialog = true;
+        } else {
+          const msg = data?.message || "Booking failed";
+          this.$swal.fire("Booking Failed", msg, "error");
+        }
+      } catch (err) {
+        console.error("Confirm booking error:", err);
+        const message =
+          err?.response?.data?.message ||
+          err.message ||
+          "Network error creating booking";
+        this.$swal.fire("Booking Error", message, "error");
+      } finally {
+        this.confirmLoading = false;
+        this.globalLoading = false;
+      }
+    },
+
+    closeBookingDialog() {
+      this.bookingDialog = false;
+      // optionally reset bookingResponse if you want to allow another booking
+      // this.bookingResponse = null;
+    },
+
+    proceedToPayment() {
+      // route to payment page with booking id and order id
+      if (!this.bookingResponse) return;
+      const bookingId = this.bookingResponse.booking.booking_id;
+      // const orderId = this.bookingResponse.order.internal_order_id;
+      this.$router.push({
+        path: `/booking/${bookingId}/overview`,
+        // query: {
+        //   ...this.$route.query,
+        //   bookingId,
+        //   orderId,
+        // },
+      });
     },
   },
 };

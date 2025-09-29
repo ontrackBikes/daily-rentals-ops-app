@@ -36,25 +36,50 @@
             </div>
 
             <v-divider class="my-3" />
+            <div class="d-flex">
+              Order Total:
+              <strong class="ml-2"
+                >₹{{ booking.order_data?.order_total }}</strong
+              >
+            </div>
+            <div class="d-flex">
+              Order Balance:
+              <strong
+                class="ml-2"
+                :class="{
+                  'green--text': booking.order_data?.order_balance === 0,
+                  'red--text': booking.order_data?.order_balance < 0,
+                }"
+              >
+                ₹{{ booking.order_data?.order_balance }}
+              </strong>
+            </div>
 
             <!-- Payment Status -->
-            <div class="text-subtitle-2 font-weight-medium mb-1">
-              Payment Status
+            <div class="d-flex text-subtitle-2 font-weight-medium mb-1">
+              Payment Status:
+              <v-chip
+                color="red"
+                small
+                text-color="white"
+                class="font-weight-medium ml-2"
+              >
+                {{ booking.order_data?.payment_status || "N/A" }}
+              </v-chip>
             </div>
-            <v-chip
-              color="red"
-              small
-              text-color="white"
-              class="font-weight-medium"
-            >
-              {{ booking.order_data?.payment_status || "N/A" }}
-            </v-chip>
 
             <!-- Upcoming → Show Start Booking -->
             <div
               v-if="booking.status === 'upcoming'"
               class="d-flex justify-end mt-4"
             >
+              <v-btn
+                color="warning"
+                dark
+                class="mr-2"
+                @click="openCancelBookingDialog = true"
+                >Cancel Booking</v-btn
+              >
               <v-btn color="primary" dark @click="openStartBookingDialog = true"
                 >Start Booking</v-btn
               >
@@ -63,7 +88,7 @@
             <!-- Active → Show End & Extend Booking -->
             <div
               v-if="booking.status === 'active'"
-              class="d-flex justify-end mt-4"
+              class="d-flex justify-center mt-4"
             >
               <v-btn
                 color="red"
@@ -453,6 +478,57 @@
       </v-card>
     </v-dialog> -->
 
+    <v-dialog v-model="openCancelBookingDialog" max-width="600px">
+      <v-card :loading="loading">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Cancel Booking</div>
+            <v-btn icon @click="closeCancelBookingDialog">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <!-- Cancel Form -->
+          <v-form ref="cancelFormRef" v-model="cancelFormValid" class="my-4">
+            <!-- Fee Applicable -->
+            <label class="text-subtitle-2">Cancellation Fee Applicable *</label>
+            <v-radio-group
+              v-model="cancelForm.cancellation_fee_applicable"
+              row
+              :rules="[rules.required]"
+            >
+              <v-radio label="Yes" :value="true"></v-radio>
+              <v-radio label="No" :value="false"></v-radio>
+            </v-radio-group>
+            <!-- Reason -->
+            <label class="text-subtitle-2">Reason *</label>
+            <v-textarea
+              v-model="cancelForm.reason"
+              outlined
+              dense
+              rows="3"
+              :rules="[rules.required]"
+              hide-details
+            />
+          </v-form>
+          <!-- Actions -->
+          <div class="d-flex justify-end my-2">
+            <v-btn text @click="closeCancelBookingDialog" class="mr-2"
+              >Cancel</v-btn
+            >
+            <v-btn
+              color="red darken-1"
+              dark
+              :disabled="!cancelFormValid"
+              @click="submitCancelBooking"
+            >
+              Confirm Cancel
+            </v-btn>
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
+
     <input
       ref="fileInput"
       type="file"
@@ -501,6 +577,10 @@ export default {
         plan: null,
         customEndDate: null,
       },
+
+      openCancelBookingDialog: false,
+      cancelFormValid: false,
+      cancelForm: { cancellation_fee_applicable: null, reason: "" },
 
       // Image upload
       currentUploadType: null, // 'start' or 'end'
@@ -770,6 +850,41 @@ export default {
       console.log("Custom End Date:", this.form.customEndDate);
       // Call API to confirm extension here
       this.openExtendDialog = false;
+    },
+
+    closeCancelBookingDialog() {
+      this.openCancelBookingDialog = false;
+      this.cancelForm = { cancellation_fee_applicable: null, reason: "" };
+    },
+    async submitCancelBooking() {
+      if (!this.cancelFormValid) return;
+      this.loading = true;
+      try {
+        const resp = await api.post(
+          `/api/booking/${this.booking.booking_id}/cancel`,
+          {
+            cancellation_fee_applicable:
+              this.cancelForm.cancellation_fee_applicable,
+            reason: this.cancelForm.reason,
+          }
+        );
+        this.$swal.fire({
+          icon: "success",
+          title: "Booking Cancelled",
+          text:
+            resp.data.message || "The booking has been cancelled successfully.",
+        });
+        this.closeCancelBookingDialog();
+        this.fetchBookingDetails();
+      } catch (e) {
+        this.$swal.fire({
+          icon: "error",
+          title: "Error",
+          text: e.response?.data?.message || "Failed to cancel booking!",
+        });
+      } finally {
+        this.loading = false;
+      }
     },
 
     // async fetchExtensionSummary() {
