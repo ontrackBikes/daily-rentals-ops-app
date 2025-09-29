@@ -102,10 +102,17 @@
                 @click="openEndBookingDialog = true"
                 >End Booking</v-btn
               >
-              <v-btn color="primary" dark @click="openExtendDialog = true">
+              <v-btn
+                color="primary"
+                class="mr-2"
+                dark
+                @click="openExtendDialog = true"
+              >
                 Extend Booking
               </v-btn>
-
+              <v-btn color="primary" @click="openExchangeDialog = true"
+                >Exchange</v-btn
+              >
               <extend-booking-viewer
                 v-model="openExtendDialog"
                 :booking_id="booking_id"
@@ -483,6 +490,15 @@
       </v-card>
     </v-dialog> -->
 
+    <v-dialog v-model="openExchangeDialog" max-width="500px">
+      <v-card>
+        <v-container>
+          <!-- Header -->
+          <exchange-viewer :booking_id="booking_id" />
+        </v-container>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="openCancelBookingDialog" max-width="600px">
       <v-card :loading="loading">
         <v-container>
@@ -551,9 +567,10 @@ import Swal from "sweetalert2";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import ExtendBookingViewer from "@/components/ExtendBookingViewer.vue";
 import StatusService from "@/plugins/statusColor";
+import ExchangeViewer from "@/components/ExchangeViewer.vue";
 
 export default {
-  components: { DeepLayout, ExtendBookingViewer },
+  components: { DeepLayout, ExtendBookingViewer, ExchangeViewer },
   data() {
     return {
       booking_id: null,
@@ -583,7 +600,7 @@ export default {
         plan: null,
         customEndDate: null,
       },
-
+      openExchangeDialog: false,
       openCancelBookingDialog: false,
       cancelFormValid: false,
       cancelForm: { cancellation_fee_applicable: null, reason: "" },
