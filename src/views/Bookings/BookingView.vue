@@ -11,11 +11,11 @@
             <div class="d-flex">
               <v-chip
                 small
-                color="orange"
                 text-color="white"
                 class="font-weight-medium"
+                :color="getStatusColor(booking.status, 'booking')"
               >
-                {{ booking.status }}
+                {{ booking.status || "N/A" }}
               </v-chip>
             </div>
 
@@ -42,10 +42,15 @@
               Payment Status
             </div>
             <v-chip
-              color="red"
               small
               text-color="white"
               class="font-weight-medium"
+              :color="
+                getStatusColor(
+                  booking.order_data?.payment_status,
+                  'payment_status'
+                )
+              "
             >
               {{ booking.order_data?.payment_status || "N/A" }}
             </v-chip>
@@ -469,6 +474,7 @@ import api from "@/plugins/axios";
 import Swal from "sweetalert2";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import ExtendBookingViewer from "@/components/ExtendBookingViewer.vue";
+import StatusService from "@/plugins/statusColor";
 
 export default {
   components: { DeepLayout, ExtendBookingViewer },
@@ -814,6 +820,10 @@ export default {
       } catch (e) {
         alert("Some error occurred during payment");
       }
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 
