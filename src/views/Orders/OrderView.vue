@@ -34,9 +34,15 @@
 
             <!-- Payment Status -->
             <div class="text-body-2">Payment Status</div>
-            <div class="font-weight-bold">
+
+            <v-chip
+              small
+              text-color="white"
+              class="font-weight-medium"
+              :color="getStatusColor(order?.payment_status, 'payment_status')"
+            >
               {{ order?.payment_status || "N/A" }}
-            </div>
+            </v-chip>
           </v-card>
 
           <v-card outlined class="pa-4 rounded-lg my-2">
@@ -101,6 +107,7 @@
 import api from "@/plugins/axios";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import CustomerViewer from "@/components/CustomerViewer.vue";
+import StatusService from "@/plugins/statusColor";
 
 export default {
   components: { DeepLayout, CustomerViewer },
@@ -157,6 +164,10 @@ export default {
       } catch (e) {
         console.error("Failed to load order", e);
       }
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 };

@@ -5,7 +5,7 @@
       <div class="d-flex">
         <v-chip
           small
-          :color="customerData.status === 'Active' ? 'green' : 'red'"
+          :color="getStatusColor(customerData.status, 'customer')"
           text-color="white"
           class="font-weight-medium"
         >
@@ -389,6 +389,7 @@
 <script>
 import api from "@/plugins/axios";
 import Swal from "sweetalert2";
+import StatusService from "@/plugins/statusColor";
 
 export default {
   props: {
@@ -616,6 +617,10 @@ export default {
     openUpdateCustomerDialog(customer) {
       this.customerData = { ...customer };
       this.updateCustomerDialog = true;
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 };

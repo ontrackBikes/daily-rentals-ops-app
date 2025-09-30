@@ -302,27 +302,11 @@ export default {
         addons: [],
         vehicle: null,
       },
-      model: null, // Changed to null initially, will be loaded from API
-      locations: [], // Changed to empty array initially, will be loaded from API
-      addons: [
-        {
-          label: "Premium Helmet",
-          value: "helmet",
-          price: 100,
-          icon: "mdi-shield-check",
-          description: "ISI certified safety helmet",
-        },
-
-        {
-          label: "Comprehensive Insurance",
-          value: "insurance",
-          price: 200,
-          icon: "mdi-shield-account",
-          description: "Full coverage protection",
-        },
-      ],
+      model: null,
+      locations: [],
+      addons: [],
       loading: false,
-      locationsLoading: false, // Added separate loading state for locations
+      locationsLoading: false,
     };
   },
   async mounted() {
@@ -330,6 +314,7 @@ export default {
     if (this.model) {
       await this.fetchLocations(this.model_id);
     }
+    this.fetchAddons();
   },
   computed: {
     availableVehicles() {
@@ -388,14 +373,8 @@ export default {
         this.form.addons.push(addonValue);
       }
     },
-    goBack() {
-      console.log("Going back to models");
-    },
-    goToPayment() {
-      console.log("Proceeding to payment with:", this.form);
-    },
+
     goToCustomerDetails() {
-      // Find the selected plan object
       const selectedPlan = this.model.vehicle_model_pricing_data.find(
         (p) => p.model_pricing_plan_data.plan_type === this.form.plan
       );
@@ -412,6 +391,33 @@ export default {
           vehicleId: this.form.vehicle,
         },
       });
+    },
+
+    async fetchAddons() {
+      try {
+        this.loading = true;
+        const res = await api.get(`/api/addons`);
+        const rawAddons = res.data?.data?.addons || [];
+
+        this.addons = rawAddons.map((a) => ({
+          label: a.addon_name,
+          value: a.provider_addon_id,
+          price:
+            a.addon_type === "per_day"
+              ? Number(a.offer_price_per_day || a.base_price_per_day)
+              : Number(a.offer_price_per_booking || a.base_price_per_booking),
+          icon:
+            a.description === "Protective helmet"
+              ? "mdi-racing-helmet"
+              : "mdi-cellphone-dock",
+          description: a.description,
+        }));
+      } catch (err) {
+        console.error("Error fetching addons:", err);
+        this.addons = [];
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
