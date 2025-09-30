@@ -138,19 +138,17 @@
               }}
             </p>
           </v-card-text>
+          <v-card-action>
+            <v-btn color="grey" @click="step = 1">Back</v-btn>
+            <v-btn
+              color="primary"
+              :disabled="!selectedVehicleId"
+              @click="confirmExchange"
+            >
+              Confirm Exchange
+            </v-btn>
+          </v-card-action>
         </v-card>
-
-        <!-- Navigation -->
-        <v-row class="mt-4" justify="space-between">
-          <v-btn color="grey" @click="step = 1">Back</v-btn>
-          <v-btn
-            color="primary"
-            :disabled="!selectedVehicleId"
-            @click="confirmExchange"
-          >
-            Confirm Exchange
-          </v-btn>
-        </v-row>
       </div>
     </div>
   </v-container>
