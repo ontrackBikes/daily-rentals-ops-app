@@ -45,19 +45,25 @@
         <v-icon
           small
           class="mr-1"
-          :color="customerData.dl_verified ? 'green' : 'red'"
+          :color="
+            customerData.verification_status === 'verified' ? 'green' : 'red'
+          "
         >
           {{
-            customerData.dl_verified
+            customerData.verification_status === "verified"
               ? "mdi-check-circle-outline"
               : "mdi-close-circle-outline"
           }}
         </v-icon>
         <span class="text-body-2 grey--text">
-          {{ customerData.dl_verified ? "Verified" : "Not Verified" }}
+          {{
+            customerData.verification_status === "verified"
+              ? "Verified"
+              : "Not Verified"
+          }}
         </span>
         <v-chip
-          v-if="!customerData.dl_verified"
+          v-if="customerData.verification_status !== 'verified'"
           small
           class="ml-2"
           color="amber darken-2"
@@ -214,7 +220,7 @@
             <div class="mb-3">
               <v-text-field
                 v-model="dlForm.dl_number"
-                :rules="[rules.required, rules.dlNumber]"
+                :rules="[rules.required]"
                 outlined
                 dense
                 hide-details
@@ -549,17 +555,28 @@ export default {
       }
     },
 
-    verifyDL() {
+    async verifyDL() {
       if (!this.$refs.dlVerifyForm?.validate()) return;
 
       this.loading = true;
-      setTimeout(() => {
-        this.loading = false;
+      this.errorMessage = "";
 
-        const isMatch = this.dlForm.dl_number === "UP123456"; // dummy check
+      try {
+        const payload = {
+          customer_id: this.customerData.customer_id,
+          dl_no: this.dlForm.dl_number,
+          dob: this.dlForm.dob,
+        };
 
-        if (isMatch) {
-          Swal.fire("DL Verified", "DL is valid", "success").then(() => {
+        const response = await api.post("/api/customer/verify-dl", payload);
+
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "DL Verified",
+            text: "Driving License verification successful.",
+            confirmButtonColor: "#198754",
+          }).then(() => {
             this.customerData.dl_verified = true;
             this.openDLVerifyDialog = false;
           });
@@ -567,14 +584,26 @@ export default {
           Swal.fire({
             icon: "error",
             title: "DL Not Verified",
-            text: "DL details not found. Try manual entry.",
+            text:
+              response.data.message ||
+              "DL details not found. Try manual entry.",
             confirmButtonText: "Verify Manually",
           }).then(() => {
             this.openDLVerifyDialog = false;
             this.openManualDLDialog = true;
           });
         }
-      }, 1000);
+      } catch (error) {
+        console.error("DL verification error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Verification Failed",
+          text:
+            error.response?.data?.message || "Something went wrong. Try again.",
+        });
+      } finally {
+        this.loading = false;
+      }
     },
 
     submitManualDL() {

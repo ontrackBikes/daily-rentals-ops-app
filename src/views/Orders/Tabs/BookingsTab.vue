@@ -205,7 +205,7 @@
           <v-card>
             <end-booking
               @refresh-booking="refreshPage"
-              @close-modal="startBookingDialog = false"
+              @close-modal="endBookingDialog = false"
               :booking="booking"
             ></end-booking>
           </v-card>
