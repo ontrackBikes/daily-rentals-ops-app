@@ -6,7 +6,7 @@
     </div>
 
     <!-- Bookings List -->
-    <v-expansion-panels v-else accordion>
+    <v-expansion-panels v-model="activePanel" v-else accordion>
       <v-expansion-panel v-for="booking in bookings" :key="booking.booking_id">
         <!-- Row -->
         <v-expansion-panel-header>
@@ -34,29 +34,67 @@
         <!-- Expand Content -->
         <v-expansion-panel-content>
           <v-divider class="my-2" />
-          <v-chip
-            class="my-auto"
-            outlined
-            small
-            :color="getStatusColor(booking.status, 'booking')"
-          >
-            {{ booking.status || "N/A" }}
-          </v-chip>
-          <div
-            v-if="booking.status === 'upcoming'"
-            class="d-flex justify-end my-4"
-          >
-            <v-btn
-              color="warning"
-              dark
-              class="mr-2"
-              @click="openCancelBookingDialog = true"
-              >Cancel Booking</v-btn
-            >
-            <v-btn color="primary" dark @click="openStartBookingDialog = true"
-              >Start Booking</v-btn
-            >
-          </div>
+          <v-row>
+            <v-col cols="4" class="my-auto">
+              <v-chip
+                class="my-auto"
+                outlined
+                small
+                :color="getStatusColor(booking.status, 'booking')"
+              >
+                {{ booking.status || "N/A" }}
+              </v-chip>
+            </v-col>
+            <v-col cols="8" class="my-auto">
+              <div
+                v-if="booking.status === 'upcoming'"
+                class="d-flex justify-space-between"
+              >
+                <v-btn
+                  color="warning"
+                  dark
+                  class="mr-2"
+                  @click="cancelBookingDialog = true"
+                  >Cancel Booking</v-btn
+                >
+                <v-btn color="primary" dark @click="startBookingDialog = true"
+                  >Start Booking</v-btn
+                >
+              </div>
+
+              <v-row v-if="booking.status === 'active'" class="my-4">
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    color="red"
+                    dark
+                    @click="endBookingDialog = true"
+                    >End Booking</v-btn
+                  >
+                </v-col>
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    color="primary"
+                    @click="openExtendDialog(booking)"
+                  >
+                    Extend Booking
+                  </v-btn>
+                </v-col>
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    color="primary"
+                    @click="exchangeDialog = true"
+                    >Exchange</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
 
           <div>
             <h4 class="subtitle-2 font-weight-bold mb-2">Booking Details</h4>
@@ -89,29 +127,29 @@
 
           <div class="mt-4">
             <h4 class="subtitle-2 font-weight-bold mb-2">Line Items</h4>
-            <div
-              v-for="line in booking.booking_line_item_data"
-              :key="line.line_item_id"
-              class="d-flex justify-space-between mb-1"
+            <v-row
+              no-gutters
+              v-for="(data, index) in booking.booking_line_item_data"
+              :key="index"
               :class="
-                line.status === 'active' ? '' : 'text-decoration-line-through'
+                data.status == 'active' ? '' : 'text-decoration-line-through'
               "
             >
-              <span>
-                {{ line.product_name }} × {{ line.quantity }}
-                <small v-if="line.reason">({{ line.reason }})</small>
-              </span>
-              <strong>
-                ₹{{ line.net_total }}
+              <v-col cols="6" class="text-truncate"
+                >{{ data.product_name }} × {{ data.quantity }}</v-col
+              >
+              <v-col cols="4">{{ data.created_at | moment("lll") }}</v-col>
+              <v-col cols="2" class="text-right">
+                ₹{{ data.net_total }}
                 <del
                   v-if="
-                    parseFloat(line.gross_total) > parseFloat(line.net_total)
+                    parseFloat(data.gross_total) > parseFloat(data.net_total)
                   "
                 >
-                  ₹{{ line.gross_total }}
+                  ₹{{ data.gross_total }}
                 </del>
-              </strong>
-            </div>
+              </v-col>
+            </v-row>
           </div>
 
           <div class="text-right mt-4">
@@ -125,13 +163,62 @@
             </v-btn>
           </div>
         </v-expansion-panel-content>
-      </v-expansion-panel>
+        <v-dialog v-model="startBookingDialog" max-width="600">
+          <v-card>
+            <start-booking
+              @refresh-booking="refreshPage"
+              @close-modal="startBookingDialog = false"
+              :booking="booking"
+            ></start-booking>
+          </v-card>
+        </v-dialog>
 
-      <v-dialog v-model="startBookingDialog">
-        <v-card>
-          <start-booking :booking="booking"></start-booking>
-        </v-card>
-      </v-dialog>
+        <v-dialog v-model="exchangeDialog" max-width="500px">
+          <v-card>
+            <v-container>
+              <!-- Header -->
+              <exchange-viewer
+                @exchangeConfirmed="refreshPage"
+                :booking_id="booking.booking_id"
+                @close-modal="exchangeDialog = false"
+              />
+            </v-container>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="extendDialog" max-width="500px">
+          <v-card>
+            <v-container>
+              <!-- Header -->
+              <extend-booking
+                @exchangeConfirmed="refreshPage"
+                :booking="selectedBooking"
+                @close-modal="extendDialog = false"
+              />
+            </v-container>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="endBookingDialog" max-width="600">
+          <v-card>
+            <end-booking
+              @refresh-booking="refreshPage"
+              @close-modal="startBookingDialog = false"
+              :booking="booking"
+            ></end-booking>
+          </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="cancelBookingDialog" max-width="600">
+          <v-card>
+            <cancel-booking
+              @refresh-booking="refreshPage"
+              @close-modal="startBookingDialog = false"
+              :booking="booking"
+            ></cancel-booking>
+          </v-card>
+        </v-dialog>
+      </v-expansion-panel>
     </v-expansion-panels>
 
     <!-- No data -->
@@ -158,12 +245,31 @@
 import api from "@/plugins/axios";
 import StartBooking from "@/components/StartBooking.vue";
 import StatusService from "@/plugins/statusColor";
+import ExchangeViewer from "@/components/ExchangeViewer.vue";
+import ExtendBooking from "@/components/ExtendBooking.vue";
+import EndBooking from "@/components/EndBooking.vue";
+import CancelBooking from "@/components/CancelBooking.vue";
 
 export default {
-  components: { StartBooking },
+  components: {
+    StartBooking,
+    ExchangeViewer,
+    ExtendBooking,
+    EndBooking,
+    CancelBooking,
+  },
+  props: {
+    refreshOrder: { type: Function, required: true },
+  },
   name: "BookingsList",
   data() {
     return {
+      cancelBookingDialog: false,
+      endBookingDialog: false,
+      extensionDialog: false,
+      extendDialog: false,
+      exchangeDialog: false,
+      activePanel: [],
       bookings: [],
       total: 0,
       limit: 10,
@@ -171,6 +277,7 @@ export default {
       loading: false,
       startBookingDialog: false,
       orderId: "",
+      selectedBooking: null,
     };
   },
   computed: {
@@ -183,6 +290,14 @@ export default {
     this.fetchBookings();
   },
   methods: {
+    openExtendDialog(booking) {
+      this.selectedBooking = booking;
+      this.extendDialog = true;
+    },
+    refreshPage() {
+      this.fetchBookings();
+      this.refreshOrder();
+    },
     async fetchBookings() {
       if (this.loading) return; // ✅ prevent multiple clicks
       this.loading = true;

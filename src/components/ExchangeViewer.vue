@@ -2,7 +2,7 @@
   <v-container>
     <div class="d-flex justify-space-between align-center mb-2">
       <div class="text-h6 font-weight-bold">Exchange Vehicle</div>
-      <v-btn icon @click="$emit('close')">
+      <v-btn icon @click="$emit('close-modal')">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </div>
@@ -232,6 +232,7 @@ export default {
           Swal.fire("Success", "Exchange confirmed successfully!", "success");
           // Optionally reload or redirect
           this.$emit("exchangeConfirmed", data.data);
+          this.$emit("close-modal");
         } else {
           Swal.fire(
             "Error",

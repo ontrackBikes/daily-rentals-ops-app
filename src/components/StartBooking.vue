@@ -25,7 +25,7 @@
             hide-details
           />
 
-          <div class="text-right">
+          <div class="text-right mt-5">
             <v-btn color="primary" @click="nextStep">Next</v-btn>
           </div>
         </div>
@@ -70,20 +70,21 @@
               </div>
             </v-col>
           </v-row>
+          <!-- Actions -->
+          <div class="d-flex justify-end my-2">
+            <v-btn text @click="$emit('close-modal')" class="mr-2"
+              >Cancel</v-btn
+            >
+            <v-btn
+              color="primary"
+              :disabled="!startFormValid || startImages.length < 4"
+              @click="submitStartBooking"
+            >
+              Confirm
+            </v-btn>
+          </div>
         </div>
       </v-form>
-
-      <!-- Actions -->
-      <div class="d-flex justify-end my-2">
-        <v-btn text @click="$emit('close-modal')" class="mr-2">Cancel</v-btn>
-        <v-btn
-          color="primary"
-          :disabled="!startFormValid || startImages.length < 4"
-          @click="submitStartBooking"
-        >
-          Confirm
-        </v-btn>
-      </div>
 
       <!-- Hidden File Input -->
       <input
@@ -183,6 +184,7 @@ export default {
           title: "Started",
           text: resp.data.message,
         });
+        this.$emit("refresh-booking");
         this.$emit("close-modal");
       } catch (e) {
         this.$swal.fire({

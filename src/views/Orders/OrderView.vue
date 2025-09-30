@@ -90,7 +90,7 @@
           </v-tabs>
 
           <!-- Nested View -->
-          <router-view ref="routerView" />
+          <router-view :refresh-order="getOrderData" ref="routerView" />
         </v-col>
       </v-row>
     </v-container>
