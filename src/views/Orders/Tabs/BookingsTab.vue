@@ -45,11 +45,8 @@
                 {{ booking.status || "N/A" }}
               </v-chip>
             </v-col>
-            <v-col cols="8" class="my-auto">
-              <div
-                v-if="booking.status === 'upcoming'"
-                class="d-flex justify-space-between"
-              >
+            <v-col cols="8" class="my-auto text-right">
+              <div v-if="booking.status === 'upcoming'" class="d-flex">
                 <v-btn
                   color="warning"
                   dark
