@@ -21,19 +21,10 @@
               </v-chip>
             </div>
 
-            <!-- Date Range -->
-            <!-- <div class="text-subtitle-2 mb-1">
-              {{ order.booking_data?.[0]?.start_date | moment("DD/MM/YYYY") }} -
-              {{ order.booking_data?.[0]?.end_date | moment("DD/MM/YYYY") }}
-            </div> -->
-
-            <!-- Reg. Number -->
-            <!-- <div class="font-weight-bold mb-1">
-              {{
-                order?.booking_data?.[0]?.vehicle_data?.registration_number ||
-                "N/A"
-              }}
-            </div> -->
+            <div class="d-flex">
+              Paid Total:
+              <strong class="ml-2">₹{{ order?.amount_received }}</strong>
+            </div>
 
             <!-- Order Balance -->
             <div class="text-body-2">Order Balance</div>

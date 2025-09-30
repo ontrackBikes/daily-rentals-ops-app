@@ -49,6 +49,14 @@
                   >₹{{ booking.order_data?.order_total }}</strong
                 >
               </div>
+
+              <div class="d-flex">
+                Paid Total:
+                <strong class="ml-2"
+                  >₹{{ booking.order_data?.amount_received }}</strong
+                >
+              </div>
+
               <div class="d-flex">
                 Order Balance:
                 <strong
@@ -65,25 +73,25 @@
               <!-- Payment Status -->
               <div class="text-subtitle-2 font-weight-medium mb-1">
                 Payment Status
-              </div>
-              <v-chip
-                small
-                text-color="white"
-                class="font-weight-medium"
-                :color="
-                  getStatusColor(
-                    booking.order_data?.payment_status,
-                    'payment_status'
-                  )
-                "
-              >
-                {{ booking.order_data?.payment_status || "N/A" }}
-              </v-chip>
 
+                <v-chip
+                  small
+                  text-color="white"
+                  class="font-weight-medium"
+                  :color="
+                    getStatusColor(
+                      booking.order_data?.payment_status,
+                      'payment_status'
+                    )
+                  "
+                >
+                  {{ booking.order_data?.payment_status || "N/A" }}
+                </v-chip>
+              </div>
               <!-- Upcoming → Show Start Booking -->
               <div
                 v-if="booking.status === 'upcoming'"
-                class="d-flex justify-end mt-4"
+                class="d-flex justify-end my-4"
               >
                 <v-btn
                   color="warning"
@@ -101,32 +109,46 @@
               </div>
 
               <!-- Active → Show End & Extend Booking -->
-              <div v-if="booking.status === 'active'">
-                <v-btn
-                  color="red"
-                  dark
-                  class="mr-2"
-                  @click="openEndBookingDialog = true"
-                  >End Booking</v-btn
-                >
-                <v-btn
-                  color="primary"
-                  class="mr-2"
-                  dark
-                  @click="openExtendDialog = true"
-                >
-                  Extend Booking
-                </v-btn>
-                <v-btn color="primary" @click="openExchangeDialog = true"
-                  >Exchange</v-btn
-                >
+              <v-row v-if="booking.status === 'active'" class="my-4">
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    color="red"
+                    dark
+                    block
+                    @click="openEndBookingDialog = true"
+                    >End Booking</v-btn
+                  >
+                </v-col>
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    color="primary"
+                    block
+                    @click="openExtendDialog = true"
+                  >
+                    Extend Booking
+                  </v-btn>
+                </v-col>
+                <v-col cols="12">
+                  <v-btn
+                    rounded
+                    depressed
+                    block
+                    color="primary"
+                    @click="openExchangeDialog = true"
+                    >Exchange</v-btn
+                  >
+                </v-col>
                 <extend-booking-viewer
                   v-model="openExtendDialog"
                   :booking_id="booking_id"
                   @confirm="handleConfirm"
                   @error="showError"
                 />
-              </div>
+              </v-row>
             </v-container>
           </v-card>
         </v-col>
