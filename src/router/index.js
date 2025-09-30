@@ -66,7 +66,7 @@ const router = new Router({
 
     {
       path: "/booking/:booking_id",
-      component: () => import("@/views/Bookings/BookingView.vue"),
+      component: () => import("@/views/Bookings/BookingView2.vue"),
       children: [
         { path: "", redirect: "overview" },
         {

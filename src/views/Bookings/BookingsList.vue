@@ -1,28 +1,17 @@
 <template>
   <v-container>
     <!-- Header Row -->
-    <v-row align="center" class="mb-4">
+
+    <!-- Header Row -->
+    <v-row align="center" class="my-2" dense>
       <!-- Title -->
-      <v-col cols="12" md="4" class="d-flex align-center">
+      <v-col cols="12" md="3" class="d-flex align-center mb-2 mb-md-0">
         <div class="text-h6 font-weight-bold">Bookings ({{ total }})</div>
       </v-col>
 
-      <!-- Search Field -->
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model="searchQuery"
-          append-icon="mdi-magnify"
-          placeholder="Search by name, phone, reg. no., model, location..."
-          dense
-          outlined
-          hide-details
-          class="mr-2 flex-grow-1"
-          @keyup.enter="fetchBookings"
-        />
-      </v-col>
-
       <!-- Filter & Sort -->
-      <v-col cols="12" md="4" class="d-flex align-center justify-end">
+      <v-col cols="12" md="9" class="d-flex flex-wrap align-center justify-end">
+        <!-- Source Type -->
         <v-select
           v-model="selectedSourceType"
           :items="sourceTypeOptions"
@@ -30,15 +19,42 @@
           outlined
           dense
           hide-details
-          class="mr-2"
+          class="mr-2 mb-2 flex-grow-1 flex-md-grow-0"
           @change="fetchBookings"
         />
-        <v-btn color="primary" dark to="/create-booking">
+
+        <!-- Sub Status -->
+        <v-select
+          v-model="selectedSubStatus"
+          :items="subStatusOptions"
+          label="Sub Status"
+          outlined
+          dense
+          hide-details
+          class="mr-2 mb-2 flex-grow-1 flex-md-grow-0"
+          @change="fetchBookings"
+        />
+
+        <!-- Add Booking Button -->
+        <!-- <v-btn color="primary" dark class="mb-2" to="/create-booking">
           <v-icon left>mdi-plus</v-icon>
           Add Booking
-        </v-btn>
+        </v-btn> -->
       </v-col>
     </v-row>
+
+    <div>
+      <v-text-field
+        v-model="searchQuery"
+        append-icon="mdi-magnify"
+        placeholder="Search by name, phone, reg. no., model, location..."
+        dense
+        outlined
+        hide-details
+        class="w-100"
+        @keyup.enter="fetchBookings"
+      />
+    </div>
 
     <!-- Table -->
     <v-card class="rounded-lg my-4" outlined :loading="loading">
@@ -50,6 +66,7 @@
             <th class="text-left">Model</th>
             <th class="text-left">Customer</th>
             <th class="text-left">Status</th>
+            <th class="text-left">Source</th>
             <th class="text-left">Created At</th>
             <th class="text-left">Actions</th>
           </tr>
@@ -65,6 +82,7 @@
                 {{ booking.status }}
               </v-chip>
             </td>
+            <td>{{ booking.source_type }}</td>
             <td>{{ booking.created_at | moment }}</td>
             <td>
               <v-btn
@@ -119,11 +137,19 @@ export default {
       pageCount: 1,
       searchQuery: "",
       selectedSourceType: "",
+      selectedSubStatus: null,
       sourceTypeOptions: [
         { text: "All", value: "" },
         { text: "New", value: "new" },
         { text: "Extend", value: "extend" },
         { text: "Exchange", value: "exchange" },
+      ],
+      subStatusOptions: [
+        // 👈 added
+        { text: "All", value: null },
+        { text: "Ongoing", value: "ongoing" },
+        { text: "Expired", value: "expired" },
+        { text: "Hold", value: "hold" },
       ],
     };
   },
@@ -159,6 +185,7 @@ export default {
             search: this.searchQuery || undefined,
             source_type: this.selectedSourceType,
             status: this.booking_status,
+            sub_status: this.selectedSubStatus || undefined, // 👈 added
           },
         });
 

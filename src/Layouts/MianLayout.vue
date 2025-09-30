@@ -58,9 +58,23 @@
       <v-container fluid>
         <!-- Top-right User Menu -->
         <div class="d-flex justify-end mb-4">
+          <v-btn
+            rounded
+            depressed
+            color="primary"
+            dark
+            class="mr-2"
+            to="/create-booking"
+          >
+            <v-icon left>mdi-plus</v-icon>
+            Add Booking
+          </v-btn>
+
           <v-menu offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
+                rounded
+                depressed
                 text
                 color="primary"
                 v-bind="attrs"

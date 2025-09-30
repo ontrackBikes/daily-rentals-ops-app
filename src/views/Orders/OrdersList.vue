@@ -43,10 +43,10 @@
           @change="fetchOrders"
         />
 
-        <v-btn color="primary" dark to="/create-booking">
+        <!-- <v-btn color="primary" dark to="/create-booking">
           <v-icon left>mdi-plus</v-icon>
           Add Order
-        </v-btn>
+        </v-btn> -->
       </v-col>
     </v-row>
 
