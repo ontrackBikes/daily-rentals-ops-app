@@ -46,6 +46,7 @@ const router = new Router({
         { path: "/", name: "Home", component: HomeView },
         { path: "/orders", name: "Order", component: OrdersList },
         { path: "/bookings", name: "Booking", component: BookingsList },
+        { path: "/bookings/:status", name: "Booking", component: BookingsList },
         { path: "/vehicles", name: "Vehicle", component: VehiclesList },
         { path: "/customers", name: "Customer", component: CustomersList },
         { path: "/locations", name: "Location", component: LocationList },

@@ -3,22 +3,53 @@
     <!-- Navigation Drawer -->
     <v-navigation-drawer app v-model="drawer" permanent clipped>
       <v-list dense>
-        <!-- Navigation Items -->
-        <v-list-item
-          v-for="item in items"
-          :key="item.title"
-          :to="item.route"
-          router
-          exact
-          active-class="deep-purple--text text--accent-4 font-weight-bold"
-        >
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        <template v-for="item in items">
+          <v-list-group
+            v-if="item.children"
+            :key="item.title"
+            :prepend-icon="item.icon"
+            no-action
+          >
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item-content>
+            </template>
+
+            <v-list-item
+              v-for="child in item.children"
+              :key="child.title"
+              :to="child.route"
+              router
+              exact
+              active-class="deep-purple--text text--accent-4 font-weight-bold"
+            >
+              <v-list-item-icon v-if="child.icon">
+                <v-icon>{{ child.icon }}</v-icon>
+              </v-list-item-icon>
+
+              <v-list-item-content>
+                <v-list-item-title>{{ child.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-group>
+
+          <v-list-item
+            v-else
+            :key="item.title"
+            :to="item.route"
+            router
+            exact
+            active-class="deep-purple--text text--accent-4 font-weight-bold"
+          >
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -112,7 +143,19 @@ export default {
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard", route: "/" },
         { title: "Orders", icon: "mdi-receipt", route: "/orders" },
-        { title: "Bookings", icon: "mdi-calendar-check", route: "/bookings" },
+        {
+          title: "Bookings",
+          icon: "mdi-calendar-check",
+          route: "/bookings",
+          children: [
+            { title: "All", route: "/bookings/" },
+            { title: "Created", route: "/bookings/created" },
+            { title: "Active", route: "/bookings/active" },
+            { title: "Upcoming", route: "/bookings/upcoming" },
+            { title: "Cancelled", route: "/bookings/cancelled" },
+            { title: "Completed", route: "/bookings/completed" },
+          ],
+        },
         { title: "Vehicles", icon: "mdi-motorbike", route: "/vehicles" },
         { title: "Customers", icon: "mdi-account-group", route: "/customers" },
         { title: "Locations", icon: "mdi-map-marker", route: "/locations" },

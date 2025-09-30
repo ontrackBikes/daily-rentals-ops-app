@@ -17,7 +17,6 @@
           outlined
           hide-details
           class="mr-2 flex-grow-1"
-          @input="onSearchInput"
           @keyup.enter="fetchBookings"
         />
       </v-col>
@@ -61,7 +60,6 @@
             <td>{{ booking.vehicle_data?.registration_number }}</td>
             <td>{{ booking.vehicle_data?.model_data?.model_name }}</td>
             <td>{{ booking.order_data?.customer_data?.display_name }}</td>
-
             <td>
               <v-chip :color="getStatusColor(booking.status, 'booking')" small>
                 {{ booking.status }}
@@ -79,7 +77,7 @@
               </v-btn>
             </td>
           </tr>
-          <tr v-if="!bookings.length">
+          <tr v-if="!bookings.length && !loading">
             <td colspan="7" class="text-center grey--text">
               No Bookings found.
             </td>
@@ -88,6 +86,8 @@
       </v-simple-table>
 
       <v-divider></v-divider>
+
+      <!-- Pagination -->
       <v-card-actions class="justify-center">
         <v-pagination
           v-model="page"
@@ -110,6 +110,7 @@ export default {
   name: "BookingList",
   data() {
     return {
+      booking_status: null, // status from route param
       loading: false,
       bookings: [],
       total: 0,
@@ -124,34 +125,32 @@ export default {
         { text: "Extend", value: "extend" },
         { text: "Exchange", value: "exchange" },
       ],
-      formValid: false,
-      form: {
-        name: "",
-        phone: "",
-        email: "",
-        address: "",
-      },
-      rules: {
-        required: (v) => !!v || "Required.",
-        email: (v) =>
-          !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || "Invalid email.",
-        numeric: (v) => /^\d{10}$/.test(v) || "Must be exactly 10 digits",
-      },
     };
   },
+
   watch: {
+    "$route.params.status"(newVal) {
+      this.booking_status = newVal || null;
+      this.page = 1;
+      this.fetchBookings();
+    },
     searchQuery: "onSearchInput",
   },
+
   created() {
     this.onSearchInput = debounce(this.fetchBookings, 400);
   },
+
   mounted() {
+    this.booking_status = this.$route.params.status || null;
     this.fetchBookings();
   },
+
   methods: {
     async fetchBookings() {
       this.loading = true;
       const offset = (this.page - 1) * this.limit;
+
       try {
         const { data } = await api.get(`/api/bookings`, {
           params: {
@@ -159,8 +158,10 @@ export default {
             offset,
             search: this.searchQuery || undefined,
             source_type: this.selectedSourceType,
+            status: this.booking_status,
           },
         });
+
         this.bookings = data?.data?.bookings || [];
         this.total = data?.data?.meta?.total || 0;
         this.pageCount = Math.ceil(this.total / this.limit) || 1;

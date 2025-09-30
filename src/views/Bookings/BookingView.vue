@@ -1,5 +1,5 @@
 <template>
-  <deep-layout>
+  <deep-layout :back-to="'/bookings'">
     <v-container fluid>
       <v-row dense>
         <!-- LEFT: Booking Info -->
