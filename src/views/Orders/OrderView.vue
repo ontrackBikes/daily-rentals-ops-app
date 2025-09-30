@@ -21,19 +21,10 @@
               </v-chip>
             </div>
 
-            <!-- Date Range -->
-            <!-- <div class="text-subtitle-2 mb-1">
-              {{ order.booking_data?.[0]?.start_date | moment("DD/MM/YYYY") }} -
-              {{ order.booking_data?.[0]?.end_date | moment("DD/MM/YYYY") }}
-            </div> -->
-
-            <!-- Reg. Number -->
-            <!-- <div class="font-weight-bold mb-1">
-              {{
-                order?.booking_data?.[0]?.vehicle_data?.registration_number ||
-                "N/A"
-              }}
-            </div> -->
+            <div class="d-flex">
+              Paid Total:
+              <strong class="ml-2">₹{{ order?.amount_received }}</strong>
+            </div>
 
             <!-- Order Balance -->
             <div class="text-body-2">Order Balance</div>
@@ -43,9 +34,15 @@
 
             <!-- Payment Status -->
             <div class="text-body-2">Payment Status</div>
-            <div class="font-weight-bold">
+
+            <v-chip
+              small
+              text-color="white"
+              class="font-weight-medium"
+              :color="getStatusColor(order?.payment_status, 'payment_status')"
+            >
               {{ order?.payment_status || "N/A" }}
-            </div>
+            </v-chip>
           </v-card>
 
           <v-card outlined class="pa-4 rounded-lg my-2">
@@ -99,7 +96,7 @@
           </v-tabs>
 
           <!-- Nested View -->
-          <router-view ref="routerView" />
+          <router-view :refresh-order="getOrderData" ref="routerView" />
         </v-col>
       </v-row>
     </v-container>
@@ -110,6 +107,7 @@
 import api from "@/plugins/axios";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import CustomerViewer from "@/components/CustomerViewer.vue";
+import StatusService from "@/plugins/statusColor";
 
 export default {
   components: { DeepLayout, CustomerViewer },
@@ -166,6 +164,10 @@ export default {
       } catch (e) {
         console.error("Failed to load order", e);
       }
+    },
+
+    getStatusColor(status, type) {
+      return StatusService.getColor(status, type);
     },
   },
 };

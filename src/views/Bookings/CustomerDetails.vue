@@ -4,7 +4,7 @@
       <v-row>
         <!-- Left Column - Form -->
         <v-col cols="12" md="8">
-          <v-card elevation="2">
+          <v-card outlined class="rounded-lg">
             <v-card-title class="grey white--text">
               <v-icon left color="white">mdi-account-edit</v-icon>
               Customer Information
@@ -135,7 +135,10 @@
                 <span class="font-weight-bold">{{ subscription }}</span>
               </div>
 
-              <div v-if="addons && addons.length > 0" class="mb-3">
+              <div
+                v-if="addons && addons.length > 0"
+                class="d-flex justify-space-between align-center mb-3"
+              >
                 <span class="text-subtitle-2">Add-ons</span>
                 <div class="mt-2">
                   <v-chip
@@ -464,11 +467,15 @@ export default {
     buildAddonsPayload() {
       if (!this.addons || this.addons.length === 0) return [];
       return this.addons.map((a) => {
-        // Keep it robust: if addon already contains addon_id & qty, use it
-        if (a.addon_id) return { addon_id: a.addon_id, qty: a.qty || 1 };
-        if (a.id) return { addon_id: a.id, qty: a.qty || 1 };
+        // Keep it robust: if addon already contains provider_addon_id & qty, use it
+        if (a.provider_addon_id)
+          return { provider_addon_id: a.provider_addon_id, qty: a.qty || 1 };
+        if (a.id) return { provider_addon_id: a.id, qty: a.qty || 1 };
         // fallback: if addon is primitive (string/number) we cannot map id -> send as-is is risky
-        return { addon_id: a.addonId || a.id || a.addon_id || a, qty: 1 };
+        return {
+          provider_addon_id: a.addonId || a.id || a.provider_addon_id || a,
+          qty: 1,
+        };
       });
     },
 
