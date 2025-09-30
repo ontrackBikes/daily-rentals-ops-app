@@ -174,6 +174,7 @@ export default {
         { title: "Customers", icon: "mdi-account-group", route: "/customers" },
         { title: "Locations", icon: "mdi-map-marker", route: "/locations" },
         { title: "Models", icon: "mdi-bike", route: "/models" },
+        { title: "Add-Ons", icon: "mdi-plus-box", route: "/add-ons" },
       ],
     };
   },

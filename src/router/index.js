@@ -20,6 +20,7 @@ import ModelView from "@/views/Models/ModelView.vue";
 import SelectSubscription from "@/views/Bookings/SelectSubscription.vue";
 import SelectModels from "@/views/Bookings/SelectModels.vue";
 import CustomerDetails from "@/views/Bookings/CustomerDetails.vue";
+import AddOnList from "@/views/AddOnList.vue";
 
 Vue.use(Router);
 
@@ -51,6 +52,11 @@ const router = new Router({
         { path: "/customers", name: "Customer", component: CustomersList },
         { path: "/locations", name: "Location", component: LocationList },
         { path: "/models", name: "Model", component: ModelsList },
+        {
+          path: "/add-ons",
+          name: "Add-Ons",
+          component: AddOnList,
+        },
       ],
     },
 
@@ -160,6 +166,7 @@ const router = new Router({
         },
       ],
     },
+
     // Model view with tabs
     {
       path: "/models/:model_id",
