@@ -2,10 +2,7 @@
 import axios from "axios";
 import router from "@/router"; // import router to redirect
 
-const baseURL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3001"
-    : "https://api.com";
+const baseURL = "http://localhost:3001/";
 
 const api = axios.create({
   baseURL,
