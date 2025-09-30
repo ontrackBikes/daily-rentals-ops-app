@@ -46,7 +46,12 @@
               </v-chip>
             </v-col>
             <v-col cols="8" class="my-auto text-right">
-              <div v-if="booking.status === 'upcoming'" class="d-flex">
+              <div
+                v-if="
+                  booking.status === 'upcoming' || booking.status === 'created'
+                "
+                class="d-flex"
+              >
                 <v-btn
                   color="warning"
                   dark
