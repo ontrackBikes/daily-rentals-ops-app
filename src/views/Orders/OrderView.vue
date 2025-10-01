@@ -1,5 +1,5 @@
 <template>
-  <deep-layout>
+  <deep-layout :backTo="'/orders'">
     <v-container fluid>
       <v-row>
         <!-- LEFT: Order Summary -->
@@ -56,7 +56,7 @@
           <v-card outlined class="pa-4 rounded-lg">
             <CustomerViewer
               v-if="selectedCustomer"
-              :customer="selectedCustomer"
+              :customer_id="selectedCustomer"
             />
           </v-card>
         </v-col>
@@ -160,7 +160,7 @@ export default {
       try {
         const res = await api.get(`/api/order/${this.orderId}`);
         this.order = res.data.data;
-        this.selectedCustomer = res.data?.data?.customer_data;
+        this.selectedCustomer = res.data?.data?.customer_id;
       } catch (e) {
         console.error("Failed to load order", e);
       }

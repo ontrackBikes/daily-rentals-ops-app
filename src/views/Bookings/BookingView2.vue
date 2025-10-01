@@ -153,7 +153,7 @@
           </v-card>
         </v-col>
         <v-col cols="8">
-          <v-card outlined v-if="booking?.booking_line_item_data?.length">
+          <!-- <v-card outlined v-if="booking?.booking_line_item_data?.length">
             <v-container>
               <h3><strong>Booking Line Items</strong></h3>
               <v-row
@@ -211,7 +211,7 @@
                 </strong>
               </div>
             </v-container>
-          </v-card>
+          </v-card> -->
           <v-tabs
             v-model="activeTab"
             background-color="transparent"

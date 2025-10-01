@@ -1,6 +1,6 @@
 <template>
   <deep-layout>
-    <v-container class="py-8" fluid>
+    <v-container class="py-8">
       <v-row>
         <!-- Left Column - Form -->
         <v-col cols="12" md="8">

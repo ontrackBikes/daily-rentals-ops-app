@@ -92,6 +92,15 @@
                   <v-row>
                     <!-- Booking Details -->
                     <v-col cols="12" md="6">
+                      <v-btn
+                        rounded
+                        text
+                        color="primary"
+                        @click.stop="goToBookingView(booking.booking_id)"
+                      >
+                        View Booking
+                        <v-icon right small>mdi-open-in-new</v-icon>
+                      </v-btn>
                       <div>
                         <div class="d-flex align-center my-2">
                           <v-icon small color="grey" class="mr-2"
@@ -249,6 +258,7 @@
                       </v-btn>
                       <v-btn
                         color="primary"
+                        class="mr-2"
                         rounded
                         depressed
                         @click="startBookingDialog = true"
@@ -256,12 +266,21 @@
                         <v-icon left>mdi-play-circle</v-icon>
                         Start
                       </v-btn>
+
+                      <v-btn
+                        rounded
+                        depressed
+                        color="primary"
+                        @click="exchangeDialog = true"
+                      >
+                        <v-icon left>mdi-swap-horizontal</v-icon>
+                        Exchange
+                      </v-btn>
                     </div>
 
                     <v-row v-if="booking.status === 'active'" dense>
                       <v-col cols="12" sm="4">
                         <v-btn
-                          block
                           rounded
                           depressed
                           color="red"
@@ -274,7 +293,6 @@
                       </v-col>
                       <v-col cols="12" sm="4">
                         <v-btn
-                          block
                           rounded
                           depressed
                           color="primary"
@@ -286,7 +304,6 @@
                       </v-col>
                       <v-col cols="12" sm="4">
                         <v-btn
-                          block
                           rounded
                           depressed
                           color="primary"
@@ -299,18 +316,6 @@
                     </v-row>
                   </v-col>
                 </v-row>
-
-                <div class="text-right mt-2">
-                  <v-btn
-                    small
-                    color="primary"
-                    text
-                    @click.stop="goToBookingView(booking.booking_id)"
-                  >
-                    View Booking
-                    <v-icon right small>mdi-open-in-new</v-icon>
-                  </v-btn>
-                </div>
               </div>
 
               <!-- Start Booking  -->

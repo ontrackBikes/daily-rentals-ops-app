@@ -21,20 +21,20 @@
         </v-btn>
       </div>
 
-      <!-- Email -->
-      <div
-        class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
-      >
-        <v-icon small color="indigo" class="mr-1">mdi-email</v-icon>
-        {{ customerData.email }}
-      </div>
-
       <!-- Phone -->
       <div
         class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
       >
         <v-icon small color="indigo" class="mr-1">mdi-phone</v-icon>
         {{ customerData.user_data?.phone }}
+      </div>
+
+      <div
+        v-for="(data, index) in customerData.customer_contact_data"
+        :key="index"
+      >
+        {{ data.value }} ({{ data.type }}) -
+        {{ data.is_primary ? "Primary" : "" }}
       </div>
 
       <v-divider class="my-4" />
@@ -144,22 +144,6 @@
                 <v-text-field
                   v-model="customerData.user_data.phone"
                   readonly
-                  outlined
-                  dense
-                  hide-details
-                />
-              </div>
-
-              <!-- Email -->
-              <label class="text-subtitle-2">
-                Email <span class="red--text">*</span>
-              </label>
-              <div class="mb-3">
-                <v-text-field
-                  v-model="customerData.email"
-                  type="email"
-                  :rules="[rules.required, rules.email]"
-                  required
                   outlined
                   dense
                   hide-details
@@ -399,17 +383,17 @@ import StatusService from "@/plugins/statusColor";
 
 export default {
   props: {
-    customer: {
-      type: Object,
+    customer_id: {
+      type: Number,
       required: true,
     },
   },
 
   data() {
     return {
+      customer: {},
       loading: false,
       loadingIDVerify: false,
-      customer_id: null,
       customerData: null,
 
       // Dialog controls
@@ -464,20 +448,6 @@ export default {
     };
   },
 
-  watch: {
-    customer: {
-      handler(newCustomer) {
-        if (newCustomer?.customer_id) {
-          this.customer_id = newCustomer.customer_id;
-          this.customerData = { ...newCustomer };
-          // this.loadCustomer(); // Uncomment if you want to refetch fresh data
-        }
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
-
   computed: {
     manualFields() {
       return [
@@ -502,6 +472,10 @@ export default {
         { model: "state", label: "State", required: true },
       ];
     },
+  },
+
+  mounted() {
+    this.loadCustomer();
   },
 
   methods: {
