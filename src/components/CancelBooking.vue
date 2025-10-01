@@ -42,6 +42,7 @@
           dark
           :disabled="!cancelFormValid"
           @click="submitCancelBooking"
+          rounded
         >
           Confirm Cancel
         </v-btn>

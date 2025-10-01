@@ -6,7 +6,7 @@
         <v-col cols="12" md="3">
           <v-skeleton-loader v-if="loading" type="card" />
           <v-card outlined class="pa-4 rounded-lg">
-            <CustomerViewer v-if="customer" :customer="customer" />
+            <CustomerViewer v-if="customer" :customer_id="customer_id" />
           </v-card>
         </v-col>
 

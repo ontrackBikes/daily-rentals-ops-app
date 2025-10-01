@@ -105,6 +105,7 @@
                 small
                 outlined
                 color="primary"
+                rounded
                 @click="viewOrder(order.order_id)"
               >
                 View

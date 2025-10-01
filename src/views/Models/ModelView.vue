@@ -80,7 +80,7 @@
 
             <!-- Edit Button -->
             <div class="text-center mt-4">
-              <v-btn color="primary" @click="editDialog = true"
+              <v-btn rounded color="primary" @click="editDialog = true"
                 >Edit Model</v-btn
               >
             </div>
@@ -272,7 +272,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="editDialog = false"
+            <v-btn rounded text color="primary" @click="editDialog = false"
               >Close</v-btn
             >
           </v-card-actions>
@@ -350,7 +350,11 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="editOverviewDialog = false"
+            <v-btn
+              text
+              rounded
+              color="primary"
+              @click="editOverviewDialog = false"
               >Cancel</v-btn
             >
             <v-btn
@@ -358,6 +362,7 @@
               @click="submitOverview"
               :loading="overviewLoading"
               :disabled="!overviewValid"
+              rounded
             >
               Save
             </v-btn>

@@ -34,7 +34,12 @@
             @change="fetchCustomers"
           />
 
-          <v-btn color="primary" dark @click="openCreateCustomerDialog = true">
+          <v-btn
+            rounded
+            color="primary"
+            dark
+            @click="openCreateCustomerDialog = true"
+          >
             <v-icon left>mdi-plus</v-icon>
             Add Customer
           </v-btn>
@@ -80,6 +85,7 @@
                   small
                   outlined
                   color="primary"
+                  rounded
                   @click="viewCustomer(customer.customer_id)"
                 >
                   View
@@ -185,13 +191,18 @@
 
           <!-- Action Buttons -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="openCreateCustomerDialog = false" class="mr-2"
+            <v-btn
+              text
+              rounded
+              @click="openCreateCustomerDialog = false"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
               color="primary"
               :disabled="!formValid"
               @click="createCustomer"
+              rounded
             >
               Create
             </v-btn>
@@ -315,7 +326,7 @@ export default {
     },
 
     viewCustomer(id) {
-      this.$router.push("/customer/" + id);
+      this.$router.push(`/customer/${id}`);
     },
 
     getStatusColor(status, type) {

@@ -227,6 +227,7 @@
               color="success"
               type="submit"
               :disabled="!valid"
+              rounded
             >
               {{ isEditMode ? "Update Model" : "Add Model" }}
             </v-btn>

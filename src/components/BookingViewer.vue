@@ -20,6 +20,7 @@
           color="primary"
           dark
           class="text-capitalize"
+          rounded
           @click.stop="goToBookingView(booking.booking_id)"
         >
           <v-icon small class="mr-1">mdi-open-in-new</v-icon> Expand

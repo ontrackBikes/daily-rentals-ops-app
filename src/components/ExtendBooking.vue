@@ -48,6 +48,7 @@
             class="mt-3"
             :disabled="!selectedPlan"
             @click="goToPreview"
+            rounded
           >
             Next
           </v-btn>
@@ -81,12 +82,13 @@
               </div>
             </v-alert>
           </div>
-          <v-btn text class="mt-3" @click="step = 1">Back</v-btn>
+          <v-btn text rounded class="mt-3" @click="step = 1">Back</v-btn>
           <v-btn
             color="primary"
             class="mt-3"
             :disabled="!preview"
             @click="step = 3"
+            rounded
           >
             Continue
           </v-btn>
@@ -97,8 +99,13 @@
           <v-alert type="success" outlined class="mb-4">
             You are about to extend this booking.
           </v-alert>
-          <v-btn text @click="step = 2">Back</v-btn>
-          <v-btn color="success" :loading="confirming" @click="extendBooking">
+          <v-btn text rounded @click="step = 2">Back</v-btn>
+          <v-btn
+            color="success"
+            rounded
+            :loading="confirming"
+            @click="extendBooking"
+          >
             Confirm Extension
           </v-btn>
         </v-stepper-content>

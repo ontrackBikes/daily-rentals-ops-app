@@ -20,6 +20,7 @@
         :loading="loading"
         :disabled="!newModelSelected"
         @click="checkExchange"
+        rounded
       >
         Check Exchange
       </v-btn>
@@ -139,11 +140,12 @@
             </p>
           </v-card-text>
           <v-card-action>
-            <v-btn color="grey" @click="step = 1">Back</v-btn>
+            <v-btn color="grey" rounded @click="step = 1">Back</v-btn>
             <v-btn
               color="primary"
               :disabled="!selectedVehicleId"
               @click="confirmExchange"
+              rounded
             >
               Confirm Exchange
             </v-btn>

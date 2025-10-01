@@ -19,7 +19,13 @@
               @input="onSearchInput"
               @keyup.enter="fetchLocations"
             />
-            <v-btn depressed color="primary" dark @click="openAddDialog">
+            <v-btn
+              depressed
+              rounded
+              color="primary"
+              dark
+              @click="openAddDialog"
+            >
               <v-icon left>mdi-plus</v-icon> Add location
             </v-btn>
           </div>
@@ -56,6 +62,7 @@
                   color="primary"
                   @click="openEditDialog(location)"
                   class="mr-2"
+                  rounded
                 >
                   <v-icon>mdi-pencil</v-icon>
                 </v-btn>
@@ -314,10 +321,11 @@
 
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text class="mr-2" @click="closeDialog">Cancel</v-btn>
+            <v-btn text rounded class="mr-2" @click="closeDialog">Cancel</v-btn>
             <v-btn
               color="primary"
               :disabled="!formValid"
+              rounded
               @click="isEditMode ? updateLocation() : createLocation()"
             >
               {{ isEditMode ? "Update" : "Add" }}

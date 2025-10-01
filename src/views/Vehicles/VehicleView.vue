@@ -31,7 +31,13 @@
               class="text-subtitle-1 font-weight-bold mt-2 d-flex align-center"
             >
               {{ vehicle.registration_number }}
-              <v-btn icon small @click="editVehicleDialog = true" class="ml-2">
+              <v-btn
+                icon
+                rounded
+                small
+                @click="editVehicleDialog = true"
+                class="ml-2"
+              >
                 <v-icon small color="primary">mdi-pencil</v-icon>
               </v-btn>
             </div>
@@ -271,13 +277,14 @@
 
           <!-- Buttons -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="editVehicleDialog = false" class="mr-2"
+            <v-btn text rounded @click="editVehicleDialog = false" class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
               color="primary"
               :disabled="!formValid || !isVehicleChanged"
               @click="updateVehicle"
+              rounded
               >Update</v-btn
             >
           </div>

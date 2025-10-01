@@ -63,7 +63,9 @@ const router = new Router({
     {
       path: "/customer/:customer_id",
       name: "Customer View",
-      redirect: "/customer/:customer_id/orders",
+      redirect: (to) => {
+        return `/customer/${to.params.customer_id}/orders`;
+      },
       component: CustomerView,
       children: [
         { path: "orders", name: "Customer  - Orders", component: OrdersTab },

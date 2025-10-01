@@ -19,7 +19,13 @@
               @input="onSearchInput"
               @keyup.enter="fetchAddons"
             />
-            <v-btn depressed color="primary" dark @click="openAddDialog">
+            <v-btn
+              depressed
+              rounded
+              color="primary"
+              dark
+              @click="openAddDialog"
+            >
               <v-icon left>mdi-plus</v-icon> Add addon
             </v-btn>
           </div>
@@ -65,6 +71,7 @@
                   small
                   icon
                   color="primary"
+                  rounded
                   @click="openEditDialog(addon)"
                 >
                   <v-icon>mdi-pencil</v-icon>
@@ -193,10 +200,11 @@
 
           <!-- Actions -->
           <div class="d-flex justify-end mt-4">
-            <v-btn text class="mr-2" @click="closeDialog">Cancel</v-btn>
+            <v-btn text rounded class="mr-2" @click="closeDialog">Cancel</v-btn>
             <v-btn
               color="primary"
               :disabled="!formValid"
+              rounded
               @click="isEditMode ? updateAddon() : createAddon()"
             >
               {{ isEditMode ? "Update" : "Add" }}

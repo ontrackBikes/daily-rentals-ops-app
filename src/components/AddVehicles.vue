@@ -183,6 +183,7 @@
             class="px-6"
             type="submit"
             :disabled="!valid"
+            rounded
           >
             Submit
           </v-btn>
