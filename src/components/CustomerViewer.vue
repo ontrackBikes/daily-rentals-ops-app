@@ -1,7 +1,18 @@
 <template>
   <div>
-    <div v-if="!loading && customerData">
-      <!-- Status -->
+    <v-skeleton-loader
+      v-if="loading"
+      type="chip, list-item-two-line, divider, list-item, list-item, divider"
+      class="mb-3"
+    />
+    <v-alert v-else-if="loadError" type="error" dense outlined class="mb-3">
+      {{ loadError }}
+      <v-btn small text color="primary" class="ml-2" @click="loadCustomer"
+        >Retry</v-btn
+      >
+    </v-alert>
+
+    <div v-else-if="customerData">
       <div class="d-flex">
         <v-chip
           small
@@ -13,7 +24,6 @@
         </v-chip>
       </div>
 
-      <!-- Name -->
       <div class="text-subtitle-1 font-weight-bold mt-2">
         {{ customerData.display_name }}
         <v-btn icon small @click="openUpdateCustomerDialog(customerData)">
@@ -21,49 +31,37 @@
         </v-btn>
       </div>
 
-      <!-- Phone -->
       <div
         class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
       >
         <v-icon small color="indigo" class="mr-1">mdi-phone</v-icon>
-        {{ customerData.user_data?.phone }}
+        {{ customerPhone }}
       </div>
 
-      <div
-        v-for="(data, index) in customerData.customer_contact_data"
-        :key="index"
-      >
-        {{ data.value }} ({{ data.type }}) -
-        {{ data.is_primary ? "Primary" : "" }}
+      <div class="text-body-2 mt-1">
+        <v-icon small color="indigo" class="mr-1">mdi-email</v-icon>
+        {{
+          customerData.customer_contact_data.find((c) => c.type === "email")
+            ?.value
+        }}
       </div>
 
       <v-divider class="my-4" />
 
-      <!-- DL Verification -->
       <div class="text-subtitle-2 font-weight-medium mb-1">DL Verification</div>
       <div class="d-flex align-center">
-        <v-icon
-          small
-          class="mr-1"
-          :color="
-            customerData.verification_status === 'verified' ? 'green' : 'red'
-          "
-        >
+        <v-icon small class="mr-1" :color="isDLVerified ? 'green' : 'red'">
           {{
-            customerData.verification_status === "verified"
+            isDLVerified
               ? "mdi-check-circle-outline"
               : "mdi-close-circle-outline"
           }}
         </v-icon>
         <span class="text-body-2 grey--text">
-          {{
-            customerData.verification_status === "verified"
-              ? "Verified"
-              : "Not Verified"
-          }}
+          {{ isDLVerified ? "Verified" : "Not Verified" }}
         </span>
         <v-chip
-          v-if="customerData.verification_status !== 'verified'"
+          v-if="!isDLVerified"
           small
           class="ml-2"
           color="amber darken-2"
@@ -75,27 +73,22 @@
         </v-chip>
       </div>
 
-      <!-- ID Verification -->
       <div class="text-subtitle-2 font-weight-medium mt-3 mb-1">
         ID Verification
       </div>
       <div class="d-flex align-center">
-        <v-icon
-          small
-          class="mr-1"
-          :color="customerData.id_verified ? 'green' : 'red'"
-        >
+        <v-icon small class="mr-1" :color="isIDVerified ? 'green' : 'red'">
           {{
-            customerData.id_verified
+            isIDVerified
               ? "mdi-check-circle-outline"
               : "mdi-close-circle-outline"
           }}
         </v-icon>
         <span class="text-body-2 grey--text">
-          {{ customerData.id_verified ? "Verified" : "Not Verified" }}
+          {{ isIDVerified ? "Verified" : "Not Verified" }}
         </span>
         <v-chip
-          v-if="!customerData.id_verified"
+          v-if="!isIDVerified"
           small
           class="ml-2"
           color="amber darken-2"
@@ -108,76 +101,81 @@
       </div>
     </div>
 
-    <!-- Update Customer Dialog -->
-    <v-dialog v-model="updateCustomerDialog" max-width="500px">
-      <v-card :loading="loading">
+    <div v-else class="grey--text text--darken-1 text-body-2">
+      No customer found.
+    </div>
+
+    <v-dialog
+      v-model="updateCustomerDialog"
+      max-width="500px"
+      @input="onDialogToggle('update')"
+    >
+      <v-card :loading="updating">
         <v-container>
-          <!-- Header -->
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">Update Customer</div>
-            <v-btn icon @click="updateCustomerDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+            <v-btn icon @click="updateCustomerDialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
           </div>
 
-          <!-- Form -->
-          <div class="my-4">
-            <v-form ref="updateForm" v-model="formValid">
-              <!-- Name -->
-              <label class="text-subtitle-2">
-                Name <span class="red--text">*</span>
-              </label>
-              <div class="mb-3">
-                <v-text-field
-                  v-model="customerData.display_name"
-                  :rules="[rules.required]"
-                  required
-                  outlined
-                  dense
-                  hide-details
-                />
-              </div>
+          <v-form
+            ref="updateForm"
+            v-model="valid.update"
+            lazy-validation
+            class="my-4"
+          >
+            <label class="text-subtitle-2">
+              Name <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model="editCustomer.display_name"
+                :rules="[rules.required]"
+                required
+                outlined
+                dense
+                hide-details="auto"
+              />
+            </div>
 
-              <!-- Phone (readonly) -->
-              <label class="text-subtitle-2">Phone</label>
-              <div class="mb-3">
-                <v-text-field
-                  v-model="customerData.user_data.phone"
-                  readonly
-                  outlined
-                  dense
-                  hide-details
-                />
-              </div>
+            <label class="text-subtitle-2">Phone</label>
+            <div class="mb-3">
+              <v-text-field
+                v-model="editCustomer.user_data.phone"
+                readonly
+                outlined
+                dense
+                hide-details="auto"
+              />
+            </div>
 
-              <!-- Address -->
-              <label class="text-subtitle-2">Address</label>
-              <div class="mb-3">
-                <v-textarea
-                  v-model="customerData.address"
-                  outlined
-                  dense
-                  rows="2"
-                  hide-details
-                />
-              </div>
+            <label class="text-subtitle-2">Address</label>
+            <div class="mb-3">
+              <v-textarea
+                v-model="editCustomer.address"
+                outlined
+                dense
+                rows="2"
+                hide-details="auto"
+              />
+            </div>
+          </v-form>
 
-              <!-- Error Alert -->
-              <v-alert v-if="errorMessage" type="error" dense class="mt-2">
-                {{ errorMessage }}
-              </v-alert>
-            </v-form>
-          </div>
+          <v-alert v-if="updateError" type="error" dense outlined class="mt-2">
+            {{ updateError }}
+          </v-alert>
 
-          <!-- Action Buttons -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="updateCustomerDialog = false" class="mr-2">
-              Cancel
-            </v-btn>
+            <v-btn text class="mr-2" @click="updateCustomerDialog = false"
+              >Cancel</v-btn
+            >
             <v-btn
               color="success"
-              :disabled="!formValid"
+              :loading="updating"
+              :disabled="!valid.update"
               @click="updateCustomer"
+              rounded
             >
               Update
             </v-btn>
@@ -186,34 +184,43 @@
       </v-card>
     </v-dialog>
 
-    <!-- Dialog 1: DL Verify -->
-    <v-dialog v-model="openDLVerifyDialog" max-width="500px">
-      <v-card :loading="loading">
+    <v-dialog
+      v-model="openDLVerifyDialog"
+      max-width="500px"
+      @input="onDialogToggle('dl')"
+    >
+      <v-card :loading="verifyingDL">
         <v-container>
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">DL Verification</div>
-            <v-btn icon @click="openDLVerifyDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+            <v-btn icon @click="openDLVerifyDialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
           </div>
 
-          <v-form ref="dlVerifyForm" v-model="dlVerifyValid" class="my-4">
-            <label class="text-subtitle-2"
-              >DL Number <span class="red--text">*</span></label
-            >
+          <v-form
+            ref="dlVerifyForm"
+            v-model="valid.dl"
+            lazy-validation
+            class="my-4"
+          >
+            <label class="text-subtitle-2">
+              DL Number <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-text-field
                 v-model="dlForm.dl_number"
-                :rules="[rules.required]"
+                :rules="[rules.required, rules.dlNumber]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
+                persistent-hint
               />
             </div>
 
-            <label class="text-subtitle-2"
-              >Date of Birth <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Date of Birth <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-text-field
                 v-model="dlForm.dob"
@@ -221,86 +228,118 @@
                 :rules="[rules.required]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
               />
             </div>
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="openDLVerifyDialog = false" class="mr-2"
+            <v-btn text class="mr-2" @click="openDLVerifyDialog = false"
               >Cancel</v-btn
             >
-            <v-btn color="primary" :disabled="!dlVerifyValid" @click="verifyDL"
-              >Verify Now</v-btn
+            <v-btn text color="primary" class="mr-2" @click="openManualFromDL"
+              >Manual Verification</v-btn
             >
+            <v-btn
+              color="primary"
+              :loading="verifyingDL"
+              :disabled="!valid.dl"
+              @click="verifyDL"
+            >
+              Verify Now
+            </v-btn>
           </div>
         </v-container>
       </v-card>
     </v-dialog>
 
-    <!-- Dialog 2: Manual DL -->
-    <v-dialog v-model="openManualDLDialog" max-width="500px">
-      <v-card :loading="loading">
+    <v-dialog
+      v-model="openManualDLDialog"
+      max-width="500px"
+      @input="onDialogToggle('manual')"
+    >
+      <v-card :loading="verifyingManualDL">
         <v-container>
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">Manual DL Entry</div>
-            <v-btn icon @click="openManualDLDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+            <v-btn icon @click="openManualDLDialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
           </div>
 
-          <v-form ref="manualDLForm" v-model="manualDLValid" class="my-4">
-            <template v-for="field in manualFields">
-              <label class="text-subtitle-2" :key="field.model + '-label'">
+          <v-form
+            ref="manualDLForm"
+            v-model="valid.manual"
+            lazy-validation
+            class="my-4"
+          >
+            <div v-for="field in manualFields" :key="field.model" class="mb-3">
+              <label class="text-subtitle-2">
                 {{ field.label }}
                 <span v-if="field.required" class="red--text">*</span>
               </label>
-              <div class="mb-3" :key="field.model">
-                <v-text-field
-                  v-model="manualDLForm[field.model]"
-                  :type="field.type || 'text'"
-                  :rules="field.required ? [rules.required] : []"
-                  outlined
-                  dense
-                  hide-details
-                />
-              </div>
-            </template>
+
+              <v-select
+                v-if="field.type === 'select'"
+                v-model="manualDLForm[field.model]"
+                :items="field.items"
+                :rules="field.required ? [rules.required] : []"
+                outlined
+                dense
+                hide-details="auto"
+              />
+              <v-text-field
+                v-else
+                v-model="manualDLForm[field.model]"
+                :type="field.type || 'text'"
+                :rules="field.required ? [rules.required] : []"
+                outlined
+                dense
+                hide-details="auto"
+              />
+            </div>
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="openManualDLDialog = false" class="mr-2"
+            <v-btn text class="mr-2" @click="openManualDLDialog = false"
               >Cancel</v-btn
             >
             <v-btn
               color="primary"
-              :disabled="!manualDLValid"
+              :loading="verifyingManualDL"
+              :disabled="!valid.manual"
               @click="submitManualDL"
-              >Verify</v-btn
             >
+              Verify
+            </v-btn>
           </div>
         </v-container>
       </v-card>
     </v-dialog>
 
-    <!-- ID Verification Dialog -->
-    <v-dialog v-model="openIDVerifyDialog" max-width="500px">
-      <v-card :loading="loadingIDVerify">
+    <v-dialog
+      v-model="openIDVerifyDialog"
+      max-width="500px"
+      @input="onDialogToggle('id')"
+    >
+      <v-card :loading="verifyingID">
         <v-container>
-          <!-- Header -->
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">ID Verification</div>
-            <v-btn icon @click="openIDVerifyDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+            <v-btn icon @click="openIDVerifyDialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
           </div>
 
-          <!-- Form -->
-          <v-form ref="idFormRef" v-model="idFormValid" class="my-4">
-            <!-- ID Type -->
-            <label class="text-subtitle-2"
-              >ID Type <span class="red--text">*</span></label
-            >
+          <v-form
+            ref="idFormRef"
+            v-model="valid.id"
+            lazy-validation
+            class="my-4"
+          >
+            <label class="text-subtitle-2">
+              ID Type <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-select
                 v-model="idForm.id_type"
@@ -308,43 +347,40 @@
                 :rules="[rules.required]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
                 placeholder="Select ID Type"
               />
             </div>
 
-            <!-- ID Number -->
-            <label class="text-subtitle-2"
-              >ID Number <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              ID Number <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-text-field
                 v-model="idForm.id_number"
                 :rules="[rules.required, rules.idFormat]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
               />
             </div>
 
-            <!-- Name on ID -->
-            <label class="text-subtitle-2"
-              >Name on ID <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Name on ID <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-text-field
                 v-model="idForm.name"
                 :rules="[rules.required, rules.alphaOnly]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
               />
             </div>
 
-            <!-- DOB -->
-            <label class="text-subtitle-2"
-              >Date of Birth <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Date of Birth <span class="red--text">*</span>
+            </label>
             <div class="mb-3">
               <v-text-field
                 v-model="idForm.dob"
@@ -352,19 +388,19 @@
                 :rules="[rules.required, rules.dob]"
                 outlined
                 dense
-                hide-details
+                hide-details="auto"
               />
             </div>
           </v-form>
 
-          <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="openIDVerifyDialog = false" class="mr-2"
+            <v-btn text class="mr-2" @click="openIDVerifyDialog = false"
               >Cancel</v-btn
             >
             <v-btn
               color="primary"
-              :disabled="!idFormValid"
+              :loading="verifyingID"
+              :disabled="!valid.id"
               @click="submitIDVerify"
             >
               Verify
@@ -382,246 +418,360 @@ import Swal from "sweetalert2";
 import StatusService from "@/plugins/statusColor";
 
 export default {
+  name: "CustomerDetails",
   props: {
-    customer_id: {
-      type: Number,
-      required: true,
-    },
+    customer_id: { type: Number, required: true },
   },
-
   data() {
     return {
-      customer: {},
+      // base
       loading: false,
-      loadingIDVerify: false,
+      loadError: "",
       customerData: null,
 
-      // Dialog controls
-      openDLVerifyDialog: false,
-      openIDVerifyDialog: false,
-      openManualDLDialog: false,
-      updateCustomerDialog: false,
+      // actions
+      updating: false,
+      verifyingDL: false,
+      verifyingManualDL: false,
+      verifyingID: false,
 
-      // Forms
-      dlForm: {
-        dl_number: "",
-        dob: "",
+      // dialogs
+      updateCustomerDialog: false,
+      openDLVerifyDialog: false,
+      openManualDLDialog: false,
+      openIDVerifyDialog: false,
+
+      // forms
+      editCustomer: {
+        display_name: "",
+        user_data: { phone: "" },
+        address: "",
+        email: "",
       },
-      idForm: {
-        id_type: "",
-        id_number: "",
-        name: "",
-        dob: "",
-      },
+      dlForm: { dl_number: "", dob: "" },
       manualDLForm: {
         dl_number: "",
+        name_on_dl: "",
+        father_or_husband_name: "",
         dob: "",
-        holder_name: "",
-        valid_from: "",
-        gender: "",
         address: "",
-        vehicle_class: "",
+        pincode: "",
+        district: "",
         state: "",
+        country: "",
+        issue_date: "",
+        non_transport_valid_from: "",
+        non_transport_valid_to: "",
+        transport_valid_from: "",
+        transport_valid_to: "",
+        hazardous_valid_till: "",
+        hill_valid_till: "",
+        class_of_vehicle: "",
       },
+      idForm: { id_type: "", id_number: "", name: "", dob: "" },
 
-      // Valid flags
-      dlVerifyValid: false,
-      manualDLValid: false,
-      idFormValid: false,
-      formValid: false,
+      // validity
+      valid: { update: false, dl: false, manual: false, id: false },
 
-      // Validation rules
+      // errors
+      updateError: "",
+
+      // rules
       rules: {
         required: (v) => !!v || "Required",
-        dlNumber: (v) =>
-          /^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4,7}$/.test(v) ||
-          "DL Number must be like 'UP32AB1234567'",
+        dlNumber: (v) => {
+          const val = (v || "").toUpperCase().trim();
+          const re = /^[A-Z]{2}[- ]?\d{2}[A-Z]?\s?\d{11,13}$/;
+          return (
+            re.test(val) ||
+            "Invalid DL number. Supported: DL-1420110012345, DL14 20110012345, RJ02A20200000736, KA4720180102021"
+          );
+        },
         alphaOnly: (v) => /^[A-Za-z\s]+$/.test(v) || "Only alphabets allowed",
         idFormat: (v) =>
           /^[A-Z0-9]{6,20}$/.test(v) || "Invalid ID number format",
-        email: (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
-        // Optional DOB format rule (if needed)
         dob: (v) => !!v || "Date of Birth is required",
       },
-
-      errorMessage: "",
     };
   },
-
   computed: {
+    customerPhone() {
+      return this.customerData && this.customerData.user_data
+        ? this.customerData.user_data.phone
+        : "";
+    },
+    isDLVerified() {
+      const c = this.customerData || {};
+      return c.verification_status === "verified" || c.dl_verified === true;
+    },
+    isIDVerified() {
+      const c = this.customerData || {};
+      return !!c.id_verified;
+    },
     manualFields() {
       return [
         { model: "dl_number", label: "DL Number", required: true },
-        { model: "dob", label: "Date of Birth", type: "date", required: true },
-        { model: "holder_name", label: "Holder Name", required: true },
+        { model: "name_on_dl", label: "Name on DL", required: true },
         {
-          model: "valid_from",
-          label: "Valid From",
+          model: "father_or_husband_name",
+          label: "Father/Husband's Name",
+          required: true,
+        },
+        { model: "dob", label: "Date of Birth", type: "date", required: true },
+        { model: "address", label: "Address", required: true },
+        { model: "pincode", label: "Pincode", required: true },
+        { model: "district", label: "District", required: true },
+        { model: "state", label: "State", required: true },
+        { model: "country", label: "Country", required: true },
+        {
+          model: "issue_date",
+          label: "Issue Date",
           type: "date",
           required: true,
         },
         {
-          model: "gender",
-          label: "Gender",
-          type: "select",
-          items: ["Male", "Female"],
+          model: "class_of_vehicle",
+          label: "Class of Vehicle",
           required: true,
         },
-        { model: "address", label: "Permanent Address", required: true },
-        { model: "vehicle_class", label: "Vehicle Class", required: true },
-        { model: "state", label: "State", required: true },
+        // optional validity windows
+        {
+          model: "non_transport_valid_from",
+          label: "Non-Transport Valid From",
+          type: "date",
+        },
+        {
+          model: "non_transport_valid_to",
+          label: "Non-Transport Valid To",
+          type: "date",
+        },
+        {
+          model: "transport_valid_from",
+          label: "Transport Valid From",
+          type: "date",
+        },
+        {
+          model: "transport_valid_to",
+          label: "Transport Valid To",
+          type: "date",
+        },
+        {
+          model: "hazardous_valid_till",
+          label: "Hazardous Valid Till",
+          type: "date",
+        },
+        { model: "hill_valid_till", label: "Hill Valid Till", type: "date" },
       ];
     },
   },
-
   mounted() {
     this.loadCustomer();
   },
-
   methods: {
+    parseError(error) {
+      let msg = "Something went wrong";
+      if (error) {
+        if (error.response && error.response.data) {
+          msg = error.response.data.message || error.response.data.error || msg;
+        } else if (error.message) {
+          msg = error.message;
+        }
+      }
+      return msg;
+    },
     async loadCustomer() {
       this.loading = true;
+      this.loadError = "";
       try {
         const { data } = await api.get(`/api/customer/${this.customer_id}`);
-        this.customerData = data.data || null;
-      } catch (error) {
-        console.error("Error loading customer:", error);
-        Swal.fire({
-          title: "Error",
-          text: error.response?.data?.message || "Failed to load customer data",
-          icon: "error",
-        });
+        this.customerData = (data && data.data) || null;
+      } catch (e) {
+        this.loadError = this.parseError(e);
       } finally {
         this.loading = false;
       }
     },
-
+    onDialogToggle(kind) {
+      // Reset validation when a dialog opens
+      this.$nextTick(() => {
+        const map = {
+          update: "updateForm",
+          dl: "dlVerifyForm",
+          manual: "manualDLForm",
+          id: "idFormRef",
+        };
+        const ref = map[kind];
+        if (ref && this.$refs[ref] && this.$refs[ref].resetValidation) {
+          this.$refs[ref].resetValidation();
+        }
+      });
+    },
+    openUpdateCustomerDialog(customer) {
+      const base = JSON.parse(
+        JSON.stringify(customer || this.customerData || {})
+      );
+      base.user_data = base.user_data || { phone: "" };
+      this.editCustomer = base;
+      this.updateError = "";
+      this.updateCustomerDialog = true;
+    },
     async updateCustomer() {
-      this.loading = true;
-      this.errorMessage = "";
-
+      if (this.$refs.updateForm && !this.$refs.updateForm.validate()) return;
+      this.updating = true;
+      this.updateError = "";
       try {
-        const response = await api.put(
-          `/api/customer/${this.customerData.customer_id}`,
-          {
-            display_name: this.customerData.display_name,
-            email: this.customerData.email,
-            phone: this.customerData.user_data?.phone,
-            address: this.customerData.address,
-          }
+        const payload = {
+          display_name: this.editCustomer.display_name,
+          email: this.editCustomer.email,
+          phone:
+            (this.editCustomer.user_data &&
+              this.editCustomer.user_data.phone) ||
+            "",
+          address: this.editCustomer.address,
+        };
+        const res = await api.put(
+          `/api/customer/${
+            this.editCustomer.customer_id ||
+            (this.customerData && this.customerData.customer_id)
+          }`,
+          payload
         );
-
         Swal.fire({
           icon: "success",
           title: "Updated Customer",
-          text: response.data.message || "Customer updated successfully.",
-          confirmButtonColor: "#198754",
+          text:
+            (res && res.data && res.data.message) ||
+            "Customer updated successfully.",
         });
-
         this.updateCustomerDialog = false;
-        this.loadCustomer();
-      } catch (error) {
-        this.errorMessage =
-          error.response?.data?.message || "Something went wrong.";
-        console.error("Update error:", error);
+        await this.loadCustomer();
+      } catch (e) {
+        this.updateError = this.parseError(e);
+        Swal.fire({
+          icon: "error",
+          title: "Update failed",
+          text: this.updateError,
+        });
       } finally {
-        this.loading = false;
+        this.updating = false;
       }
     },
-
     async verifyDL() {
-      if (!this.$refs.dlVerifyForm?.validate()) return;
-
-      this.loading = true;
-      this.errorMessage = "";
-
+      if (this.$refs.dlVerifyForm && !this.$refs.dlVerifyForm.validate())
+        return;
+      this.verifyingDL = true;
       try {
         const payload = {
           customer_id: this.customerData.customer_id,
           dl_no: this.dlForm.dl_number,
           dob: this.dlForm.dob,
         };
-
-        const response = await api.post("/api/customer/verify-dl", payload);
-
-        if (response.data.success) {
+        const res = await api.post("/api/customer/verify-dl", payload);
+        const ok = res && res.data && res.data.success;
+        if (ok) {
           Swal.fire({
             icon: "success",
             title: "DL Verified",
             text: "Driving License verification successful.",
-            confirmButtonColor: "#198754",
-          }).then(() => {
-            this.customerData.dl_verified = true;
-            this.openDLVerifyDialog = false;
           });
+          this.customerData.dl_verified = true;
+          this.openDLVerifyDialog = false;
         } else {
           Swal.fire({
             icon: "error",
             title: "DL Not Verified",
             text:
-              response.data.message ||
+              (res && res.data && res.data.message) ||
               "DL details not found. Try manual entry.",
             confirmButtonText: "Verify Manually",
           }).then(() => {
+            // prefill manual with available info
+            this.manualDLForm.dl_number = this.dlForm.dl_number;
+            this.manualDLForm.dob = this.dlForm.dob;
             this.openDLVerifyDialog = false;
             this.openManualDLDialog = true;
           });
         }
-      } catch (error) {
-        console.error("DL verification error:", error);
+      } catch (e) {
         Swal.fire({
           icon: "error",
           title: "Verification Failed",
-          text:
-            error.response?.data?.message || "Something went wrong. Try again.",
+          text: this.parseError(e),
         });
       } finally {
-        this.loading = false;
+        this.verifyingDL = false;
       }
     },
-
-    submitManualDL() {
-      if (!this.$refs.manualDLForm?.validate()) return;
-
-      this.loading = true;
-      setTimeout(() => {
-        this.loading = false;
-        Swal.fire(
-          "Verified",
-          "Manual DL verification successful",
-          "success"
-        ).then(() => {
-          this.customerData.dl_verified = true;
+    async submitManualDL() {
+      if (this.$refs.manualDLForm && !this.$refs.manualDLForm.validate())
+        return;
+      this.verifyingManualDL = true;
+      try {
+        const payload = Object.assign(
+          { customer_id: this.customerData.customer_id },
+          this.manualDLForm
+        );
+        const res = await api.post("/api/customer/verify-dl-manual", payload); // uses axios baseURL
+        const body = (res && res.data) || {};
+        if (body.success) {
+          Swal.fire(
+            "Verified",
+            body.message || "Manual DL verification successful",
+            "success"
+          );
+          // trust server as source of truth and refresh
           this.openManualDLDialog = false;
-        });
-      }, 1000);
-    },
-
-    submitIDVerify() {
-      if (!this.$refs.idFormRef?.validate()) return;
-
-      this.loadingIDVerify = true;
-      setTimeout(() => {
-        this.loadingIDVerify = false;
-
-        const isValid = this.idForm.id_number?.length >= 6;
-
-        if (isValid) {
-          Swal.fire("Success", "ID Verified", "success").then(() => {
-            this.customerData.id_verified = true;
-            this.openIDVerifyDialog = false;
-          });
+          await this.loadCustomer();
         } else {
-          Swal.fire("Failed", "ID could not be verified", "error");
+          throw new Error(body.message || "Manual verification failed");
         }
-      }, 1000);
+      } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: "Manual Verification Failed",
+          text: this.parseError(e),
+        });
+      } finally {
+        this.verifyingManualDL = false;
+      }
     },
-
-    openUpdateCustomerDialog(customer) {
-      this.customerData = { ...customer };
-      this.updateCustomerDialog = true;
+    async submitIDVerify() {
+      if (this.$refs.idFormRef && !this.$refs.idFormRef.validate()) return;
+      this.verifyingID = true;
+      try {
+        const payload = Object.assign(
+          { customer_id: this.customerData.customer_id },
+          this.idForm
+        );
+        await api.post("/api/customer/verify-id", payload);
+        Swal.fire("Success", "ID Verified", "success");
+        this.customerData.id_verified = true;
+        this.openIDVerifyDialog = false;
+      } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: "ID Verification Failed",
+          text: this.parseError(e),
+        });
+      } finally {
+        this.verifyingID = false;
+      }
     },
-
+    openManualFromDL() {
+      this.manualDLForm.dl_number =
+        this.dlForm.dl_number || this.manualDLForm.dl_number;
+      this.manualDLForm.dob = this.dlForm.dob || this.manualDLForm.dob;
+      // helpful prefill from customer data where available
+      const c = this.customerData || {};
+      this.manualDLForm.name_on_dl =
+        this.manualDLForm.name_on_dl || c.display_name || "";
+      this.manualDLForm.address = this.manualDLForm.address || c.address || "";
+      this.manualDLForm.state = this.manualDLForm.state || c.state || "";
+      this.manualDLForm.country = this.manualDLForm.country || "India";
+      this.openDLVerifyDialog = false;
+      this.openManualDLDialog = true;
+      this.onDialogToggle("manual");
+    },
     getStatusColor(status, type) {
       return StatusService.getColor(status, type);
     },

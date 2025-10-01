@@ -7,6 +7,7 @@
         color="primary"
         class="my-auto"
         @click="openCreateLinkDialog = true"
+        rounded
       >
         Create Payment Link
       </v-btn>
@@ -34,10 +35,11 @@
             <td>{{ link.link_id }}</td>
             <td>{{ link.amount }}</td>
             <td>{{ link.status }}</td>
-            <td>
-              <a :href="link.url" target="_blank">{{ link.url }}</a>
-
-              <v-icon class="mr-2" small @click="copyLink(link.url)"
+            <td class="d-flex align-center">
+              <a :href="link.url" target="_blank" class="mr-2">{{
+                link.url
+              }}</a>
+              <v-icon small @click="copyLink(link.url)" class="ml-1"
                 >mdi-content-copy</v-icon
               >
             </td>
@@ -45,64 +47,60 @@
             <td>{{ link.created_at | moment }}</td>
           </tr>
           <tr v-if="!paymentLinks.length && !loading">
-            <td colspan="7" class="text-center">No payment links found</td>
+            <td colspan="6" class="text-center">No payment links found</td>
           </tr>
         </tbody>
       </v-simple-table>
 
       <!-- Pagination -->
-      <!-- <v-card-actions class="justify-center">
+      <v-card-actions class="justify-center" v-if="total > limit">
         <v-btn :disabled="offset === 0 || loading" @click="prevPage"
           >Previous</v-btn
         >
         <v-btn :disabled="offset + limit >= total || loading" @click="nextPage"
           >Next</v-btn
         >
-      </v-card-actions> -->
+      </v-card-actions>
     </v-card>
 
     <!-- Create Payment Link Dialog -->
     <v-dialog v-model="openCreateLinkDialog" max-width="500px">
-      <v-card :loading="loading">
+      <v-card>
         <v-overlay :value="loading">
           <v-progress-circular indeterminate size="64" color="primary" />
         </v-overlay>
 
-        <v-container>
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">Create Payment Link</div>
-            <v-btn icon @click="openCreateLinkDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
+        <v-card-title class="d-flex justify-space-between align-center">
+          <div class="text-h6 font-weight-bold">Create Payment Link</div>
+          <v-btn icon @click="openCreateLinkDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
 
-          <v-form ref="linkForm" v-model="linkFormValid" class="mt-4">
-            <v-row>
-              <v-col cols="12">
-                <label class="text-subtitle-2">Amount</label>
-                <v-text-field
-                  v-model="newLink.amount"
-                  placeholder="Enter amount"
-                  type="number"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required, rules.positive]"
-                />
-              </v-col>
-            </v-row>
+        <v-card-text>
+          <v-form ref="linkForm" v-model="linkFormValid" class="mt-2">
+            <v-text-field
+              v-model="newLink.amount"
+              label="Amount"
+              type="number"
+              dense
+              outlined
+              hide-details
+              :rules="[rules.required, rules.positive]"
+            />
           </v-form>
+        </v-card-text>
 
-          <div class="d-flex justify-end mt-4">
-            <v-btn
-              color="primary"
-              :disabled="!linkFormValid || loading"
-              @click="createPaymentLink"
-            >
-              Create
-            </v-btn>
-          </div>
-        </v-container>
+        <v-card-actions class="d-flex justify-end">
+          <v-btn
+            color="primary"
+            :disabled="!linkFormValid || loading"
+            @click="createPaymentLink"
+            rounded
+          >
+            Create
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
@@ -122,8 +120,6 @@ export default {
       orderId: this.$route.params.id,
       loading: false,
       openCreateLinkDialog: false,
-
-      selectedLink: {},
       linkFormValid: false,
       newLink: { amount: "" },
       rules: {
@@ -145,14 +141,18 @@ export default {
             params: { limit: this.limit, offset: this.offset },
           }
         );
-        this.paymentLinks = data.data.paymentLinks || [];
-        this.total = data.data.meta.total || 0;
+
+        this.paymentLinks = data?.data?.paymentLinks ?? [];
+        this.total = data?.data?.meta?.total ?? 0;
       } catch (err) {
-        console.error(err);
+        console.error("Fetch Payment Links Error:", err);
         this.$swal.fire({
           icon: "error",
           title: "Error",
-          text: err.response?.data?.error || "Failed to fetch payment links",
+          text:
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to fetch payment links",
         });
       } finally {
         this.loading = false;
@@ -183,13 +183,13 @@ export default {
 
         this.fetchPaymentLinks();
       } catch (err) {
-        console.error(err);
+        console.error("Create Payment Link Error:", err);
         this.$swal.fire({
           icon: "error",
           title: "Error",
           text:
-            err.response?.data?.error ||
             err.response?.data?.message ||
+            err.message ||
             "Failed to create payment link",
         });
       } finally {
@@ -199,6 +199,13 @@ export default {
 
     copyLink(url) {
       navigator.clipboard.writeText(url);
+      this.$swal.fire({
+        icon: "success",
+        title: "Copied",
+        text: "Payment link copied to clipboard",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     },
 
     prevPage() {

@@ -80,6 +80,7 @@
               color="primary"
               depressed
               class="mt-2"
+              rounded
             >
               Add Payment
             </v-btn>

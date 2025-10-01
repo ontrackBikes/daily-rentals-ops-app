@@ -7,6 +7,7 @@
         class="my-auto"
         color="primary"
         @click="openAddPaymentDialog = true"
+        rounded
         >Add Payment</v-btn
       >
     </div>
@@ -181,6 +182,7 @@
               color="primary"
               :disabled="!isPaymentFormValid"
               @click="confirmPayment"
+              rounded
             >
               Confirm
             </v-btn>
