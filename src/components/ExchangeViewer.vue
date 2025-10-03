@@ -21,6 +21,7 @@
         :disabled="!newModelSelected"
         @click="checkExchange"
         rounded
+        depressed
       >
         Check Exchange
       </v-btn>
@@ -146,6 +147,7 @@
               :disabled="!selectedVehicleId"
               @click="confirmExchange"
               rounded
+              depressed
             >
               Confirm Exchange
             </v-btn>

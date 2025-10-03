@@ -26,7 +26,9 @@
           />
 
           <div class="text-right mt-5">
-            <v-btn color="primary" @click="nextStep">Next</v-btn>
+            <v-btn rounded depressed color="primary" @click="nextStep"
+              >Next</v-btn
+            >
           </div>
         </div>
 
@@ -51,7 +53,14 @@
               <div class="text-caption mt-1 text-center grey--text">
                 {{ img.type || "pickup" }}
               </div>
-              <v-btn small color="red" class="mt-1" @click="removeImage(index)">
+              <v-btn
+                small
+                rounded
+                depressed
+                color="red"
+                class="mt-1"
+                @click="removeImage(index)"
+              >
                 Remove
               </v-btn>
             </v-col>
@@ -72,7 +81,12 @@
           </v-row>
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="$emit('close-modal')" class="mr-2"
+            <v-btn
+              text
+              rounded
+              depressed
+              @click="$emit('close-modal')"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn

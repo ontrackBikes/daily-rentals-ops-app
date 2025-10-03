@@ -7,7 +7,14 @@
     />
     <v-alert v-else-if="loadError" type="error" dense outlined class="mb-3">
       {{ loadError }}
-      <v-btn small text color="primary" class="ml-2" @click="loadCustomer"
+      <v-btn
+        small
+        text
+        rounded
+        depressed
+        color="primary"
+        class="ml-2"
+        @click="loadCustomer"
         >Retry</v-btn
       >
     </v-alert>
@@ -66,7 +73,6 @@
           class="ml-2"
           color="amber darken-2"
           text-color="black"
-          label
           @click="openDLVerifyDialog = true"
         >
           Verify Now
@@ -93,7 +99,6 @@
           class="ml-2"
           color="amber darken-2"
           text-color="black"
-          label
           @click="openIDVerifyDialog = true"
         >
           Verify Now
@@ -167,7 +172,12 @@
           </v-alert>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text class="mr-2" @click="updateCustomerDialog = false"
+            <v-btn
+              rounded
+              depressed
+              text
+              class="mr-2"
+              @click="updateCustomerDialog = false"
               >Cancel</v-btn
             >
             <v-btn
@@ -176,6 +186,7 @@
               :disabled="!valid.update"
               @click="updateCustomer"
               rounded
+              depressed
             >
               Update
             </v-btn>
@@ -234,10 +245,21 @@
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text class="mr-2" @click="openDLVerifyDialog = false"
+            <v-btn
+              text
+              rounded
+              depressed
+              class="mr-2"
+              @click="openDLVerifyDialog = false"
               >Cancel</v-btn
             >
-            <v-btn text color="primary" class="mr-2" @click="openManualFromDL"
+            <v-btn
+              text
+              rounded
+              depressed
+              color="primary"
+              class="mr-2"
+              @click="openManualFromDL"
               >Manual Verification</v-btn
             >
             <v-btn
@@ -245,6 +267,8 @@
               :loading="verifyingDL"
               :disabled="!valid.dl"
               @click="verifyDL"
+              rounded
+              depressed
             >
               Verify Now
             </v-btn>
@@ -301,7 +325,12 @@
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text class="mr-2" @click="openManualDLDialog = false"
+            <v-btn
+              rounded
+              depressed
+              text
+              class="mr-2"
+              @click="openManualDLDialog = false"
               >Cancel</v-btn
             >
             <v-btn
@@ -309,6 +338,8 @@
               :loading="verifyingManualDL"
               :disabled="!valid.manual"
               @click="submitManualDL"
+              rounded
+              depressed
             >
               Verify
             </v-btn>
@@ -394,7 +425,7 @@
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text class="mr-2" @click="openIDVerifyDialog = false"
+            <v-btn rounded text class="mr-2" @click="openIDVerifyDialog = false"
               >Cancel</v-btn
             >
             <v-btn
@@ -402,6 +433,8 @@
               :loading="verifyingID"
               :disabled="!valid.id"
               @click="submitIDVerify"
+              rounded
+              depressed
             >
               Verify
             </v-btn>

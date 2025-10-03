@@ -17,6 +17,8 @@
           target="_blank"
           rel="noopener"
           class="mt-2"
+          rounded
+          depressed
         >
           <v-icon left>mdi-map-marker-path</v-icon>
           Get Directions
@@ -47,6 +49,8 @@
         <v-btn
           color="primary"
           outlined
+          rounded
+          depressed
           :href="googleMapsUrl"
           target="_blank"
           rel="noopener"

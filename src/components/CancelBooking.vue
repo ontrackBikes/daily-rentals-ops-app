@@ -36,13 +36,16 @@
 
       <!-- Actions -->
       <div class="d-flex justify-end my-2">
-        <v-btn text @click="$emit('close-modal')" class="mr-2">Cancel</v-btn>
+        <v-btn rounded depressed text @click="$emit('close-modal')" class="mr-2"
+          >Cancel</v-btn
+        >
         <v-btn
           color="red darken-1"
           dark
           :disabled="!cancelFormValid"
           @click="submitCancelBooking"
           rounded
+          depressed
         >
           Confirm Cancel
         </v-btn>

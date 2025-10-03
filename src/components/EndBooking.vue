@@ -71,6 +71,7 @@
           :disabled="!endFormValid || endImages.length < 4"
           @click="submitEndBooking"
           rounded
+          depressed
         >
           Confirm
         </v-btn>

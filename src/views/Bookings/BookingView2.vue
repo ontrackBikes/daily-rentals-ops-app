@@ -95,14 +95,16 @@
               >
                 <v-btn
                   color="warning"
-                  dark
+                  rounded
+                  depressed
                   class="mr-2"
                   @click="openCancelBookingDialog = true"
                   >Cancel Booking</v-btn
                 >
                 <v-btn
                   color="primary"
-                  dark
+                  rounded
+                  depressed
                   @click="openStartBookingDialog = true"
                   >Start Booking</v-btn
                 >
@@ -290,6 +292,8 @@
                 </div>
                 <v-btn
                   small
+                  rounded
+                  depressed
                   color="red"
                   class="mt-1"
                   @click="removeImage('start', index)"
@@ -316,10 +320,17 @@
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="closeStartBookingDialog" class="mr-2"
+            <v-btn
+              text
+              rounded
+              depressed
+              @click="closeStartBookingDialog"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
+              rounded
+              depressed
               color="primary"
               :disabled="!startFormValid || startImages.length < 4"
               @click="submitStartBooking"
@@ -404,10 +415,17 @@
           </v-form>
 
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="closeEndBookingDialog" class="mr-2"
+            <v-btn
+              text
+              rounded
+              depressed
+              @click="closeEndBookingDialog"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
+              rounded
+              depressed
               color="primary"
               :disabled="!endFormValid || endImages.length < 4"
               @click="submitEndBooking"
@@ -470,12 +488,19 @@
           </v-form>
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="closeCancelBookingDialog" class="mr-2"
+            <v-btn
+              text
+              rounded
+              depressed
+              @click="closeCancelBookingDialog"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
               color="red darken-1"
               dark
+              rounded
+              depressed
               :disabled="!cancelFormValid"
               @click="submitCancelBooking"
             >

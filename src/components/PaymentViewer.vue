@@ -14,11 +14,20 @@
 
           <div class="mt-1">
             Refunded - ₹{{ totalRefunded }}
-            <v-btn small text @click="activeTab = 'refunds'">view</v-btn>
+            <v-btn small rounded depressed text @click="activeTab = 'refunds'"
+              >view</v-btn
+            >
           </div>
           <div>
             Credit Note - ₹{{ totalCreditNotes }}
-            <v-btn small text @click="activeTab = 'credit_notes'">view</v-btn>
+            <v-btn
+              small
+              rounded
+              depressed
+              text
+              @click="activeTab = 'credit_notes'"
+              >view</v-btn
+            >
           </div>
 
           <v-sheet color="green lighten-4" class="pa-2 mt-4 text-center">

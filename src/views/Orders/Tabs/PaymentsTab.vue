@@ -34,6 +34,8 @@
                 small
                 color="primary"
                 text
+                rounded
+                depressed
                 @click="viewPaymentSnapFn(payment)"
                 >{{ payment.internal_payment_id }}</v-btn
               >
@@ -47,6 +49,8 @@
             <td>
               <v-btn
                 small
+                rounded
+                depressed
                 text
                 color="primary"
                 class="ml-2"
@@ -55,6 +59,8 @@
               >
               <v-btn
                 small
+                rounded
+                depressed
                 text
                 color="primary"
                 class="ml-2"

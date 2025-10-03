@@ -49,6 +49,7 @@
             :disabled="!selectedPlan"
             @click="goToPreview"
             rounded
+            depressed
           >
             Next
           </v-btn>
@@ -89,6 +90,7 @@
             :disabled="!preview"
             @click="step = 3"
             rounded
+            depressed
           >
             Continue
           </v-btn>
@@ -103,6 +105,7 @@
           <v-btn
             color="success"
             rounded
+            depressed
             :loading="confirming"
             @click="extendBooking"
           >

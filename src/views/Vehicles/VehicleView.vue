@@ -58,6 +58,8 @@
               target="_blank"
               rel="noopener"
               small
+              rounded
+              depressed
               outlined
               class="mt-2"
             >

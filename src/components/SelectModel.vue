@@ -84,7 +84,9 @@
 
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="dialog = false" class="mr-2">Cancel</v-btn>
+            <v-btn text rounded depressed @click="dialog = false" class="mr-2"
+              >Cancel</v-btn
+            >
           </div>
         </v-container>
       </v-card>

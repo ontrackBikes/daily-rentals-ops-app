@@ -1,7 +1,15 @@
 <template>
   <v-menu v-model="menu" :open-on-hover="true" bottom offset-y>
     <template v-slot:activator="{ on, attrs }">
-      <v-btn text color="indigo" dark v-bind="attrs" v-on="on">
+      <v-btn
+        rounded
+        depressed
+        text
+        color="indigo"
+        dark
+        v-bind="attrs"
+        v-on="on"
+      >
         <slot></slot>
       </v-btn>
     </template>

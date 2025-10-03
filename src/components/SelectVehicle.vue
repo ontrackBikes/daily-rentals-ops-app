@@ -99,13 +99,15 @@
 
             <!-- Load More fallback -->
             <div class="text-center" v-if="!allLoaded && !loadingMore">
-              <v-btn small @click="loadMore">Load More</v-btn>
+              <v-btn small rounded depressed @click="loadMore">Load More</v-btn>
             </div>
           </div>
 
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
+            <v-btn text rounded depressed color="error" @click="dialog = false"
+              >Cancel</v-btn
+            >
           </div>
         </v-container>
       </v-card>

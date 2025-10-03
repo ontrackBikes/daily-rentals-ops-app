@@ -19,7 +19,13 @@
                 {{ formatStatus(vehicle.status) }}
               </v-chip>
             </div>
-            <v-btn color="primary" @click="statusDialog = true" outlined>
+            <v-btn
+              color="primary"
+              @click="statusDialog = true"
+              outlined
+              rounded
+              depressed
+            >
               <v-icon left>mdi-pencil</v-icon>
               Change Status
             </v-btn>
@@ -55,7 +61,13 @@
 
         <v-card-actions class="pa-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn text @click="statusDialog = false" :disabled="loading">
+          <v-btn
+            text
+            @click="statusDialog = false"
+            :disabled="loading"
+            rounded
+            depressed
+          >
             Cancel
           </v-btn>
           <v-btn
@@ -63,6 +75,8 @@
             @click="updateVehicleStatus"
             :loading="loading"
             :disabled="selectedStatus === vehicle.status"
+            rounded
+            depressed
           >
             Update Status
           </v-btn>

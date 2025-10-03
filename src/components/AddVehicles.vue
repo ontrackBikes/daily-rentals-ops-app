@@ -184,6 +184,7 @@
             type="submit"
             :disabled="!valid"
             rounded
+            depressed
           >
             Submit
           </v-btn>

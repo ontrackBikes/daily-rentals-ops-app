@@ -2,6 +2,8 @@
   <v-menu v-model="menu" bottom offset-y>
     <template v-slot:activator="{ attrs }">
       <v-btn
+        rounded
+        depressed
         text
         color="primary"
         dark
@@ -21,6 +23,7 @@
           dark
           class="text-capitalize"
           rounded
+          depressed
           @click.stop="goToBookingView(booking.booking_id)"
         >
           <v-icon small class="mr-1">mdi-open-in-new</v-icon> Expand

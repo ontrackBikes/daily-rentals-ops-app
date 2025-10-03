@@ -66,7 +66,13 @@
               <div class="text-caption mb-3">
                 Try refining your search or create a new customer.
               </div>
-              <v-btn color="primary" small @click="openCreateDialog">
+              <v-btn
+                rounded
+                depressed
+                color="primary"
+                small
+                @click="openCreateDialog"
+              >
                 Create New "{{ search }}"
               </v-btn>
             </div>
@@ -76,6 +82,8 @@
           <v-btn
             v-if="hasMore"
             block
+            rounded
+            depressed
             text
             :loading="loading"
             @click="fetchCustomers"
@@ -85,7 +93,9 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
+          <v-btn text rounded depressed color="error" @click="dialog = false"
+            >Cancel</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -160,8 +170,12 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn text @click="createDialog = false">Cancel</v-btn>
+          <v-btn text rounded depressed @click="createDialog = false"
+            >Cancel</v-btn
+          >
           <v-btn
+            rounded
+            depressed
             color="primary"
             :loading="creating"
             :disabled="!formValid"

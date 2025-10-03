@@ -52,7 +52,13 @@
             </v-list-item>
 
             <v-list-item v-if="hasMore">
-              <v-btn block text @click="loadMore" :loading="loading"
+              <v-btn
+                block
+                rounded
+                depressed
+                text
+                @click="loadMore"
+                :loading="loading"
                 >Load More</v-btn
               >
             </v-list-item>
@@ -61,7 +67,9 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn text color="error" @click="dialog = false">Cancel</v-btn>
+          <v-btn text rounded depressed color="error" @click="dialog = false"
+            >Cancel</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -54,10 +54,18 @@
 
       <!-- Pagination -->
       <v-card-actions class="justify-center" v-if="total > limit">
-        <v-btn :disabled="offset === 0 || loading" @click="prevPage"
+        <v-btn
+          :disabled="offset === 0 || loading"
+          @click="prevPage"
+          rounded
+          depressed
           >Previous</v-btn
         >
-        <v-btn :disabled="offset + limit >= total || loading" @click="nextPage"
+        <v-btn
+          :disabled="offset + limit >= total || loading"
+          @click="nextPage"
+          rounded
+          depressed
           >Next</v-btn
         >
       </v-card-actions>

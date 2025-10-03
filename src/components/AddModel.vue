@@ -228,6 +228,7 @@
               type="submit"
               :disabled="!valid"
               rounded
+              depressed
             >
               {{ isEditMode ? "Update Model" : "Add Model" }}
             </v-btn>
