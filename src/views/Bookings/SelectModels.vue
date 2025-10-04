@@ -1,6 +1,6 @@
 <template>
   <deep-layout>
-    <v-container fluid>
+    <v-container class="py-6">
       <!-- Overlay Loading -->
       <v-overlay :value="loading">
         <v-progress-circular indeterminate size="64"></v-progress-circular>
@@ -37,7 +37,6 @@
           cols="12"
           sm="6"
           md="4"
-          lg="3"
         >
           <v-card class="mx-auto" rounded="lg" outlined hover height="100%">
             <v-img
