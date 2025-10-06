@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="">
+  <v-container fluid>
     <!-- Loader  -->
     <div v-if="loading" class="pa-6">
       <v-skeleton-loader
@@ -89,18 +89,21 @@
                   Booking Details
                 </h3>
                 <v-card outlined class="my-4 pa-2">
+                  <div>
+                    <v-btn
+                      rounded
+                      plain
+                      class="pa-0"
+                      color="primary"
+                      @click.stop="goToBookingView(booking.booking_id)"
+                    >
+                      View Booking
+                      <v-icon right small>mdi-open-in-new</v-icon>
+                    </v-btn>
+                  </div>
                   <v-row>
                     <!-- Booking Details -->
                     <v-col cols="12" md="6">
-                      <v-btn
-                        rounded
-                        text
-                        color="primary"
-                        @click.stop="goToBookingView(booking.booking_id)"
-                      >
-                        View Booking
-                        <v-icon right small>mdi-open-in-new</v-icon>
-                      </v-btn>
                       <div>
                         <div class="d-flex align-center my-2">
                           <v-icon small color="grey" class="mr-2"
@@ -224,43 +227,36 @@
                   </v-card>
                 </div>
 
-                <v-divider class="my-4" />
+                <v-divider class="my-4" v-if="booking.status != 'cancelled'" />
 
                 <v-row align="center" justify="space-between">
-                  <v-col cols="12" md="6" class="d-flex align-center">
-                    <v-chip
-                      label
-                      small
-                      :color="getStatusColor(booking.status, 'booking')"
-                      class="mr-2"
-                      outlined
-                    >
-                      {{ booking.status || "N/A" }}
-                    </v-chip>
-                  </v-col>
-                  <v-col cols="12" md="6" class="text-right">
+                  <v-col cols="12" class="text-right">
+                    <!-- For Upcoming or Created Bookings -->
                     <div
                       v-if="
                         booking.status === 'upcoming' ||
                         booking.status === 'created'
                       "
-                      class="d-flex justify-end"
+                      class="d-flex flex-wrap justify-end"
                     >
                       <v-btn
                         color="warning"
-                        class="mr-2"
                         rounded
                         depressed
+                        class="mr-2 mb-2"
+                        :block="$vuetify.breakpoint.smAndDown"
                         @click="cancelBookingDialog = true"
                       >
                         <v-icon left>mdi-cancel</v-icon>
                         Cancel
                       </v-btn>
+
                       <v-btn
                         color="primary"
-                        class="mr-2"
                         rounded
                         depressed
+                        class="mr-2 mb-2"
+                        :block="$vuetify.breakpoint.smAndDown"
                         @click="startBookingDialog = true"
                       >
                         <v-icon left>mdi-play-circle</v-icon>
@@ -268,9 +264,11 @@
                       </v-btn>
 
                       <v-btn
+                        color="primary"
                         rounded
                         depressed
-                        color="primary"
+                        class="mb-2"
+                        :block="$vuetify.breakpoint.smAndDown"
                         @click="exchangeDialog = true"
                       >
                         <v-icon left>mdi-swap-horizontal</v-icon>
@@ -278,35 +276,48 @@
                       </v-btn>
                     </div>
 
-                    <v-row v-if="booking.status === 'active'" dense>
-                      <v-col cols="12" sm="4">
+                    <!-- For Active Bookings -->
+                    <v-row
+                      v-if="booking.status === 'active'"
+                      dense
+                      justify="end"
+                    >
+                      <v-col cols="12" sm="4" md="auto">
                         <v-btn
-                          rounded
-                          depressed
                           color="red"
                           dark
+                          rounded
+                          depressed
+                          class="mb-2"
+                          :block="$vuetify.breakpoint.smAndDown"
                           @click="endBookingDialog = true"
                         >
                           <v-icon left>mdi-stop-circle</v-icon>
                           End
                         </v-btn>
                       </v-col>
-                      <v-col cols="12" sm="4">
+
+                      <v-col cols="12" sm="4" md="auto">
                         <v-btn
+                          color="primary"
                           rounded
                           depressed
-                          color="primary"
+                          class="mb-2"
+                          :block="$vuetify.breakpoint.smAndDown"
                           @click="openExtendDialog(booking)"
                         >
                           <v-icon left>mdi-clock-plus</v-icon>
                           Extend
                         </v-btn>
                       </v-col>
-                      <v-col cols="12" sm="4">
+
+                      <v-col cols="12" sm="4" md="auto">
                         <v-btn
+                          color="primary"
                           rounded
                           depressed
-                          color="primary"
+                          class="mb-2"
+                          :block="$vuetify.breakpoint.smAndDown"
                           @click="exchangeDialog = true"
                         >
                           <v-icon left>mdi-swap-horizontal</v-icon>

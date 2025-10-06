@@ -1,13 +1,14 @@
 <template>
   <v-container>
     <!-- Top Button -->
-    <div class="d-flex justify-space-between my-2">
-      <h3 class="my-auto">Total Paid :{{ totalNetPaid }}</h3>
+    <div class="d-flex justify-space-between align-center my-2">
+      <h4 class="my-auto">Total Paid = {{ totalNetPaid }}</h4>
       <v-btn
         class="my-auto"
         color="primary"
         @click="openAddPaymentDialog = true"
         rounded
+        depressed
         >Add Payment</v-btn
       >
     </div>
@@ -189,6 +190,7 @@
               :disabled="!isPaymentFormValid"
               @click="confirmPayment"
               rounded
+              depressed
             >
               Confirm
             </v-btn>
@@ -423,6 +425,8 @@
               color="primary"
               :disabled="!refundFormValid"
               @click="confirmRefund"
+              rounded
+              depressed
             >
               Confirm
             </v-btn>
@@ -432,7 +436,19 @@
     </v-dialog>
 
     <v-dialog v-model="viewPaymentSnap" max-width="800px">
-      <payment-viewer :payment="selectedPaymentToView"></payment-viewer>
+      <v-card :loading="loading" min-height="550" class="rounded-lg">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Payment Details</div>
+            <v-btn icon @click="viewPaymentSnap = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <v-divider class="my-2"></v-divider>
+          <payment-viewer :payment="selectedPaymentToView"></payment-viewer>
+        </v-container>
+      </v-card>
     </v-dialog>
   </v-container>
 </template>

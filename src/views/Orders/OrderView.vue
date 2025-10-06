@@ -5,7 +5,7 @@
         <!-- LEFT: Order Summary -->
         <v-col cols="12" md="3">
           <v-card outlined class="pa-4 rounded-lg">
-            <div class="d-flex justify-space-between mb-2">
+            <div class="d-flex justify-space-between align-center">
               <div class="text-subtitle-1 font-weight-bold">
                 {{ order?.internal_order_id }}
               </div>
@@ -21,39 +21,56 @@
               </v-chip>
             </div>
 
-            <div class="d-flex">
-              Paid Total:
-              <strong class="ml-2">₹{{ order?.amount_received }}</strong>
+            <div class="d-flex justify-space-between align-center my-2">
+              <span class="text-subtitle-1 font-weight-medium">Paid Total</span>
+              <span class="text-subtitle-1 font-weight-bold"
+                >₹{{ order?.amount_received }}</span
+              >
             </div>
 
             <!-- Order Balance -->
-            <div class="text-body-2">Order Balance</div>
-            <div class="mb-1 font-weight-bold">
-              ₹{{ order?.order_balance || 0 }}
+            <div class="d-flex justify-space-between align-center my-2">
+              <span class="text-subtitle-1 font-weight-medium"
+                >Order Balance</span
+              >
+              <span
+                class="text-subtitle-1 font-weight-bold"
+                :class="{
+                  'green--text': order?.order_balance === 0,
+                  'red--text': order?.order_balance < 0,
+                }"
+                >₹{{ order?.order_balance || 0 }}</span
+              >
             </div>
 
             <!-- Payment Status -->
-            <div class="text-body-2">Payment Status</div>
+            <div class="d-flex justify-space-between align-center my-2">
+              <span class="text-subtitle-1 font-weight-medium"
+                >Payment Status</span
+              >
+              <v-chip
+                small
+                text-color="white"
+                class="font-weight-medium"
+                :color="getStatusColor(order?.payment_status, 'payment_status')"
+              >
+                {{ order?.payment_status || "N/A" }}
+              </v-chip>
+            </div>
 
-            <v-chip
-              small
-              text-color="white"
-              class="font-weight-medium"
-              :color="getStatusColor(order?.payment_status, 'payment_status')"
-            >
-              {{ order?.payment_status || "N/A" }}
-            </v-chip>
-          </v-card>
+            <v-divider class="my-2"></v-divider>
 
-          <v-card outlined class="pa-4 rounded-lg my-2">
-            <!-- Order Total -->
-            <div class="text-body-2">Order Total</div>
-            <div class="mb-1 font-weight-bold">
-              ₹{{ order?.order_total || 0 }}
+            <div class="d-flex justify-space-between align-center">
+              <span class="text-subtitle-1 font-weight-medium"
+                >Order Total</span
+              >
+              <span class="text-subtitle-1 font-weight-bold">
+                ₹{{ order?.order_total || 0 }}</span
+              >
             </div>
           </v-card>
 
-          <v-card outlined class="pa-4 rounded-lg">
+          <v-card outlined class="pa-4 rounded-lg my-4">
             <CustomerViewer
               v-if="selectedCustomer"
               :customer_id="selectedCustomer"

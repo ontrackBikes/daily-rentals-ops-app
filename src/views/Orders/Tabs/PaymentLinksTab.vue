@@ -1,13 +1,14 @@
 <template>
   <v-container>
     <!-- Top Section -->
-    <div class="d-flex justify-space-between my-2">
-      <h3 class="my-auto">Payment Links for Order #{{ orderId }}</h3>
+    <div class="d-flex justify-space-between align-center my-2">
+      <h4 class="my-auto">Payment Links for Order #{{ orderId }}</h4>
       <v-btn
         color="primary"
         class="my-auto"
         @click="openCreateLinkDialog = true"
         rounded
+        depressed
       >
         Create Payment Link
       </v-btn>
@@ -72,20 +73,17 @@
     </v-card>
 
     <!-- Create Payment Link Dialog -->
-    <v-dialog v-model="openCreateLinkDialog" max-width="500px">
-      <v-card>
-        <v-overlay :value="loading">
-          <v-progress-circular indeterminate size="64" color="primary" />
-        </v-overlay>
+    <v-dialog v-model="openCreateLinkDialog" max-width="450px">
+      <v-card :loading="loading">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Create Payment Link</div>
+            <v-btn icon @click="openCreateLinkDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
 
-        <v-card-title class="d-flex justify-space-between align-center">
-          <div class="text-h6 font-weight-bold">Create Payment Link</div>
-          <v-btn icon @click="openCreateLinkDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-card-text>
           <v-form ref="linkForm" v-model="linkFormValid" class="mt-2">
             <v-text-field
               v-model="newLink.amount"
@@ -97,18 +95,20 @@
               :rules="[rules.required, rules.positive]"
             />
           </v-form>
-        </v-card-text>
 
-        <v-card-actions class="d-flex justify-end">
-          <v-btn
-            color="primary"
-            :disabled="!linkFormValid || loading"
-            @click="createPaymentLink"
-            rounded
-          >
-            Create
-          </v-btn>
-        </v-card-actions>
+          <!-- Action -->
+          <div class="d-flex justify-end mt-4">
+            <v-btn
+              color="primary"
+              :disabled="!linkFormValid || loading"
+              @click="createPaymentLink"
+              rounded
+              depressed
+            >
+              Create
+            </v-btn>
+          </div>
+        </v-container>
       </v-card>
     </v-dialog>
   </v-container>

@@ -20,7 +20,14 @@
     </v-alert>
 
     <div v-else-if="customerData">
-      <div class="d-flex">
+      <div class="d-flex justify-space-between align-center">
+        <div class="text-subtitle-1 font-weight-bold">
+          {{ customerData.display_name }}
+          <v-btn icon small @click="openUpdateCustomerDialog(customerData)">
+            <v-icon small color="primary">mdi-pencil</v-icon>
+          </v-btn>
+        </div>
+
         <v-chip
           small
           :color="getStatusColor(customerData.status, 'customer')"
@@ -29,13 +36,6 @@
         >
           {{ customerData.status }}
         </v-chip>
-      </div>
-
-      <div class="text-subtitle-1 font-weight-bold mt-2">
-        {{ customerData.display_name }}
-        <v-btn icon small @click="openUpdateCustomerDialog(customerData)">
-          <v-icon small color="primary">mdi-pencil</v-icon>
-        </v-btn>
       </div>
 
       <div

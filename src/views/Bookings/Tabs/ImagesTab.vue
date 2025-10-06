@@ -10,23 +10,28 @@
           cols="6"
           sm="3"
         >
-          <v-img
-            :src="image.image_url"
-            aspect-ratio="1"
-            class="rounded-lg elevation-1"
-            contain
-          />
-          <!-- Type label -->
-          <div class="text-caption mt-1 text-center grey--text text--darken-1">
-            {{ image.type || "N/A" }}
-          </div>
+          <v-card class="rounded-lg pa-0" outlined>
+            <!-- Image filling full card -->
+            <v-img
+              :src="image.image_url"
+              height="160px"
+              class="align-end"
+              cover
+            >
+              <div
+                class="pa-2 text-subtitle-2 font-weight-bold black--text text-uppercase"
+              >
+                {{ image.type || "N/A" }}
+              </div>
+            </v-img>
+          </v-card>
         </v-col>
 
         <!-- Add Image Button -->
         <v-col cols="6" sm="3">
           <div
             class="d-flex flex-column align-center justify-center grey lighten-3 rounded-lg"
-            style="height: 100px; cursor: pointer"
+            style="height: 160px; cursor: pointer"
             @click="openImageUploadDialog = true"
           >
             <v-icon size="36" color="grey darken-1"
@@ -41,7 +46,7 @@
     </v-col>
 
     <!-- Add Image Dialog -->
-    <v-dialog v-model="openImageUploadDialog" max-width="400px">
+    <v-dialog v-model="openImageUploadDialog" max-width="450px">
       <v-card :loading="loading">
         <v-container>
           <!-- Header -->
@@ -94,10 +99,22 @@
 
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text @click="openImageUploadDialog = false" class="mr-2">
+            <v-btn
+              text
+              depressed
+              rounded
+              @click="openImageUploadDialog = false"
+              class="mr-2"
+            >
               Cancel
             </v-btn>
-            <v-btn color="primary" :disabled="!formValid" @click="uploadImage">
+            <v-btn
+              color="primary"
+              depressed
+              rounded
+              :disabled="!formValid"
+              @click="uploadImage"
+            >
               Upload
             </v-btn>
           </div>

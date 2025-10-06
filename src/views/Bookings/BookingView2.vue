@@ -1,23 +1,27 @@
 <template>
   <deep-layout :back-to="'/bookings'">
-    <v-container>
+    <v-container fluid>
       <v-row>
-        <v-col cols="4">
+        <v-col cols="12" md="3">
           <v-skeleton-loader v-if="loading" type="card" />
 
           <v-card outlined v-if="!loading && booking" class="rounded-lg">
             <v-container>
               <!-- Status -->
-              <div class="d-flex">
-                <v-btn
-                  :to="`/orders/${booking.order_data.order_id}`"
-                  rounded
-                  text
-                  color="primary"
-                  >{{ booking.order_data.internal_order_id }}</v-btn
-                >
+              <div class="d-flex align-center justify-space-between my-2">
+                <div v-if="booking.order_data">
+                  <router-link
+                    :to="`/orders/${booking.order_data.order_id}`"
+                    class="primary--text font-weight-bold text-decoration-none d-inline-flex align-center"
+                  >
+                    {{ booking.order_data.internal_order_id }}
+                    <v-icon small color="primary" class="ml-1"
+                      >mdi-open-in-new</v-icon
+                    >
+                  </router-link>
+                </div>
+
                 <v-chip
-                  class="my-auto"
                   outlined
                   small
                   :color="getStatusColor(booking.status, 'booking')"
@@ -27,53 +31,62 @@
               </div>
 
               <!-- Date Range -->
-              <div class="text-subtitle-1 mt-2">
-                {{ booking.start_date | moment("DD/MM/YYYY") }} -
+              <div class="my-2 text-subtitle-1 font-weight-medium">
+                {{ booking.start_date | moment("DD/MM/YYYY") }}
+                -
                 {{ booking.end_date | moment("DD/MM/YYYY") }}
               </div>
 
               <!-- Vehicle Number -->
-              <div class="dark--text text--darken-2 font-weight-bold">
+              <div class="my-2 text-subtitle-1 font-weight-bold">
                 {{ booking.vehicle_data?.registration_number }}
               </div>
 
               <!-- Booking Date -->
-              <div class="grey--text text--darken-1 text-body-2">
+              <div class="grey--text ext-subtitle-1 font-weight-medium">
                 {{ booking.created_at | moment("DD MMM YYYY") }}
               </div>
 
               <v-divider class="my-3" />
-              <div class="d-flex">
-                Order Total:
-                <strong class="ml-2"
-                  >₹{{ booking.order_data?.order_total }}</strong
+
+              <div class="d-flex justify-space-between align-center my-2">
+                <span class="text-subtitle-1 font-weight-medium"
+                  >Order Total</span
+                >
+                <span class="text-subtitle-1 font-weight-bold">
+                  ₹{{ booking.order_data?.order_total || 0 }}</span
                 >
               </div>
 
-              <div class="d-flex">
-                Paid Total:
-                <strong class="ml-2"
-                  >₹{{ booking.order_data?.amount_received }}</strong
+              <div class="d-flex justify-space-between align-center my-2">
+                <span class="text-subtitle-1 font-weight-medium"
+                  >Paid Total</span
+                >
+                <span class="text-subtitle-1 font-weight-bold">
+                  ₹{{ booking.order_data?.amount_received || 0 }}</span
                 >
               </div>
 
-              <div class="d-flex">
-                Order Balance:
-                <strong
-                  class="ml-2"
+              <div class="d-flex justify-space-between align-center my-2">
+                <span class="text-subtitle-1 font-weight-medium"
+                  >Order Balance</span
+                >
+                <span
+                  class="text-subtitle-1 font-weight-bold"
                   :class="{
                     'green--text': booking.order_data?.order_balance === 0,
                     'red--text': booking.order_data?.order_balance < 0,
                   }"
                 >
-                  ₹{{ booking.order_data?.order_balance }}
-                </strong>
+                  ₹{{ booking.order_data?.order_balance || 0 }}</span
+                >
               </div>
 
               <!-- Payment Status -->
-              <div class="text-subtitle-2 font-weight-medium mb-1">
-                Payment Status
-
+              <div class="d-flex justify-space-between align-center my-2">
+                <span class="text-subtitle-1 font-weight-medium"
+                  >Payment Status</span
+                >
                 <v-chip
                   small
                   text-color="white"
@@ -88,10 +101,15 @@
                   {{ booking.order_data?.payment_status || "N/A" }}
                 </v-chip>
               </div>
+              <v-divider
+                class="my-2"
+                v-if="booking.status != 'cancelled'"
+              ></v-divider>
+
               <!-- Upcoming → Show Start Booking -->
               <div
                 v-if="booking.status === 'upcoming'"
-                class="d-flex justify-end my-4"
+                class="d-flex justify-end my-2"
               >
                 <v-btn
                   color="warning"
@@ -111,7 +129,7 @@
               </div>
 
               <!-- Active → Show End & Extend Booking -->
-              <v-row v-if="booking.status === 'active'" class="my-4">
+              <v-row v-if="booking.status === 'active'" class="my-4" dense>
                 <v-col cols="12">
                   <v-btn
                     rounded
@@ -154,7 +172,7 @@
             </v-container>
           </v-card>
         </v-col>
-        <v-col cols="8">
+        <v-col cols="12" md="9">
           <!-- <v-card outlined v-if="booking?.booking_line_item_data?.length">
             <v-container>
               <h3><strong>Booking Line Items</strong></h3>
@@ -438,6 +456,7 @@
     </v-dialog>
 
     <extend-booking-viewer
+      v-if="booking_id"
       v-model="openExtendDialog"
       :booking_id="booking_id"
       @confirm="handleConfirm"
@@ -917,6 +936,26 @@ export default {
 
     getStatusColor(status, type) {
       return StatusService.getColor(status, type);
+    },
+
+    handleConfirm(data) {
+      console.log("Extension confirmed:", data);
+      this.$swal.fire({
+        icon: "success",
+        title: "Confirmed",
+        text: "Extension has been confirmed successfully!",
+      });
+      this.openExtendDialog = false;
+      this.fetchBookingDetails(); // Refresh data
+    },
+
+    showError(error) {
+      console.error("Error:", error);
+      this.$swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error || "Something went wrong",
+      });
     },
   },
 

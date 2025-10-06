@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="internalDialog" max-width="800px" @input="onDialogChange">
+  <v-dialog v-model="internalDialog" max-width="800px">
     <v-card>
       <v-card-title>
         <span class="headline">Extend Booking</span>
