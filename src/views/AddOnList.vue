@@ -15,9 +15,9 @@
               dense
               hide-details
               outlined
-              class="mr-4"
               @input="onSearchInput"
               @keyup.enter="fetchAddons"
+              class="rounded-lg mr-2"
             />
             <v-btn
               depressed

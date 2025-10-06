@@ -1,54 +1,55 @@
 <template>
   <v-container>
     <!-- Header -->
-    <v-card flat class="mb-4">
-      <v-row align="center">
-        <!-- Title -->
-        <v-col cols="12" md="3">
-          <div class="text-h6 font-weight-bold">
-            Vehicle Fleet ({{ totalVehicles }})
-          </div>
-        </v-col>
 
-        <!-- Controls -->
-        <v-col cols="12" md="9">
-          <v-row dense class="justify-end">
-            <!-- Search -->
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="searchQuery"
-                append-icon="mdi-magnify"
-                placeholder="Search id, vehicle number & model name..."
-                dense
-                outlined
-                hide-details
-              />
-            </v-col>
+    <v-row align="center" class="mb-4">
+      <!-- Title -->
+      <v-col cols="12" md="3">
+        <div class="text-h6 font-weight-bold">
+          Vehicle Fleet ({{ totalVehicles }})
+        </div>
+      </v-col>
 
-            <!-- Status Filter -->
-            <v-col cols="12" md="4">
-              <v-select
-                v-model="selectedStatus"
-                :items="statusOptions"
-                label="Status"
-                outlined
-                dense
-                hide-details
-                @change="loadVehicles"
-              />
-            </v-col>
+      <!-- Controls -->
+      <v-col cols="12" md="9">
+        <v-row dense class="justify-end">
+          <!-- Search -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchQuery"
+              append-icon="mdi-magnify"
+              placeholder="Search id, vehicle number & model name..."
+              dense
+              outlined
+              hide-details
+              class="rounded-lg"
+            />
+          </v-col>
 
-            <!-- Add Button -->
-            <v-col cols="12" md="2">
-              <v-btn @click="openDialog" rounded color="primary" dark block>
-                <v-icon left>mdi-plus</v-icon>
-                Add
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-card>
+          <!-- Status Filter -->
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="selectedStatus"
+              :items="statusOptions"
+              label="Status"
+              outlined
+              dense
+              hide-details
+              @change="loadVehicles"
+              class="rounded-lg"
+            />
+          </v-col>
+
+          <!-- Add Button -->
+          <v-col cols="12" md="2">
+            <v-btn @click="openDialog" rounded color="primary" depressed block>
+              <v-icon left>mdi-plus</v-icon>
+              Add
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
 
     <!-- Vehicles Table with Pagination Style -->
     <v-card class="rounded-lg my-4" outlined :loading="isLoading">

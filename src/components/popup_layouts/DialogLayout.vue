@@ -8,8 +8,8 @@
         <v-sheet>
           <v-container>
             <div class="d-flex justify-space-between">
-              <div class="my-auto"><slot name="title" /></div>
-              <v-btn icon color="primary" @click="menu = !menu"
+              <div class="text-h6 my-auto"><slot name="title" /></div>
+              <v-btn icon @click="menu = !menu"
                 ><v-icon>mdi-close</v-icon></v-btn
               >
             </div>

@@ -9,7 +9,7 @@
       <!-- Header: Models Count + Location Filter -->
       <v-row align="center" justify="space-between">
         <v-col cols="12" md="6">
-          <div class="text-caption-1 font-weight-bold">
+          <div class="text-h6 font-weight-bold">
             Vehicle Models ({{ models.length }})
           </div>
         </v-col>
@@ -25,6 +25,7 @@
             hide-details="auto"
             outlined
             @change="loadModels"
+            class="rounded-lg"
           />
         </v-col>
       </v-row>
@@ -38,7 +39,7 @@
           sm="6"
           md="4"
         >
-          <v-card class="mx-auto" rounded="lg" outlined hover height="100%">
+          <v-card class="mx-auto hover" rounded="lg" outlined height="100%">
             <v-img
               :src="vehicle.image_url"
               height="220"
@@ -185,6 +186,8 @@
                 <v-btn
                   text
                   small
+                  rounded
+                  depressed
                   color="primary"
                   @click="viewVehicleDetails(vehicle)"
                 >
@@ -193,6 +196,8 @@
                 <v-spacer></v-spacer>
                 <v-btn
                   small
+                  rounded
+                  depressed
                   color="success"
                   :disabled="
                     vehicle.available_vehicle_count === 0 ||
@@ -315,3 +320,15 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.hover {
+  transition: all 0.3s ease;
+}
+
+.hover:hover {
+  border-color: rgba(160, 160, 158, 0.748);
+  box-shadow: 0 6px 18px rgba(116, 109, 109, 0.12);
+  transform: translateY(-3px);
+}
+</style>

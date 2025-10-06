@@ -1,140 +1,266 @@
 <template>
-  <v-card>
-    <!-- Header -->
-    <v-toolbar flat dense color="white">
-      <v-toolbar-title class="text-h6">Payment Details</v-toolbar-title>
-    </v-toolbar>
+  <div class="my-4">
+    <v-row dense>
+      <!-- LEFT PANEL -->
+      <v-col cols="12" md="3">
+        <v-chip
+          :color="payment.status === 'captured' ? 'green' : 'orange'"
+          dark
+          small
+          class="my-2"
+        >
+          {{ payment.status }}
+        </v-chip>
 
-    <v-container>
-      <v-row>
-        <!-- Status & Net Paid -->
-        <v-col cols="12" md="3">
-          <v-chip color="success" dark small>{{ payment.status }}</v-chip>
-          <div class="mt-2 font-weight-bold text-h6">₹{{ payment.amount }}</div>
+        <div class="mt-2 text-h5 font-weight-bold">₹{{ payment.amount }}</div>
 
-          <div class="mt-1">
-            Refunded - ₹{{ totalRefunded }}
-            <v-btn small rounded depressed text @click="activeTab = 'refunds'"
-              >view</v-btn
-            >
-          </div>
-          <div>
-            Credit Note - ₹{{ totalCreditNotes }}
-            <v-btn
-              small
-              rounded
-              depressed
-              text
-              @click="activeTab = 'credit_notes'"
-              >view</v-btn
-            >
-          </div>
+        <v-card outlined class="my-4 pa-2 rounded-lg">
+          <v-row dense>
+            <v-col cols="12">
+              <div
+                class="d-flex justify-space-between align-center text-subtitle-2"
+              >
+                <span>Refunded:</span>
+                <span>₹{{ totalRefunded }}</span>
+                <v-btn small rounded text color="primary" @click="activeTab = 1"
+                  >View</v-btn
+                >
+              </div>
+            </v-col>
+            <v-col cols="12">
+              <div
+                class="d-flex justify-space-between align-center text-subtitle-2"
+              >
+                <span>Credit Note:</span>
+                <span>₹{{ totalCreditNotes }}</span>
+                <v-btn small text rounded color="primary" @click="activeTab = 2"
+                  >View</v-btn
+                >
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
 
-          <v-sheet color="green lighten-4" class="pa-2 mt-4 text-center">
-            <div class="caption">Net Paid</div>
-            <div class="text-h6 font-weight-bold">₹{{ netPaid }}</div>
-          </v-sheet>
-        </v-col>
+        <v-card
+          color="green lighten-5"
+          class="pa-3 my-4 text-center rounded-lg"
+          outlined
+        >
+          <div class="caption font-weight-medium">Net Paid</div>
+          <div class="text-h6 font-weight-bold">₹{{ netPaid }}</div>
+        </v-card>
+      </v-col>
 
-        <!-- Overview Details -->
-        <v-col cols="12" md="9">
-          <v-tabs v-model="activeTab" background-color="transparent" grow>
-            <v-tab>Overview</v-tab>
-            <v-tab>Refunds</v-tab>
-            <v-tab>Credit Notes</v-tab>
-          </v-tabs>
+      <!-- RIGHT PANEL -->
+      <v-col cols="12" md="9">
+        <v-tabs v-model="activeTab" background-color="transparent" grow>
+          <v-tab class="font-weight-bold">Overview</v-tab>
+          <v-tab class="font-weight-bold">Refunds</v-tab>
+          <v-tab class="font-weight-bold">Credit Notes</v-tab>
+        </v-tabs>
 
-          <v-tabs-items v-model="activeTab">
-            <v-tab-item>
-              <v-list dense>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title
-                      ><strong>Payment ID:</strong>
-                      {{ payment.provider_payment_id }}</v-list-item-title
-                    >
-                    <v-list-item-subtitle
-                      ><strong>Order ID:</strong>
-                      {{ payment.order_id }}</v-list-item-subtitle
-                    >
-                  </v-list-item-content>
-                </v-list-item>
+        <v-tabs-items v-model="activeTab">
+          <!-- Overview -->
+          <v-tab-item>
+            <v-card outlined class="rounded-lg my-4 pa-4">
+              <div class="text-subtitle-2 font-weight-medium">
+                Payment ID: {{ payment.provider_payment_id || "N/A" }}
+              </div>
+              <div class="text-subtitle-2 font-weight-medium">
+                Order ID: {{ payment.order_id || "N/A" }}
+              </div>
 
-                <v-list-item>
-                  <v-list-item-content>
-                    <div>
-                      <strong>Amount Paid:</strong> ₹{{ payment.amount }}
-                    </div>
-                    <div>
-                      <strong>Mode:</strong> {{ payment.method.toUpperCase() }}
-                    </div>
-                    <div><strong>Status:</strong> {{ payment.status }}</div>
-                    <div>
-                      <strong>Date:</strong>
-                      {{ formatDate(payment.created_at) }}
-                    </div>
-                    <div>
-                      <strong>Refunded Amount:</strong> ₹{{ totalRefunded }}
-                    </div>
-                    <div>
-                      <strong>Gateway Ref:</strong>
-                      {{ payment.vpa || payment.contact || "—" }}
-                    </div>
-                    <div>
-                      <strong>Fee:</strong> ₹{{ parseFloat(payment.fee) / 100 }}
-                    </div>
-                    <div>
-                      <strong>Note:</strong> Paid via
-                      {{ payment.method.toUpperCase() }}
-                    </div>
-                    <div>
-                      <strong>Receipt Link:</strong>
-                      <a
-                        :href="
-                          'https://yourdomain.com/receipts/' +
-                          payment.provider_payment_id
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold mt-4"
+              >
+                <span>Amount Paid</span>
+                <span>₹{{ payment.amount || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Mode</span>
+                <span>{{ payment.method.toUpperCase() || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Status</span>
+                <span>{{ payment.status || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Date</span>
+                <span>{{ formatDate(payment.created_at) || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Refunded Amount</span>
+                <span>₹{{ totalRefunded }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Gateway Ref</span>
+                <span>{{ payment.vpa || payment.contact || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Fee</span>
+                <span>₹{{ parseFloat(payment.fee) / 100 || "N/A" }}</span>
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Note</span>
+                <span
+                  >Paid via {{ payment.method.toUpperCase() || "N/A" }}</span
+                >
+              </div>
+
+              <div
+                class="d-flex align-center justify-space-between text-subtitle-1 font-weight-bold"
+              >
+                <span>Receipt Link</span>
+
+                <a
+                  text
+                  small
+                  color="primary"
+                  class="text-decoration-none"
+                  :href="
+                    'https://yourdomain.com/receipts/' +
+                    payment.provider_payment_id
+                  "
+                  target="_blank"
+                >
+                  View Receipt<v-icon small color="primary" class="ml-1"
+                    >mdi-open-in-new</v-icon
+                  >
+                </a>
+              </div>
+            </v-card>
+          </v-tab-item>
+
+          <!-- Refunds -->
+          <v-tab-item>
+            <v-card outlined class="rounded-lg my-4">
+              <v-simple-table dense>
+                <thead>
+                  <tr>
+                    <th class="text-left">Refund ID</th>
+                    <th class="text-left">Gateway</th>
+                    <th class="text-left">Amount</th>
+                    <th class="text-left">Reason</th>
+                    <th class="text-left">Status</th>
+                    <th class="text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="item in payment.refund_data"
+                    :key="item.internal_refund_id"
+                  >
+                    <td>{{ item.internal_refund_id || "N/A" }}</td>
+                    <td>{{ item.gateway_provider || "N/A" }}</td>
+                    <td>₹{{ item.amount || 0 }}</td>
+                    <td>{{ item.reason || "-" }}</td>
+                    <td>
+                      <v-chip
+                        small
+                        :color="
+                          item.status === 'success'
+                            ? 'green lighten-4'
+                            : item.status === 'failed'
+                            ? 'red lighten-4'
+                            : 'grey lighten-4'
                         "
-                        target="_blank"
+                        class="font-weight-medium"
                       >
-                        View Receipt
-                      </a>
-                    </div>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-tab-item>
+                        {{ item.status }}
+                      </v-chip>
+                    </td>
+                    <td>{{ formatDate(item.created_at) }}</td>
+                  </tr>
+                  <tr
+                    v-if="!payment.refund_data || !payment.refund_data.length"
+                  >
+                    <td colspan="6" class="text-center grey--text py-4">
+                      No refund records found
+                    </td>
+                  </tr>
+                </tbody>
+              </v-simple-table>
+            </v-card>
+          </v-tab-item>
 
-            <v-tab-item>
-              <v-data-table
-                :headers="refundHeaders"
-                :items="payment.refund_data"
-                dense
-                class="elevation-1"
-              >
-                <template v-slot:[`item.amount`]="{ item }">
-                  ₹{{ item.amount }}
-                </template>
-                <template v-slot:[`item.created_at`]="{ item }">
-                  {{ formatDate(item.created_at) }}
-                </template>
-              </v-data-table>
-            </v-tab-item>
+          <!-- Credit Notes -->
+          <v-tab-item>
+            <v-card outlined class="rounded-lg my-4">
+              <v-simple-table dense>
+                <thead>
+                  <tr>
+                    <th class="text-left">Note ID</th>
+                    <th class="text-left">Amount</th>
+                    <th class="text-left">Used</th>
+                    <th class="text-left">Status</th>
+                    <th class="text-left">Issued On</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="item in payment.credit_note_data"
+                    :key="item.credit_note_id"
+                  >
+                    <td>{{ item.credit_note_id || "N/A" }}</td>
+                    <td>₹{{ item.original_amount || 0 }}</td>
+                    <td>₹{{ item.used_amount || 0 }}</td>
+                    <td>
+                      <v-chip
+                        small
+                        :color="
+                          item.status === 'active'
+                            ? 'green lighten-4'
+                            : item.status === 'used'
+                            ? 'blue lighten-4'
+                            : 'grey lighten-4'
+                        "
+                        class="font-weight-medium"
+                      >
+                        {{ item.status }}
+                      </v-chip>
+                    </td>
+                    <td>{{ formatDate(item.issued_on) }}</td>
+                  </tr>
 
-            <v-tab-item>
-              <v-data-table
-                :headers="creditNoteHeaders"
-                :items="payment.credit_note_data"
-                dense
-                class="elevation-1"
-              >
-                <template v-slot:no-data> No credit notes issued. </template>
-              </v-data-table>
-            </v-tab-item>
-          </v-tabs-items>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+                  <tr
+                    v-if="
+                      !payment.credit_note_data ||
+                      !payment.credit_note_data.length
+                    "
+                  >
+                    <td colspan="5" class="text-center grey--text py-4">
+                      No credit notes issued.
+                    </td>
+                  </tr>
+                </tbody>
+              </v-simple-table>
+            </v-card>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -149,21 +275,6 @@ export default {
   data() {
     return {
       activeTab: 0,
-      refundHeaders: [
-        { text: "Refund ID", value: "internal_refund_id" },
-        { text: "Gateway", value: "gateway_provider" },
-        { text: "Amount", value: "amount" },
-        { text: "Reason", value: "reason" },
-        { text: "Status", value: "status" },
-        { text: "Date", value: "created_at" },
-      ],
-      creditNoteHeaders: [
-        { text: "Note ID", value: "credit_note_id" },
-        { text: "Amount", value: "original_amount" },
-        { text: "Used", value: "used_amount" },
-        { text: "Status", value: "status" },
-        { text: "Issued On", value: "issued_on" },
-      ],
     };
   },
   computed: {

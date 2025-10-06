@@ -22,6 +22,7 @@
                 dense
                 outlined
                 hide-details
+                class="rounded-lg"
               />
             </v-col>
 
@@ -35,6 +36,7 @@
                 dense
                 hide-details
                 @change="loadModels"
+                class="rounded-lg"
               />
             </v-col>
 
@@ -48,6 +50,7 @@
                 dense
                 hide-details
                 @change="loadModels"
+                class="rounded-lg"
               />
             </v-col>
 

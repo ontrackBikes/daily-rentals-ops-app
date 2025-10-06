@@ -1,16 +1,28 @@
 <template>
   <v-container>
     <!-- Header Row -->
-
-    <!-- Header Row -->
-    <v-row align="center" class="my-2" dense>
+    <v-row align="center" class="mb-4">
       <!-- Title -->
-      <v-col cols="12" md="3" class="d-flex align-center mb-2 mb-md-0">
+      <v-col cols="12" md="2" class="d-flex align-center">
         <div class="text-h6 font-weight-bold">Bookings ({{ total }})</div>
       </v-col>
 
+      <!-- Search Field -->
+      <v-col cols="12" md="5">
+        <v-text-field
+          v-model="searchQuery"
+          append-icon="mdi-magnify"
+          placeholder="Search by name, phone, reg. no., model, location..."
+          dense
+          outlined
+          hide-details
+          @keyup.enter="fetchBookings"
+          class="rounded-lg"
+        />
+      </v-col>
+
       <!-- Filter & Sort -->
-      <v-col cols="12" md="9" class="d-flex flex-wrap align-center justify-end">
+      <v-col cols="12" md="5" class="d-flex align-center justify-end">
         <!-- Source Type -->
         <v-select
           v-model="selectedSourceType"
@@ -19,7 +31,7 @@
           outlined
           dense
           hide-details
-          class="mr-2 mb-2 flex-grow-1 flex-md-grow-0"
+          class="mr-2 rounded-lg"
           @change="fetchBookings"
         />
 
@@ -31,30 +43,17 @@
           outlined
           dense
           hide-details
-          class="mr-2 mb-2 flex-grow-1 flex-md-grow-0"
+          class="rounded-lg"
           @change="fetchBookings"
         />
+      </v-col>
 
-        <!-- Add Booking Button -->
-        <!-- <v-btn color="primary" dark class="mb-2" to="/create-booking">
+      <!-- Add Booking Button -->
+      <!-- <v-btn color="primary" dark class="mb-2" to="/create-booking">
           <v-icon left>mdi-plus</v-icon>
           Add Booking
         </v-btn> -->
-      </v-col>
     </v-row>
-
-    <div>
-      <v-text-field
-        v-model="searchQuery"
-        append-icon="mdi-magnify"
-        placeholder="Search by name, phone, reg. no., model, location..."
-        dense
-        outlined
-        hide-details
-        class="w-100"
-        @keyup.enter="fetchBookings"
-      />
-    </div>
 
     <!-- Table -->
     <v-card class="rounded-lg my-4" outlined :loading="loading">
@@ -88,6 +87,7 @@
               <v-btn
                 small
                 outlined
+                rounded
                 color="primary"
                 @click="viewBooking(booking.booking_id)"
               >

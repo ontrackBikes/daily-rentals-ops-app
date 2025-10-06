@@ -191,7 +191,12 @@
               <p class="text--secondary mb-4">
                 Please try again or contact support
               </p>
-              <v-btn color="primary" @click="loadModel(model_id)" depressed>
+              <v-btn
+                rounded
+                color="primary"
+                @click="loadModel(model_id)"
+                depressed
+              >
                 Retry
               </v-btn>
             </div>
@@ -271,9 +276,10 @@
           <v-btn
             large
             block
+            rounded
+            depressed
             color="primary"
-            class="rounded-xl text-capitalize my-4"
-            elevation="2"
+            class="text-capitalize my-4"
             :disabled="!form.location"
             @click="goToCustomerDetails()"
           >

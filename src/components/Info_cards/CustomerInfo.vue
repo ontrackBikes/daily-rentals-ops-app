@@ -1,51 +1,59 @@
 <template>
-  <v-card class="pa-4 rounded-lg elevation-2" :loading="loading">
+  <v-card class="pa-4 rounded-lg elevation-2" outlined :loading="loading">
     <!-- Header -->
-    <div class="text-h6 font-weight-bold mb-2">
-      {{ localCustomer?.display_name || "Customer" }}
+
+    <div class="d-flex justify-space-between align-center mb-3">
+      <div>
+        <div class="text-h6 font-weight-bold">
+          {{ localCustomer?.display_name || "Customer" }}
+        </div>
+        <div class="text-subtitle-2 grey--text">
+          Joined: {{ formatDate(localCustomer?.created_at) }}
+        </div>
+      </div>
     </div>
 
-    <!-- Basic Info -->
-    <div class="text-body-2 mb-2">
-      <v-icon small class="mr-1">mdi-phone</v-icon>
-      {{ localCustomer?.user_data?.phone || "N/A" }}
+    <!-- Contact Details -->
+    <div class="d-flex align-center mb-2">
+      <v-icon small color="primary" class="mr-2">mdi-phone</v-icon>
+      <span class="text-subtitle-2 font-weight-bold">
+        {{ localCustomer?.user_data?.phone || "N/A" }}
+      </span>
     </div>
 
-    <div class="text-body-2 mb-2">
-      <v-icon small class="mr-1">mdi-email</v-icon>
-      {{ localCustomer?.email || "N/A" }}
+    <div class="d-flex align-center mb-2">
+      <v-icon small color="primary" class="mr-2">mdi-email</v-icon>
+      <span class="text-subtitle-2 font-weight-bold">
+        {{ localCustomer?.email || "N/A" }}
+      </span>
     </div>
 
-    <div class="text-body-2 mb-2">
-      <v-icon small class="mr-1">mdi-home</v-icon>
-      {{ localCustomer?.address || "No address available" }}
+    <div class="d-flex align-start">
+      <v-icon small color="primary" class="mr-2 mt-1">mdi-home</v-icon>
+      <span class="text-subtitle-2 font-weight-bold">
+        {{ localCustomer?.address || "No address available" }}
+      </span>
     </div>
 
-    <!-- Status & Verification -->
-    <div class="text-body-2 d-flex align-center mb-1">
+    <!-- Status Chips -->
+    <div class="mt-4">
       <v-chip
         :color="localCustomer?.status === 'active' ? 'green' : 'grey'"
         small
+        outlined
         class="mr-2"
-        text-color="white"
       >
-        {{ localCustomer?.status }}
+        {{ localCustomer?.status || "unknown" }}
       </v-chip>
       <v-chip
         :color="
           localCustomer?.verification_status === 'verified' ? 'blue' : 'orange'
         "
         small
-        text-color="white"
+        outlined
       >
-        {{ localCustomer?.verification_status }}
+        {{ localCustomer?.verification_status || "unverified" }}
       </v-chip>
-    </div>
-
-    <!-- Created At -->
-    <div class="text-caption grey--text">
-      Joined:
-      {{ formatDate(localCustomer?.created_at) }}
     </div>
   </v-card>
 </template>

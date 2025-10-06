@@ -7,7 +7,7 @@
       </v-col>
 
       <!-- Search Field -->
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="5">
         <v-text-field
           v-model="searchQuery"
           append-icon="mdi-magnify"
@@ -17,11 +17,12 @@
           hide-details
           @input="onSearchInput"
           @keyup.enter="fetchOrders"
+          class="rounded-lg"
         />
       </v-col>
 
       <!-- Filter & Sort -->
-      <v-col cols="12" md="6" class="d-flex align-center justify-end">
+      <v-col cols="12" md="5" class="d-flex align-center justify-end">
         <v-select
           v-model="selectedBalanceFilter"
           :items="orderBalanceOptions"
@@ -29,7 +30,7 @@
           outlined
           dense
           hide-details
-          class="mr-2"
+          class="mr-2 rounded-lg"
           @change="fetchOrders"
         />
         <v-select
@@ -39,7 +40,7 @@
           outlined
           dense
           hide-details
-          class="mr-2"
+          class="rounded-lg"
           @change="fetchOrders"
         />
 

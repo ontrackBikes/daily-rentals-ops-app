@@ -18,6 +18,7 @@
             hide-details
             @input="onSearchInput"
             @keyup.enter="fetchCustomers"
+            class="rounded-lg"
           />
         </v-col>
 
@@ -30,7 +31,7 @@
             outlined
             dense
             hide-details
-            class="mr-2"
+            class="rounded-lg mr-2"
             @change="fetchCustomers"
           />
 

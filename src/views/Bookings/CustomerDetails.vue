@@ -129,7 +129,7 @@
 
             <v-divider class="my-4"></v-divider>
             <div class="subtitle-1 font-weight-bold">Payment Summary</div>
-            <v-card-text>
+            <div>
               <div class="d-flex justify-space-between align-center mb-3">
                 <span class="text-subtitle-2">Subscription Plan</span>
                 <span class="font-weight-bold">{{ subscription }}</span>
@@ -165,17 +165,17 @@
 
               <v-btn
                 color="primary"
-                large
+                depressed
                 block
+                large
                 rounded
                 :disabled="!formValid || previewLoading"
                 :loading="previewLoading"
                 @click="previewBooking"
-                class="py-6"
               >
                 Preview & Confirm
               </v-btn>
-            </v-card-text>
+            </div>
           </v-card>
         </v-col>
       </v-row>
@@ -187,129 +187,149 @@
     </v-overlay>
 
     <!-- Booking Preview Dialog -->
-    <v-dialog v-model="previewDialog" max-width="800px">
+    <v-dialog v-model="previewDialog" max-width="600px">
       <v-card>
-        <v-card-title class="headline"> Booking Preview </v-card-title>
-
-        <v-card-text>
-          <div v-if="previewError" class="mb-4">
-            <v-alert type="error" dense text>
-              {{ previewError }}
-            </v-alert>
+        <v-container>
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Booking Preview</div>
+            <v-btn icon @click="previewDialog === false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </div>
 
-          <div v-if="!bookingPreview && !previewError" class="text-center pa-8">
-            <v-progress-circular indeterminate />
-            <div class="mt-2">Loading preview...</div>
-          </div>
-
-          <div v-if="bookingPreview">
-            <div class="mb-3">
-              <strong>Plan:</strong>
-              {{
-                bookingPreview?.modelDetails?.plan_name ||
-                bookingPreview?.modelDetails?.plan_type
-              }}
+          <div class="mt-4">
+            <div v-if="previewError" class="mb-4">
+              <v-alert type="error" dense text>
+                {{ previewError }}
+              </v-alert>
             </div>
 
-            <div class="mb-3">
-              <strong>Dates:</strong>
-              {{
-                bookingPreview?.bookingDates?.start_date | moment("DD/MM/YYYY")
-              }}
-              →
-              {{
-                bookingPreview?.bookingDates?.end_date | moment("DD/MM/YYYY")
-              }}
-              <span class="grey--text text--darken-1"
-                >({{ bookingPreview?.bookingDates?.plan_type }})</span
-              >
-            </div>
-
-            <v-divider class="my-3"></v-divider>
-
-            <div>
-              <strong>Items</strong>
-              <v-simple-table class="mt-2">
-                <thead>
-                  <tr>
-                    <th class="text-left">Item</th>
-                    <th class="text-left">Qty</th>
-                    <th class="text-right">Unit</th>
-                    <th class="text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(li, idx) in bookingPreview?.lineItems || []"
-                    :key="idx"
-                  >
-                    <td>{{ li.product_name }}</td>
-                    <td>{{ li.quantity }}</td>
-                    <td class="text-right">
-                      ₹{{ formatAmount(li.unit_final_price) }}
-                    </td>
-                    <td class="text-right">
-                      ₹{{ formatAmount(li.net_total || li.gross_total) }}
-                    </td>
-                  </tr>
-                </tbody>
-              </v-simple-table>
-            </div>
-
-            <v-divider class="my-3"></v-divider>
-
-            <div class="d-flex justify-space-between">
-              <span>Plan Rate</span>
-              <span
-                >₹{{
-                  formatAmount(bookingPreview?.pricingBreakdown?.planRate)
-                }}</span
-              >
-            </div>
-            <div class="d-flex justify-space-between">
-              <span>Add-on Total</span>
-              <span
-                >₹{{
-                  formatAmount(bookingPreview?.pricingBreakdown?.addonTotal)
-                }}</span
-              >
-            </div>
             <div
-              class="d-flex justify-space-between font-weight-bold text-h6 mt-2"
+              v-if="!bookingPreview && !previewError"
+              class="text-center pa-8"
             >
-              <span>Total Payable</span>
-              <span
-                >₹{{
-                  formatAmount(bookingPreview?.pricingBreakdown?.totalPayable)
-                }}</span
-              >
+              <v-progress-circular indeterminate />
+              <div class="mt-2">Loading preview...</div>
             </div>
 
-            <div class="mt-4">
-              <small class="grey--text">
-                Model: {{ bookingPreview?.modelDetails?.model_name }} • Plan:
+            <div v-if="bookingPreview">
+              <div class="mb-3">
+                <strong>Plan:</strong>
                 {{
                   bookingPreview?.modelDetails?.plan_name ||
                   bookingPreview?.modelDetails?.plan_type
                 }}
-              </small>
+              </div>
+
+              <div class="my-2">
+                <strong>Dates:</strong>
+                {{
+                  bookingPreview?.bookingDates?.start_date
+                    | moment("DD/MM/YYYY")
+                }}
+                →
+                {{
+                  bookingPreview?.bookingDates?.end_date | moment("DD/MM/YYYY")
+                }}
+                <span class="grey--text text--darken-1"
+                  >({{ bookingPreview?.bookingDates?.plan_type }})</span
+                >
+              </div>
+
+              <v-divider class="my-3"></v-divider>
+
+              <div>
+                <strong>Items</strong>
+                <v-card outlined class="rounded-lg my-4">
+                  <v-simple-table class="mt-2">
+                    <thead>
+                      <tr>
+                        <th class="text-left">Item</th>
+                        <th class="text-left">Qty</th>
+                        <th class="text-right">Unit</th>
+                        <th class="text-right">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="(li, idx) in bookingPreview?.lineItems || []"
+                        :key="idx"
+                      >
+                        <td>{{ li.product_name }}</td>
+                        <td>{{ li.quantity }}</td>
+                        <td class="text-right">
+                          ₹{{ formatAmount(li.unit_final_price) }}
+                        </td>
+                        <td class="text-right">
+                          ₹{{ formatAmount(li.net_total || li.gross_total) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-simple-table>
+                </v-card>
+              </div>
+
+              <v-divider class="my-3"></v-divider>
+
+              <div
+                class="d-flex justify-space-between text-subtitle-2 font-weight-bold"
+              >
+                <span>Plan Rate</span>
+                <span
+                  >₹{{
+                    formatAmount(bookingPreview?.pricingBreakdown?.planRate)
+                  }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-space-between text-subtitle-2 font-weight-bold"
+              >
+                <span>Add-on Total</span>
+                <span
+                  >₹{{
+                    formatAmount(bookingPreview?.pricingBreakdown?.addonTotal)
+                  }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-space-between text-subtitle-1 font-weight-bold text-h6 mt-2"
+              >
+                <span>Total Payable</span>
+                <span
+                  >₹{{
+                    formatAmount(bookingPreview?.pricingBreakdown?.totalPayable)
+                  }}</span
+                >
+              </div>
+
+              <!-- <div class="mt-4">
+                <small class="grey--text">
+                  Model: {{ bookingPreview?.modelDetails?.model_name }} • Plan:
+                  {{
+                    bookingPreview?.modelDetails?.plan_name ||
+                    bookingPreview?.modelDetails?.plan_type
+                  }}
+                </small>
+              </div> -->
             </div>
           </div>
-        </v-card-text>
 
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="closePreview">Cancel</v-btn>
-          <v-btn
-            color="primary"
-            :disabled="!bookingPreview || confirmLoading"
-            :loading="confirmLoading"
-            @click="confirmBookingFromPreview"
-          >
-            Confirm & Create Booking
-          </v-btn>
-        </v-card-actions>
+          <div class="text-right mt-6">
+            <v-btn text rounded depressed @click="closePreview" class="mr-2"
+              >Cancel</v-btn
+            >
+            <v-btn
+              color="primary"
+              rounded
+              depressed
+              :disabled="!bookingPreview || confirmLoading"
+              :loading="confirmLoading"
+              @click="confirmBookingFromPreview"
+            >
+              Confirm & Create Booking
+            </v-btn>
+          </div>
+        </v-container>
       </v-card>
     </v-dialog>
 
