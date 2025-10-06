@@ -192,7 +192,7 @@
         <v-container>
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">Booking Preview</div>
-            <v-btn icon @click="previewDialog === false">
+            <v-btn icon @click="closePreview()">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
