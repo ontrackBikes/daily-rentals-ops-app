@@ -25,22 +25,28 @@
         />
 
         <!-- Images -->
-        <label class="text-subtitle-2 mt-3">
-          Booking Images (Min 4 required)
-        </label>
+        <div class="my-4">
+          <label class="text-subtitle-2 mt-3">
+            Booking Images <span class="error--text">*</span> (Min 4 required)
+          </label>
+        </div>
         <v-row dense>
           <v-col v-for="(img, index) in endImages" :key="index" cols="6" sm="3">
-            <v-img
-              :src="img.preview || img.image_url"
-              aspect-ratio="1"
-              class="rounded-lg elevation-1"
-              contain
-            />
-            <div
-              class="text-caption mt-1 text-center grey--text text--darken-1"
-            >
-              {{ img.type || "drop" }}
-            </div>
+            <v-card class="rounded-lg pa-0" outlined>
+              <!-- Image filling full card -->
+              <v-img
+                :src="img.preview || img.image_url"
+                height="100px"
+                class="align-end"
+                cover
+              >
+                <div
+                  class="pa-2 text-caption font-weight-medium black--text text-uppercase"
+                >
+                  {{ img.type || "drop" }}
+                </div>
+              </v-img>
+            </v-card>
           </v-col>
 
           <!-- Add Image -->

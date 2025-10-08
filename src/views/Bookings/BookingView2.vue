@@ -103,19 +103,24 @@
               </div>
               <v-divider
                 class="my-2"
-                v-if="booking.status != 'cancelled'"
+                v-if="
+                  booking.status != 'cancelled' && booking.status != 'completed'
+                "
               ></v-divider>
 
               <!-- Upcoming → Show Start Booking -->
               <div
-                v-if="booking.status === 'upcoming'"
-                class="d-flex justify-end my-2"
+                v-if="
+                  booking.status === 'upcoming' || booking.status === 'created'
+                "
+                class="my-2"
               >
                 <v-btn
                   color="warning"
                   rounded
                   depressed
-                  class="mr-2"
+                  block
+                  class="my-2"
                   @click="openCancelBookingDialog = true"
                   >Cancel Booking</v-btn
                 >
@@ -123,6 +128,7 @@
                   color="primary"
                   rounded
                   depressed
+                  block
                   @click="openStartBookingDialog = true"
                   >Start Booking</v-btn
                 >
@@ -264,7 +270,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-dialog v-model="openStartBookingDialog" max-width="700px">
+    <v-dialog v-model="openStartBookingDialog" max-width="500px">
       <v-card :loading="loading">
         <v-container>
           <div class="d-flex justify-space-between align-center">
@@ -287,9 +293,11 @@
               hide-details
             />
 
-            <label class="text-subtitle-2 mt-3">
-              Booking Images (Min 4 required)
-            </label>
+            <div class="my-4">
+              <label class="text-subtitle-2">
+                Booking Images <span class="red--text">*</span> (Min 4 required)
+              </label>
+            </div>
             <v-row dense>
               <v-col
                 v-for="(img, index) in startImages"
@@ -297,18 +305,22 @@
                 cols="6"
                 sm="3"
               >
-                <v-img
-                  :src="img.preview || img.image_url"
-                  aspect-ratio="1"
-                  class="rounded-lg elevation-1"
-                  contain
-                />
-                <div
-                  class="text-caption mt-1 text-center grey--text text--darken-1"
-                >
-                  {{ img.type || "pickup" }}
-                </div>
-                <v-btn
+                <v-card class="rounded-lg pa-0" outlined>
+                  <!-- Image filling full card -->
+                  <v-img
+                    :src="img.preview || img.image_url"
+                    height="100px"
+                    class="align-end"
+                    cover
+                  >
+                    <div
+                      class="pa-2 text-caption font-weight-medium black--text text-uppercase"
+                    >
+                      {{ img.type || "pickup" }}
+                    </div>
+                  </v-img>
+                </v-card>
+                <!-- <v-btn
                   small
                   rounded
                   depressed
@@ -317,7 +329,7 @@
                   @click="removeImage('start', index)"
                 >
                   Remove
-                </v-btn>
+                </v-btn> -->
               </v-col>
 
               <v-col cols="6" sm="3">
@@ -360,10 +372,10 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="openEndBookingDialog" max-width="700px">
+    <v-dialog v-model="openEndBookingDialog" max-width="500px">
       <v-card :loading="loading">
         <v-container>
-          Header
+          <!-- Header -->
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">End Booking</div>
             <v-btn icon @click="closeEndBookingDialog">
@@ -373,7 +385,7 @@
 
           <v-form ref="endFormRef" v-model="endFormValid" class="my-4">
             <label class="text-subtitle-2">
-              Odometer Reading <span class="red--text">*</span>
+              Odometer Reading <span class="error--text">*</span>
             </label>
             <v-text-field
               v-model="endForm.odometer"
@@ -384,9 +396,12 @@
               hide-details
             />
 
-            <label class="text-subtitle-2 mt-3">
-              Booking Images (Min 4 required)
-            </label>
+            <div class="my-4">
+              <label class="text-subtitle-2 mt-3">
+                Booking Images <span class="error--text">*</span> (Min 4
+                required)
+              </label>
+            </div>
             <v-row dense>
               <v-col
                 v-for="(img, index) in endImages"
@@ -394,17 +409,22 @@
                 cols="6"
                 sm="3"
               >
-                <v-img
-                  :src="img.preview || img.image_url"
-                  aspect-ratio="1"
-                  class="rounded-lg elevation-1"
-                  contain
-                />
-                <div
-                  class="text-caption mt-1 text-center grey--text text--darken-1"
-                >
-                  {{ img.type || "drop" }}
-                </div>
+                <v-card class="rounded-lg pa-0" outlined>
+                  <!-- Image filling full card -->
+                  <v-img
+                    :src="img.preview || img.image_url"
+                    height="100px"
+                    class="align-end"
+                    cover
+                  >
+                    <div
+                      class="pa-2 text-caption font-weight-medium black--text text-uppercase"
+                    >
+                      {{ img.type || "pickup" }}
+                    </div>
+                  </v-img>
+                </v-card>
+
                 <!-- <v-btn
                   small
                   color="red"
@@ -459,20 +479,26 @@
       v-if="booking_id"
       v-model="openExtendDialog"
       :booking_id="booking_id"
+      :model_id="booking.model_id"
       @confirm="handleConfirm"
       @error="showError"
     />
 
-    <v-dialog v-model="openExchangeDialog" max-width="500px">
-      <v-card>
+    <v-dialog v-model="openExchangeDialog" max-width="600px">
+      <v-card flat>
         <v-container>
-          <!-- Header -->
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="text-h6 font-weight-bold">Exchange Vehicle</div>
+            <v-btn icon @click="openExchangeDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
           <exchange-viewer :booking_id="booking_id" />
         </v-container>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="openCancelBookingDialog" max-width="600px">
+    <v-dialog v-model="openCancelBookingDialog" max-width="500px">
       <v-card :loading="loading">
         <v-container>
           <!-- Header -->
@@ -482,20 +508,27 @@
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
+
           <!-- Cancel Form -->
           <v-form ref="cancelFormRef" v-model="cancelFormValid" class="my-4">
             <!-- Fee Applicable -->
-            <label class="text-subtitle-2">Cancellation Fee Applicable *</label>
+            <label class="text-subtitle-2"
+              >Cancellation Fee Applicable
+              <span class="error--text">*</span></label
+            >
             <v-radio-group
               v-model="cancelForm.cancellation_fee_applicable"
               row
+              dense
               :rules="[rules.required]"
             >
               <v-radio label="Yes" :value="true"></v-radio>
               <v-radio label="No" :value="false"></v-radio>
             </v-radio-group>
             <!-- Reason -->
-            <label class="text-subtitle-2">Reason *</label>
+            <label class="text-subtitle-2"
+              >Reason <span class="error--text">*</span></label
+            >
             <v-textarea
               v-model="cancelForm.reason"
               outlined
@@ -516,8 +549,7 @@
               >Cancel</v-btn
             >
             <v-btn
-              color="red darken-1"
-              dark
+              color="error"
               rounded
               depressed
               :disabled="!cancelFormValid"
@@ -723,14 +755,14 @@ export default {
           }
         }
 
-        this.$swal.fire({
-          icon: "success",
-          title: "Images uploaded successfully!",
-          text: `${files.length} image(s) uploaded`,
-          showConfirmButton: false,
-          timer: 1000,
-          timerProgressBar: true,
-        });
+        // this.$swal.fire({
+        //   icon: "success",
+        //   title: "Images uploaded successfully!",
+        //   text: `${files.length} image(s) uploaded`,
+        //   showConfirmButton: false,
+        //   timer: 1000,
+        //   timerProgressBar: true,
+        // });
       } catch (err) {
         console.error("Upload failed:", err);
         this.$swal.fire({

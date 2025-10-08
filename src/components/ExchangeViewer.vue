@@ -1,11 +1,11 @@
 <template>
-  <v-container>
-    <div class="d-flex justify-space-between align-center mb-2">
+  <div>
+    <!-- <div class="d-flex justify-space-between align-center mb-2">
       <div class="text-h6 font-weight-bold">Exchange Vehicle</div>
       <v-btn icon @click="$emit('close-modal')">
         <v-icon>mdi-close</v-icon>
       </v-btn>
-    </div>
+    </div> -->
     <!-- Step 1: Select New Model -->
     <div v-if="step === 1">
       <select-model v-model="newModelSelected"></select-model>
@@ -14,17 +14,19 @@
         {{ errorMessage }}
       </div>
 
-      <v-btn
-        class="mt-4"
-        color="primary"
-        :loading="loading"
-        :disabled="!newModelSelected"
-        @click="checkExchange"
-        rounded
-        depressed
-      >
-        Check Exchange
-      </v-btn>
+      <div class="text-right">
+        <v-btn
+          class="mt-4"
+          color="primary"
+          :loading="loading"
+          :disabled="!newModelSelected"
+          @click="checkExchange"
+          rounded
+          depressed
+        >
+          Check Exchange
+        </v-btn>
+      </div>
     </div>
 
     <!-- Step 2: Show Exchange Preview -->
@@ -35,55 +37,53 @@
         class="mb-4"
       ></v-skeleton-loader>
 
-      <div v-else>
+      <div v-else class="my-2">
         <!-- Available Vehicles -->
-        <v-card
-          class="mb-4"
-          outlined
-          v-if="exchangeData.availableVehiclesForExchange?.length"
-        >
-          <v-card-title>Select a Vehicle</v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="selectedVehicleId"
-              :items="exchangeData.availableVehiclesForExchange"
-              item-value="vehicle_id"
-              item-text="registration_number"
-              label="Select a Vehicle"
-              outlined
-              dense
-            ></v-select>
-          </v-card-text>
-        </v-card>
+        <div v-if="exchangeData.availableVehiclesForExchange?.length">
+          <h4 class="my-2">Select a Vehicle</h4>
+          <v-select
+            v-model="selectedVehicleId"
+            :items="exchangeData.availableVehiclesForExchange"
+            item-value="vehicle_id"
+            item-text="registration_number"
+            placeholder="Select a Vehicle"
+            outlined
+            dense
+            hide-details="auto"
+          ></v-select>
+        </div>
 
-        <v-card v-else class="mb-4" outlined>
-          <v-container>
-            <div class="error--text">No vehicle available for exchange.</div>
-          </v-container>
-        </v-card>
+        <div v-else class="error--text my-4 d-flex align-center">
+          <v-icon color="red" size="18" class="mr-1">mdi-close-circle</v-icon>
+          <h5>No vehicle available for exchange.</h5>
+        </div>
 
         <!-- Summary Message -->
-        <v-alert type="success" variant="outlined" class="mb-4">
+        <v-alert type="success" variant="tonal" class="my-4">
           {{ exchangeData.summary.message }}
         </v-alert>
 
         <!-- Price Difference -->
-        <v-card class="mb-4" outlined>
-          <v-card-title>Price Difference</v-card-title>
-          <v-card-text
-            :class="{
-              'text-red-600': exchangeData.priceDifference < 0,
-              'text-green-600': exchangeData.priceDifference > 0,
-            }"
+        <div>
+          <v-card flat class="pa-2 grey lighten-2"
+            ><div class="d-flex align-center justify-space-between">
+              <h3>Price Difference</h3>
+              <h3
+                :class="{
+                  'text-red-600': exchangeData.priceDifference < 0,
+                  'text-green-600': exchangeData.priceDifference > 0,
+                }"
+              >
+                ₹{{ exchangeData.priceDifference }}
+              </h3>
+            </div></v-card
           >
-            ₹{{ exchangeData.priceDifference }}
-          </v-card-text>
-        </v-card>
+        </div>
 
         <!-- New Booking Line Items -->
-        <v-card class="mb-4" outlined>
-          <v-card-title>New Booking Line Items</v-card-title>
-          <v-card-text>
+        <div class="my-4">
+          <h4 class="my-2">New Booking Line Items</h4>
+          <v-card outlined>
             <v-simple-table dense>
               <thead>
                 <tr>
@@ -105,63 +105,84 @@
                 </tr>
               </tbody>
             </v-simple-table>
-          </v-card-text>
-        </v-card>
+          </v-card>
+        </div>
 
         <!-- Booking Details -->
-        <v-card class="mb-4" outlined>
-          <v-card-title>Booking Details</v-card-title>
-          <v-card-text>
-            <p>
-              <strong>Current:</strong>
-              {{ exchangeData.currentBooking.start_date }} →
-              {{ exchangeData.currentBooking.end_date }}
-            </p>
-            <p>
-              <strong>New:</strong>
-              {{ exchangeData.newBookingDetails.start_date }} →
-              {{ exchangeData.newBookingDetails.end_date }}
-            </p>
-          </v-card-text>
-        </v-card>
+        <div class="my-4">
+          <h4 class="my-2">Booking Details</h4>
+          <v-card outlined class="pa-4">
+            <v-simple-table dense>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Current</strong></td>
+                  <td>
+                    {{ formatDate(exchangeData.currentBooking.start_date) }}
+                  </td>
+                  <td>
+                    {{ formatDate(exchangeData.currentBooking.end_date) }}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>New</strong></td>
+                  <td>
+                    {{ formatDate(exchangeData.newBookingDetails.start_date) }}
+                  </td>
+                  <td>
+                    {{ formatDate(exchangeData.newBookingDetails.end_date) }}
+                  </td>
+                </tr>
+              </tbody>
+            </v-simple-table>
+          </v-card>
+        </div>
 
         <!-- Summary -->
-        <v-card class="mb-4" outlined>
-          <v-card-title>Summary</v-card-title>
-          <v-card-text>
-            <p>
-              <strong>Refund Amount:</strong> ₹{{
-                exchangeData.summary.refundAmount
-              }}
-            </p>
-            <p>
-              <strong>Additional Payment:</strong> ₹{{
-                exchangeData.summary.additionalPayment
-              }}
-            </p>
-          </v-card-text>
-          <v-card-action>
-            <v-btn color="grey" rounded @click="step = 1">Back</v-btn>
-            <v-btn
-              color="primary"
-              :disabled="!selectedVehicleId"
-              @click="confirmExchange"
-              rounded
-              depressed
-            >
-              Confirm Exchange
-            </v-btn>
-          </v-card-action>
-        </v-card>
+        <div class="my-4">
+          <h4 class="my-2">Summary</h4>
+          <v-card outlined class="pa-4">
+            <div class="d-flex align-center justify-space-between">
+              <h4>Refund Amount:</h4>
+              <h4>₹{{ exchangeData.summary.refundAmount }}</h4>
+            </div>
+            <div class="d-flex align-center justify-space-between">
+              <h4>Additional Payment:</h4>
+              <h4>₹{{ exchangeData.summary.additionalPayment }}</h4>
+            </div>
+          </v-card>
+        </div>
+
+        <div class="mt-4 text-right">
+          <v-btn color="grey" class="mr-2" rounded depressed @click="step = 1"
+            >Back</v-btn
+          >
+          <v-btn
+            color="primary"
+            :disabled="!selectedVehicleId"
+            @click="confirmExchange"
+            rounded
+            depressed
+          >
+            Confirm Exchange
+          </v-btn>
+        </div>
       </div>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script>
 import SelectModel from "./SelectModel.vue";
 import api from "@/plugins/axios";
 import Swal from "sweetalert2";
+import moment from "moment";
 
 export default {
   components: { SelectModel },
@@ -252,6 +273,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    formatDate(date) {
+      return moment(date).format("DD MMM YYYY");
     },
   },
 };
