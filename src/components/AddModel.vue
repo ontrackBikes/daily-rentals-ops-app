@@ -9,242 +9,318 @@
       <v-row dense>
         <!-- Model Name -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.model_name"
-            label="Model Name *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Model Name <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.model_name"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Make -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.make"
-            label="Make *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Make <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.make"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Year -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.year"
-            label="Year *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Year <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.year"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Vehicle Type -->
         <v-col cols="12" md="6">
-          <v-select
-            v-model="model.vehicle_type"
-            :items="['ICE', 'EV']"
-            label="Vehicle Type *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Vehicle Type <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-select
+              v-model="model.vehicle_type"
+              :items="['ICE', 'EV']"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Seat Capacity -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.seat_capacity"
-            label="Seat Capacity *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Seat Capacity <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.seat_capacity"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Body Type -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.body_type"
-            label="Body Type *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Body Type <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.body_type"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Start Type -->
         <v-col cols="12" md="6">
-          <v-select
-            v-model="model.start_type"
-            :items="['self', 'kick']"
-            label="Start Type *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Start Type <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-select
+              v-model="model.start_type"
+              :items="['self', 'kick']"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Fuel Capacity (ICE) -->
         <v-col cols="12" md="6" v-if="model.vehicle_type === 'ICE'">
-          <v-text-field
-            v-model="model.fuel_capacity"
-            label="Fuel Capacity (L) *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Fuel Capacity (L) <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.fuel_capacity"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Battery Capacity (EV) -->
         <v-col cols="12" md="6" v-if="model.vehicle_type === 'EV'">
-          <v-text-field
-            v-model="model.battery_capacity"
-            label="Battery Capacity (kWh) *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Battery Capacity (kWh) <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.battery_capacity"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Range KM (EV) -->
         <v-col cols="12" md="6" v-if="model.vehicle_type === 'EV'">
-          <v-text-field
-            v-model="model.range_km"
-            label="Range (KM) *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Range (KM) <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.range_km"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
-        <!-- Rates -->
+        <!-- Base Rates -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.base_hourly_rate"
-            label="Base Hourly Rate *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.base_daily_rate"
-            label="Base Daily Rate *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.base_weekly_rate"
-            label="Base Weekly Rate *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Base Hourly Rate <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.base_hourly_rate"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.base_monthly_rate"
-            label="Base Monthly Rate *"
-            type="number"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Base Daily Rate <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.base_daily_rate"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <label class="text-subtitle-2">
+            Base Weekly Rate <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.base_weekly_rate"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <label class="text-subtitle-2">
+            Base Monthly Rate <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.base_monthly_rate"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Description -->
         <v-col cols="12">
-          <v-textarea
-            v-model="model.description"
-            label="Description *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            rows="3"
-            required
-          />
+          <label class="text-subtitle-2">
+            Description <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-textarea
+              v-model="model.description"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              rows="3"
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Image URL -->
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="model.image_url"
-            label="Image URL (Optional)"
-            dense
-            outlined
-          />
+          <label class="text-subtitle-2">Image URL (Optional)</label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.image_url"
+              outlined
+              dense
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Status -->
         <v-col cols="12" md="6">
-          <v-select
-            v-model="model.status"
-            :items="['active', 'inactive']"
-            label="Status *"
-            :rules="[(v) => !!v || 'Required']"
-            dense
-            outlined
-            required
-          />
+          <label class="text-subtitle-2">
+            Status <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-select
+              v-model="model.status"
+              :items="['active', 'inactive']"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
         </v-col>
 
         <!-- Submit Button -->
-        <v-row justify="end">
-          <v-col cols="auto">
-            <v-btn
-              :loading="loading"
-              color="success"
-              type="submit"
-              :disabled="!valid"
-              rounded
-              depressed
-            >
-              {{ isEditMode ? "Update Model" : "Add Model" }}
-            </v-btn>
-          </v-col>
-        </v-row>
+        <v-col cols="12" class="d-flex justify-end">
+          <v-btn
+            :loading="loading"
+            color="primary"
+            type="submit"
+            :disabled="!valid"
+            rounded
+          >
+            {{ isEditMode ? "Update Model" : "Add Model" }}
+          </v-btn>
+        </v-col>
 
         <!-- Error Alert -->
-        <v-alert
-          v-if="errorMessage"
-          type="error"
-          class="mt-4"
-          dense
-          dismissible
-        >
-          {{ errorMessage }}
-        </v-alert>
+        <v-col cols="12" v-if="errorMessage">
+          <v-alert type="error" dense dismissible>
+            {{ errorMessage }}
+          </v-alert>
+        </v-col>
       </v-row>
     </v-form>
   </v-container>

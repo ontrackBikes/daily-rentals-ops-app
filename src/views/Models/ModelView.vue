@@ -105,98 +105,182 @@
             <v-tabs-items v-model="activeTab">
               <!-- Overview -->
               <v-tab-item>
-                <v-card flat class="pa-4">
-                  <div class="d-flex justify-space-between align-center mb-3">
-                    <!-- <v-btn small color="primary" @click="openOverviewEditor">
-                      Edit
-                    </v-btn> -->
+                <v-card flat class="pa-6 elevation-1">
+                  <!-- Header Row with Optional Actions -->
+                  <div class="d-flex justify-space-between align-center mb-4">
+                    <!-- Uncomment for edit button if needed -->
+                    <!-- <v-btn small color="primary" @click="openOverviewEditor">Edit</v-btn> -->
                   </div>
 
-                  <!-- Specifications -->
-                  <div class="mb-4">
-                    <h4 class="font-weight-bold mb-2">Specifications</h4>
-                    <div><strong>Body Type:</strong> {{ model.body_type }}</div>
-                    <div>
-                      <strong>Vehicle Type:</strong> {{ model.vehicle_type }}
-                    </div>
-                    <div>
-                      <strong>Start Type:</strong> {{ model.start_type }}
-                    </div>
-                    <div v-if="model.fuel_capacity">
-                      <strong>Fuel Capacity:</strong>
-                      {{ model.fuel_capacity }} L
-                    </div>
-                    <div v-if="model.battery_capacity">
-                      <strong>Battery Capacity:</strong>
-                      {{ model.battery_capacity }} kWh
-                    </div>
-                    <div v-if="model.range_km">
-                      <strong>Range:</strong> {{ model.range_km }} km
-                    </div>
-                  </div>
+                  <!-- Specifications Section -->
+                  <section class="mb-6">
+                    <h3 class="font-weight-bold mb-3">Specifications</h3>
+                    <v-row dense>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Body Type:</strong>
+                        {{ model.body_type || "N/A" }}
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Vehicle Type:</strong>
+                        {{ model.vehicle_type || "N/A" }}
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Start Type:</strong>
+                        {{ model.start_type || "N/A" }}
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4" v-if="model.fuel_capacity">
+                        <strong>Fuel Capacity:</strong>
+                        {{ model.fuel_capacity }} L
+                      </v-col>
+                      <v-col
+                        cols="12"
+                        sm="6"
+                        lg="4"
+                        v-if="model.battery_capacity"
+                      >
+                        <strong>Battery Capacity:</strong>
+                        {{ model.battery_capacity }} kWh
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4" v-if="model.range_km">
+                        <strong>Range:</strong> {{ model.range_km }} km
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Year:</strong> {{ model.year || "N/A" }}
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Make:</strong> {{ model.make || "N/A" }}
+                      </v-col>
+                      <v-col cols="12" sm="6" lg="4">
+                        <strong>Seat Capacity:</strong>
+                        {{ model.seat_capacity || "N/A" }}
+                      </v-col>
+                    </v-row>
+                  </section>
 
-                  <!-- Pricing -->
-                  <div class="mb-4">
-                    <h4 class="font-weight-bold mb-2">Pricing</h4>
-                    <v-row>
+                  <section class="mb-6">
+                    <h3 class="font-weight-bold mb-3">Pricing</h3>
+                    <v-row
+                      v-if="
+                        model.vehicle_model_pricing_data &&
+                        model.vehicle_model_pricing_data.length
+                      "
+                      class="gy-4"
+                    >
                       <v-col
                         v-for="plan in model.vehicle_model_pricing_data"
                         :key="plan.pricing_id"
                         cols="12"
                         md="6"
+                        lg="4"
                       >
-                        <v-card outlined class="pa-3 rounded-lg">
-                          <div class="font-weight-bold text-subtitle-1 mb-2">
-                            {{ plan.model_pricing_plan_data.plan_name }}
+                        <v-card outlined class="pa-4 rounded-xl elevation-0">
+                          <div
+                            class="d-flex align-center justify-space-between mb-2"
+                          >
+                            <span class="font-weight-bold">{{
+                              plan.model_pricing_plan_data.plan_name
+                            }}</span>
+                            <v-chip small color="primary" outlined>
+                              {{ plan.model_pricing_plan_data.plan_type }}
+                            </v-chip>
                           </div>
-                          <div>
-                            <strong>Rate:</strong>
+
+                          <div class="my-2">
+                            <span class="font-weight-bold">Price:</span>
                             <span
                               v-if="
                                 plan.offer_rate &&
-                                plan.offer_rate < plan.base_rate
+                                Number(plan.offer_rate) < Number(plan.base_rate)
                               "
                             >
-                              <s>₹{{ plan.base_rate }}</s>
-                              <span class="red--text ml-2"
-                                >₹{{ plan.offer_rate }}</span
+                              <s class="grey--text"
+                                >₹{{
+                                  Number(plan.base_rate).toLocaleString()
+                                }}</s
+                              >
+                              <span class="ml-2 red--text font-weight-bold"
+                                >₹{{
+                                  Number(plan.offer_rate).toLocaleString()
+                                }}</span
+                              >
+                              <v-chip
+                                x-small
+                                color="green lighten-1"
+                                dark
+                                class="ml-2"
+                                >Offer</v-chip
                               >
                             </span>
-                            <span v-else>₹{{ plan.base_rate }}</span>
+                            <span v-else>
+                              <span class="primary--text font-weight-bold"
+                                >₹{{
+                                  Number(plan.base_rate).toLocaleString()
+                                }}</span
+                              >
+                            </span>
                           </div>
-                          <div>
-                            <strong>KM Cap:</strong>
-                            {{ plan.model_pricing_plan_data.km_cap }} km
-                          </div>
-                          <div>
-                            <strong>Extra KM Rate:</strong> ₹{{
-                              plan.model_pricing_plan_data.extra_km_rate
-                            }}
-                          </div>
-                          <div>
-                            <strong>Security Deposit:</strong> ₹{{
-                              plan.model_pricing_plan_data.security_deposit
-                            }}
-                          </div>
-                          <div>
-                            <strong>Late Fee (per hr):</strong> ₹{{
-                              plan.model_pricing_plan_data.late_fee_per_hour
-                            }}
-                          </div>
+
+                          <v-simple-table dense>
+                            <tbody>
+                              <tr>
+                                <td>KM Cap</td>
+                                <td>
+                                  {{ plan.model_pricing_plan_data.km_cap }} km
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>Extra KM</td>
+                                <td>
+                                  ₹{{
+                                    plan.model_pricing_plan_data.extra_km_rate
+                                  }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>Deposit</td>
+                                <td>
+                                  ₹{{
+                                    Number(
+                                      plan.model_pricing_plan_data
+                                        .security_deposit
+                                    ).toLocaleString()
+                                  }}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </v-simple-table>
+                          <!-- Optionally, show "More" for plan description (collapsed by default) -->
                           <div
-                            class="mt-2 grey--text text--darken-1 text-body-2"
+                            v-if="plan.model_pricing_plan_data.plan_description"
+                            class="mt-2 text-caption grey--text text--darken-1"
                           >
-                            {{ plan.model_pricing_plan_data.plan_description }}
+                            <span v-if="!plan.showDesc">
+                              {{
+                                plan.model_pricing_plan_data.plan_description
+                              }}
+                            </span>
                           </div>
                         </v-card>
                       </v-col>
                     </v-row>
-                  </div>
-                  <!-- Description -->
-                  <div>
-                    <h4 class="font-weight-bold mb-2">Description</h4>
-                    <p class="text-body-2">{{ model.description }}</p>
-                  </div>
+                    <v-alert type="info" outlined v-else>
+                      Pricing information is not available for this model.
+                    </v-alert>
+                  </section>
+
+                  <!-- Description Section -->
+                  <section>
+                    <h3 class="font-weight-bold mb-3">Description</h3>
+                    <p class="text-body-2 mb-0" v-if="model.description">
+                      {{ model.description }}
+                    </p>
+                    <p
+                      class="text-body-2 mb-0 grey--text text--darken-1"
+                      v-else
+                    >
+                      No description provided for this vehicle model.
+                    </p>
+                  </section>
                 </v-card>
               </v-tab-item>
 
@@ -208,39 +292,64 @@
                     :items="model.vehicle_data"
                     item-key="vehicle_id"
                     dense
-                    class="elevation-1"
+                    class="elevation-2 rounded-lg"
+                    hide-default-footer
                   >
+                    <!-- Color -->
                     <template v-slot:[`item.color`]="{ item }">
-                      <span
-                        class="d-inline-block rounded-circle mr-2"
-                        :style="{
-                          backgroundColor: item.color,
-                          width: '12px',
-                          height: '12px',
-                        }"
-                      ></span>
-                      {{ item.color || "-" }}
+                      <div class="d-flex align-center">
+                        <v-tooltip bottom v-if="item.color">
+                          <template v-slot:activator="{ on, attrs }">
+                            <span
+                              v-bind="attrs"
+                              v-on="on"
+                              class="d-inline-block rounded-circle mr-2"
+                              :style="{
+                                backgroundColor: item.color,
+                                width: '14px',
+                                height: '14px',
+                                border: '1px solid #ccc',
+                              }"
+                            ></span>
+                          </template>
+                          <span>{{ item.color }}</span>
+                        </v-tooltip>
+                        <span>{{ item.color || "-" }}</span>
+                      </div>
                     </template>
+
+                    <!-- Status -->
                     <template v-slot:[`item.status`]="{ item }">
                       <v-chip
                         small
                         dark
                         :color="getStatusColor(item.status, 'vehicle')"
+                        class="text-capitalize font-weight-medium"
                       >
                         {{ item.status }}
                       </v-chip>
                     </template>
+
+                    <!-- Location -->
                     <template v-slot:[`item.location`]="{ item }">
                       {{ item.location_data?.name || "-" }}
                     </template>
+
+                    <!-- No Data State -->
                     <template v-slot:no-data>
                       <v-alert
                         type="info"
                         border="left"
                         color="blue lighten-5"
-                        class="ma-2"
+                        class="ma-4"
+                        prominent
                       >
-                        No vehicles available for this model.
+                        <div class="d-flex align-center">
+                          <v-icon color="primary" class="mr-2"
+                            >mdi-information</v-icon
+                          >
+                          <span>No vehicles available for this model.</span>
+                        </div>
                       </v-alert>
                     </template>
                   </v-data-table>
@@ -259,23 +368,27 @@
         </v-col>
       </v-row>
 
-      <!-- Full Edit Model Dialog -->
-      <v-dialog v-model="editDialog" max-width="800">
-        <v-card>
-          <v-card-title>Edit Model</v-card-title>
-          <v-card-text>
-            <AddModel
-              :modelId="model.model_id"
-              @model-saved="reloadModel"
-              :editDialog.sync="editDialog"
-            />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn rounded text color="primary" @click="editDialog = false"
-              >Close</v-btn
-            >
-          </v-card-actions>
+      <!-- Edit Model Dialog -->
+      <v-dialog v-model="editDialog" max-width="800px">
+        <v-card :loading="loading">
+          <v-container>
+            <!-- Header -->
+            <div class="d-flex justify-space-between align-center">
+              <div class="text-h6 font-weight-bold">Edit Model</div>
+              <v-btn icon @click="editDialog = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </div>
+
+            <!-- Form Content -->
+            <div class="my-4">
+              <AddModel
+                :modelId="model.model_id"
+                @model-saved="reloadModel"
+                :editDialog.sync="editDialog"
+              />
+            </div>
+          </v-container>
         </v-card>
       </v-dialog>
 

@@ -51,7 +51,7 @@
           </thead>
           <tbody>
             <tr v-for="addon in addons" :key="addon.addon_id">
-              <td>{{ addon.addon_id }}</td>
+              <td>{{ addon.provider_addon_id }}</td>
               <td>{{ addon.addon_name }}</td>
               <td>{{ addon.addon_type }}</td>
               <td>{{ addon.base_price_per_day }}</td>
@@ -60,12 +60,11 @@
               <td>{{ addon.offer_price_per_booking || "-" }}</td>
               <td>{{ addon.total_quantity }}</td>
               <td>
-                <v-icon :color="addon.available ? 'green' : 'red'">
-                  {{
-                    addon.available ? "mdi-check-circle" : "mdi-close-circle"
-                  }}
-                </v-icon>
+                <p :style="{ color: addon.available ? 'green' : 'red' }">
+                  {{ addon.available }}
+                </p>
               </td>
+
               <td>
                 <v-btn
                   small
@@ -100,10 +99,11 @@
       </v-card>
     </div>
 
-    <!-- Combined Add/Edit Addon Dialog -->
+    <!-- Add / Update Addon Dialog -->
     <v-dialog v-model="openAddonDialog" max-width="700px">
       <v-card :loading="loading">
-        <v-container class="px-4">
+        <v-container>
+          <!-- Header -->
           <div class="d-flex justify-space-between align-center">
             <div class="text-h6 font-weight-bold">
               {{ isEditMode ? "Update Addon" : "Add Addon" }}
@@ -114,93 +114,137 @@
           </div>
 
           <!-- Form -->
-          <v-form ref="form" v-model="formValid" class="mt-4">
-            <v-text-field
-              v-model="form.addon_name"
-              label="Addon Name"
-              :rules="[rules.required]"
-              required
-              outlined
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-textarea
-              v-model="form.description"
-              label="Description"
-              outlined
-              rows="2"
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-text-field
-              v-model.number="form.base_price_per_day"
-              label="Base Price / Day"
-              type="number"
-              :rules="[rules.required, rules.positive]"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-text-field
-              v-model.number="form.offer_price_per_day"
-              label="Offer Price / Day"
-              type="number"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-text-field
-              v-model.number="form.base_price_per_booking"
-              label="Base Price / Booking"
-              type="number"
-              :rules="[rules.required, rules.positive]"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-text-field
-              v-model.number="form.offer_price_per_booking"
-              label="Offer Price / Booking"
-              type="number"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-text-field
-              v-model.number="form.total_quantity"
-              label="Total Quantity"
-              type="number"
-              :rules="[rules.required, rules.positive]"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-select
-              v-model="form.addon_type"
-              :items="addonTypes"
-              label="Addon Type"
-              :rules="[rules.required]"
-              outlined
-              dense
-              hide-details="auto"
-              class="mb-3"
-            />
-            <v-switch
-              v-model="form.available"
-              label="Available"
-              color="success"
-              class="mt-3"
-            />
+          <v-form ref="form" v-model="formValid" class="my-4">
+            <!-- Addon Name -->
+            <label class="text-subtitle-2">
+              Addon Name <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model="form.addon_name"
+                :rules="[rules.required]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Description -->
+            <label class="text-subtitle-2">Description</label>
+            <div class="mb-3">
+              <v-textarea
+                v-model="form.description"
+                outlined
+                dense
+                rows="2"
+                hide-details
+              />
+            </div>
+
+            <!-- Base Price / Day -->
+            <label class="text-subtitle-2">
+              Base Price / Day <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.base_price_per_day"
+                type="number"
+                :rules="[rules.required, rules.positive]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Offer Price / Day -->
+            <label class="text-subtitle-2">Offer Price / Day</label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.offer_price_per_day"
+                type="number"
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Base Price / Booking -->
+            <label class="text-subtitle-2">
+              Base Price / Booking <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.base_price_per_booking"
+                type="number"
+                :rules="[rules.required, rules.positive]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Offer Price / Booking -->
+            <label class="text-subtitle-2">Offer Price / Booking</label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.offer_price_per_booking"
+                type="number"
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Total Quantity -->
+            <label class="text-subtitle-2">
+              Total Quantity <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.total_quantity"
+                type="number"
+                :rules="[rules.required, rules.positive]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Addon Type -->
+            <label class="text-subtitle-2">
+              Addon Type <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-select
+                v-model="form.addon_type"
+                :items="addonTypes"
+                :rules="[rules.required]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
+
+            <!-- Availability -->
+            <div class="mt-2">
+              <v-switch
+                v-model="form.available"
+                label="Available"
+                color="success"
+              />
+            </div>
           </v-form>
 
           <!-- Actions -->
-          <div class="d-flex justify-end mt-4">
-            <v-btn text rounded class="mr-2" @click="closeDialog">Cancel</v-btn>
+          <div class="d-flex justify-end my-2">
+            <v-btn text rounded class="mr-2" @click="closeDialog">
+              Cancel
+            </v-btn>
             <v-btn
               color="primary"
               :disabled="!formValid"
