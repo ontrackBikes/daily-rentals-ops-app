@@ -12,7 +12,9 @@
       <!-- Cancel Form -->
       <v-form ref="cancelFormRef" v-model="cancelFormValid" class="my-4">
         <!-- Cancellation Fee -->
-        <label class="text-subtitle-2">Cancellation Fee Applicable *</label>
+        <label class="text-subtitle-2"
+          >Cancellation Fee Applicable <span class="error--text">*</span></label
+        >
         <v-radio-group
           v-model="cancelForm.cancellation_fee_applicable"
           row
@@ -23,7 +25,9 @@
         </v-radio-group>
 
         <!-- Reason -->
-        <label class="text-subtitle-2">Reason *</label>
+        <label class="text-subtitle-2"
+          >Reason <span class="error--text">*</span></label
+        >
         <v-textarea
           v-model="cancelForm.reason"
           outlined
@@ -40,8 +44,7 @@
           >Cancel</v-btn
         >
         <v-btn
-          color="red darken-1"
-          dark
+          color="error"
           :disabled="!cancelFormValid"
           @click="submitCancelBooking"
           rounded

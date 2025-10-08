@@ -19,62 +19,54 @@
         >
           <v-card outlined class="rounded-lg my-2 pa-0">
             <!-- Row  -->
-            <v-expansion-panel-header class="py-3">
-              <v-row no-gutters align="center" class="">
-                <v-col cols="4">
-                  <div class="d-flex align-center">
-                    <!-- <v-icon color="primary" class="mr-2">mdi-car</v-icon> -->
+            <v-expansion-panel-header>
+              <div class="d-flex align-center justify-space-between">
+                <div class="d-flex align-center">
+                  <!-- <v-icon color="primary" class="mr-2">mdi-car</v-icon> -->
 
-                    <v-img
-                      v-if="booking.model_data?.image_url"
-                      :src="booking.model_data?.image_url"
-                      height="50"
-                      width="50"
-                      class="rounded-lg"
-                      contain
-                    ></v-img>
+                  <v-img
+                    v-if="booking.model_data?.image_url"
+                    :src="booking.model_data?.image_url"
+                    height="60"
+                    width="60"
+                    class="rounded-lg mr-4"
+                    contain
+                  ></v-img>
 
-                    <v-icon
-                      v-else
-                      size="48"
-                      color="grey"
-                      class="rounded-lg pa-2"
-                    >
-                      mdi-motorbike
-                    </v-icon>
+                  <v-icon v-else size="48" color="grey" class="rounded-lg mr-4">
+                    mdi-motorbike
+                  </v-icon>
 
-                    <div class="text-truncate">
-                      <div class="subtitle-1 font-weight-medium text-truncate">
-                        #{{ booking.booking_id }} —
-                        {{ booking.model_data?.model_name }}
-                      </div>
-                      <div class="caption grey--text text--darken-1">
-                        Vehicle:
-                        {{ booking.vehicle_data?.registration_number }} •
-                        {{ booking.vehicle_data?.location_data?.name }}
-                      </div>
+                  <div class="text-truncate">
+                    <div class="subtitle-1 font-weight-medium text-truncate">
+                      #{{ booking.booking_id }} —
+                      {{ booking.model_data?.model_name }}
+                    </div>
+                    <div class="caption grey--text text--darken-1">
+                      Vehicle:
+                      {{ booking.vehicle_data?.registration_number }} •
+                      {{ booking.vehicle_data?.location_data?.name }}
                     </div>
                   </div>
-                </v-col>
-                <v-col cols="8" class="text-right">
-                  <div class="d-flex align-top justify-end">
-                    <v-chip
-                      small
-                      :color="getStatusColor(booking.status, 'booking')"
-                      class="mr-4"
-                      outlined
-                    >
-                      {{ booking.status || "N/A" }}
-                    </v-chip>
-                    <div class="text-right">
-                      <h4>₹{{ booking.net_amount }}</h4>
-                      <div class="caption grey--text">
-                        {{ booking.sub_status }}
-                      </div>
+                </div>
+
+                <div class="d-flex align-top justify-end">
+                  <v-chip
+                    small
+                    :color="getStatusColor(booking.status, 'booking')"
+                    class="mr-4"
+                    outlined
+                  >
+                    {{ booking.status || "N/A" }}
+                  </v-chip>
+                  <div class="text-right">
+                    <h4>₹{{ booking.net_amount }}</h4>
+                    <div class="caption grey--text">
+                      {{ booking.sub_status }}
                     </div>
                   </div>
-                </v-col>
-              </v-row>
+                </div>
+              </div>
             </v-expansion-panel-header>
 
             <!-- Expand Content  -->
@@ -227,7 +219,13 @@
                   </v-card>
                 </div>
 
-                <v-divider class="my-4" v-if="booking.status != 'cancelled'" />
+                <v-divider
+                  class="my-4"
+                  v-if="
+                    booking.status != 'cancelled' &&
+                    booking.status != 'completed'
+                  "
+                />
 
                 <v-row align="center" justify="space-between">
                   <v-col cols="12" class="text-right">
@@ -330,7 +328,7 @@
               </div>
 
               <!-- Start Booking  -->
-              <v-dialog v-model="startBookingDialog" max-width="600">
+              <v-dialog v-model="startBookingDialog" max-width="500">
                 <start-booking
                   @refresh-booking="refreshPage"
                   @close-modal="startBookingDialog = false"
@@ -342,6 +340,15 @@
               <v-dialog v-model="exchangeDialog" max-width="500px">
                 <v-card>
                   <v-container>
+                    <div class="d-flex justify-space-between align-center mb-4">
+                      <div class="text-h6 font-weight-bold">
+                        Exchange Booking
+                      </div>
+                      <v-btn icon @click="exchangeDialog = false">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </div>
+
                     <exchange-viewer
                       @exchangeConfirmed="refreshPage"
                       :booking_id="booking.booking_id"
@@ -361,7 +368,7 @@
               </v-dialog>
 
               <!-- End Booking  -->
-              <v-dialog v-model="endBookingDialog" max-width="600">
+              <v-dialog v-model="endBookingDialog" max-width="500">
                 <end-booking
                   @refresh-booking="refreshPage"
                   @close-modal="endBookingDialog = false"
@@ -370,10 +377,10 @@
               </v-dialog>
 
               <!-- Cancel Booking  -->
-              <v-dialog v-model="cancelBookingDialog" max-width="600">
+              <v-dialog v-model="cancelBookingDialog" max-width="500">
                 <cancel-booking
                   @refresh-booking="refreshPage"
-                  @close-modal="startBookingDialog = false"
+                  @close-modal="cancelBookingDialog = false"
                   :booking="booking"
                 ></cancel-booking>
               </v-dialog>

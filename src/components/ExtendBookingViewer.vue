@@ -1,129 +1,136 @@
 <template>
-  <v-dialog v-model="internalDialog" max-width="800px">
+  <v-dialog v-model="internalDialog" max-width="700px">
     <v-card>
-      <v-card-title>
-        <span class="headline">Extend Booking</span>
-      </v-card-title>
-      <v-divider />
+      <v-container>
+        <div class="d-flex justify-space-between align-center">
+          <div class="text-h6 font-weight-bold">Extend Booking</div>
+          <v-btn icon @click="closeDialog">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
 
-      <!-- Loader Overlay -->
-      <v-overlay absolute :value="loading">
-        <v-progress-circular indeterminate color="primary" size="64" />
-      </v-overlay>
+        <!-- Loader Overlay -->
+        <v-overlay absolute :value="loading">
+          <v-progress-circular indeterminate color="primary" size="64" />
+        </v-overlay>
 
-      <v-card-text>
-        <!-- Error -->
-        <v-alert v-if="error" type="error" dense outlined class="mb-4">
-          {{ error }}
-        </v-alert>
+        <div>
+          <!-- Error -->
+          <v-alert v-if="error" type="error" dense outlined class="mb-4">
+            {{ error }}
+          </v-alert>
 
-        <!-- Plans -->
-        <v-form v-if="!loading && !error" ref="extendForm">
-          <h4 class="mt-4 mb-2">Select Your Plan</h4>
-          <v-radio-group v-model="form.pricing_id">
-            <v-row dense>
-              <v-col
-                cols="12"
-                md="6"
-                v-for="item in lineItems"
-                :key="item.pricing_id"
-              >
-                <v-card
-                  outlined
-                  class="cursor-pointer rounded-lg hover-elevate"
-                  :class="{
-                    'border-primary': form.pricing_id === item.pricing_id,
-                  }"
-                  @click="selectPlan(item)"
+          <!-- Plans -->
+          <v-form v-if="!loading && !error" ref="extendForm">
+            <v-radio-group v-model="form.pricing_id" dense>
+              <h4 class="mb-2">Select Your Plan</h4>
+              <v-row dense>
+                <v-col
+                  cols="12"
+                  md="6"
+                  v-for="item in lineItems"
+                  :key="item.pricing_id"
                 >
-                  <v-card-text class="pa-4">
-                    <!-- Radio + Title -->
-                    <div class="d-flex align-center mb-3">
-                      <v-radio
-                        :value="item.pricing_id"
-                        color="primary"
-                        class="mr-3"
-                      />
-                      <div>
-                        <h3 class="subtitle-1 font-weight-bold">
-                          {{ item.model_pricing_plan_data.plan_name }}
-                        </h3>
-                        <p class="caption text--secondary mb-0">
-                          {{ item.model_pricing_plan_data.plan_type }} • ₹{{
-                            item.offer_rate
-                          }}
-                        </p>
+                  <v-card
+                    outlined
+                    class="cursor-pointer rounded-lg hover-elevate"
+                    :class="{
+                      'border-primary': form.pricing_id === item.pricing_id,
+                    }"
+                    @click="selectPlan(item)"
+                  >
+                    <v-card-text class="pa-4">
+                      <!-- Radio + Title -->
+                      <div class="d-flex align-center mb-3">
+                        <v-radio
+                          :value="item.pricing_id"
+                          color="primary"
+                          class="mr-3"
+                        />
+                        <div>
+                          <h3 class="subtitle-1 font-weight-bold">
+                            {{ item.model_pricing_plan_data.plan_name }}
+                          </h3>
+                          <p class="caption text--secondary mb-0">
+                            {{ item.model_pricing_plan_data.plan_type }} • ₹{{
+                              item.offer_rate
+                            }}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <!-- Plan Info -->
-                    <v-divider class="my-3" />
-                    <span class="caption text--secondary">
-                      {{ item.model_pricing_plan_data.plan_description }}
-                    </span>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-radio-group>
-        </v-form>
+                      <!-- Plan Info -->
+                      <v-divider class="my-3" />
+                      <span class="caption text--secondary">
+                        {{ item.model_pricing_plan_data.plan_description }}
+                      </span>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-radio-group>
+          </v-form>
 
-        <!-- Extension Preview -->
-        <v-expand-transition>
-          <div v-if="previewData" class="mt-6">
-            <h4 class="mb-3">Extension Preview</h4>
-            <v-card outlined>
-              <v-list dense>
-                <v-list-item>
-                  <v-list-item-content>Current End Date</v-list-item-content>
-                  <v-list-item-content class="text-right">
-                    {{
-                      formatDate(previewData.currentBooking.current_end_date)
-                    }}
-                  </v-list-item-content>
-                </v-list-item>
+          <!-- Extension Preview -->
+          <v-expand-transition>
+            <div v-if="previewData" class="">
+              <h4 class="mb-3">Extension Preview</h4>
+              <v-card outlined>
+                <v-simple-table dense>
+                  <thead>
+                    <tr>
+                      <th>Current End Date</th>
+                      <th>New End Date</th>
+                      <th>Extension Days</th>
+                      <th>Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="font-weight-bold">
+                        {{
+                          formatDate(
+                            previewData.currentBooking.current_end_date
+                          )
+                        }}
+                      </td>
+                      <td class="font-weight-bold">
+                        {{
+                          formatDate(previewData.extensionDetails.new_end_date)
+                        }}
+                      </td>
+                      <td class="font-weight-bold">
+                        {{ previewData.extensionDetails.extension_days }}
+                      </td>
+                      <td class="font-weight-bold">
+                        ₹{{ previewData.pricingBreakdown.totalExtensionAmount }}
+                      </td>
+                    </tr>
+                    <tr v-if="!previewData">
+                      <td colspan="4" class="text-center">No data found</td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+              </v-card>
+            </div>
+          </v-expand-transition>
+        </div>
 
-                <v-list-item>
-                  <v-list-item-content>New End Date</v-list-item-content>
-                  <v-list-item-content class="text-right">
-                    {{ formatDate(previewData.extensionDetails.new_end_date) }}
-                  </v-list-item-content>
-                </v-list-item>
-
-                <v-list-item>
-                  <v-list-item-content>Extension Days</v-list-item-content>
-                  <v-list-item-content class="text-right">
-                    {{ previewData.extensionDetails.extension_days }}
-                  </v-list-item-content>
-                </v-list-item>
-
-                <v-divider></v-divider>
-
-                <v-list-item>
-                  <v-list-item-content>Total Amount</v-list-item-content>
-                  <v-list-item-content class="text-right font-weight-bold">
-                    ₹{{ previewData.pricingBreakdown.totalExtensionAmount }}
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </div>
-        </v-expand-transition>
-      </v-card-text>
-
-      <v-divider />
-      <v-card-actions>
-        <v-spacer />
-        <v-btn rounded text @click="closeDialog">Cancel</v-btn>
-        <v-btn
-          color="primary"
-          :disabled="!form.pricing_id || !previewData"
-          rounded
-          @click="confirm"
-        >
-          Confirm
-        </v-btn>
-      </v-card-actions>
+        <div class="text-right mt-4">
+          <v-btn rounded depressed class="mr-2" text @click="closeDialog"
+            >Cancel</v-btn
+          >
+          <v-btn
+            color="primary"
+            :disabled="!form.pricing_id || !previewData"
+            rounded
+            depressed
+            @click="confirm"
+          >
+            Confirm
+          </v-btn>
+        </div>
+      </v-container>
     </v-card>
 
     <!-- Snackbar -->
