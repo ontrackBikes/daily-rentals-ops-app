@@ -37,6 +37,7 @@
 
           <v-btn
             rounded
+            depressed
             color="primary"
             dark
             @click="openCreateCustomerDialog = true"

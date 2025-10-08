@@ -56,7 +56,14 @@
 
             <!-- Add Button -->
             <v-col cols="12" md="2">
-              <v-btn rounded @click="openDialog" color="primary" dark block>
+              <v-btn
+                rounded
+                depressed
+                @click="openDialog"
+                color="primary"
+                dark
+                block
+              >
                 <v-icon left>mdi-plus</v-icon>
                 Add
               </v-btn>

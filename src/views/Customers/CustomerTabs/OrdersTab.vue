@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card class="rounded-lg my-4" outlined>
+    <v-card outlined class="rounded-lg">
       <!-- Loading Skeleton -->
       <v-skeleton-loader
         v-if="loading"
@@ -10,67 +10,64 @@
       />
 
       <!-- Table -->
-      <div v-else>
-        <v-simple-table>
-          <thead>
-            <tr>
-              <th class="text-left">Order ID</th>
-              <th class="text-left">Order Balance</th>
-              <th class="text-left">Payment Status</th>
-              <th class="text-left">Order Status</th>
-              <th class="text-left">Created At</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="order in orders" :key="order.order_id">
-              <td>{{ order.internal_order_id }}</td>
-              <td>₹{{ order.order_balance }}</td>
-              <td>
-                <v-chip
-                  :color="
-                    getStatusColor(order.payment_status, 'payment_status')
-                  "
-                  dark
-                  small
-                >
-                  {{ order.payment_status }}
-                </v-chip>
-              </td>
-              <td>{{ order.order_status }}</td>
-              <td>{{ formatDate(order.created_at) }}</td>
-              <td>
-                <v-btn
-                  small
-                  outlined
-                  color="primary"
-                  @click="viewOrder(order.order_id)"
-                >
-                  View
-                </v-btn>
-              </td>
-            </tr>
-            <tr v-if="!orders.length">
-              <td colspan="6" class="text-center grey--text">
-                No orders found.
-              </td>
-            </tr>
-          </tbody>
-        </v-simple-table>
 
-        <v-divider></v-divider>
+      <v-simple-table v-else>
+        <thead>
+          <tr>
+            <th class="text-left">Order ID</th>
+            <th class="text-left">Order Balance</th>
+            <th class="text-left">Payment Status</th>
+            <th class="text-left">Order Status</th>
+            <th class="text-left">Created At</th>
+            <th class="text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="order in orders" :key="order.order_id">
+            <td>{{ order.internal_order_id }}</td>
+            <td>₹{{ order.order_balance }}</td>
+            <td>
+              <v-chip
+                :color="getStatusColor(order.payment_status, 'payment_status')"
+                dark
+                small
+              >
+                {{ order.payment_status }}
+              </v-chip>
+            </td>
+            <td>{{ order.order_status }}</td>
+            <td>{{ formatDate(order.created_at) }}</td>
+            <td>
+              <v-btn
+                small
+                rounded
+                depressed
+                outlined
+                color="primary"
+                @click="viewOrder(order.order_id)"
+              >
+                View
+              </v-btn>
+            </td>
+          </tr>
+          <tr v-if="!orders.length">
+            <td colspan="6" class="text-center grey--text">No orders found.</td>
+          </tr>
+        </tbody>
+      </v-simple-table>
 
-        <!-- Pagination -->
-        <v-card-actions class="justify-center">
-          <v-pagination
-            v-model="page"
-            :length="pageCount"
-            circle
-            total-visible="5"
-            @input="fetchOrders"
-          />
-        </v-card-actions>
-      </div>
+      <v-divider></v-divider>
+
+      <!-- Pagination -->
+      <v-card-actions class="justify-center">
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          circle
+          total-visible="5"
+          @input="fetchOrders"
+        />
+      </v-card-actions>
     </v-card>
   </v-container>
 </template>
