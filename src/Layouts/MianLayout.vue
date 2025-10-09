@@ -264,6 +264,8 @@ export default {
             { title: "Upcoming", route: "/bookings/upcoming" },
             { title: "Cancelled", route: "/bookings/cancelled" },
             { title: "Completed", route: "/bookings/completed" },
+            { title: "Expired", route: "/bookings/expired" },
+            { title: "Due Expiry", route: "/bookings/due-expiry" },
           ],
         },
         { title: "Vehicles", icon: "mdi-motorbike", route: "/vehicles" },

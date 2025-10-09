@@ -46,6 +46,17 @@
           class="rounded-lg"
           @change="fetchBookings"
         />
+        <v-select
+          v-if="$route.params.status === 'due-expiry'"
+          v-model="selectedExpiringDays"
+          :items="expiringDaysOptions"
+          label="Expiring In"
+          outlined
+          dense
+          hide-details
+          class="ml-2 rounded-lg"
+          @change="fetchBookings"
+        />
       </v-col>
 
       <!-- Add Booking Button -->
@@ -138,6 +149,7 @@ export default {
       searchQuery: "",
       selectedSourceType: "",
       selectedSubStatus: null,
+      selectedExpiringDays: null,
       sourceTypeOptions: [
         { text: "All", value: "" },
         { text: "New", value: "new" },
@@ -150,6 +162,12 @@ export default {
         { text: "Ongoing", value: "ongoing" },
         { text: "Expired", value: "expired" },
         { text: "Hold", value: "hold" },
+      ],
+      expiringDaysOptions: [
+        { text: "0 Day", value: 0 },
+        { text: "1 Day", value: 1 },
+        { text: "2 Days", value: 2 },
+        { text: "3 Days", value: 3 },
       ],
     };
   },
@@ -169,6 +187,13 @@ export default {
 
   mounted() {
     this.booking_status = this.$route.params.status || null;
+
+    if (this.booking_status === "expired") {
+      this.selectedSubStatus = "expired";
+    } else if (this.booking_status === "due-expiry") {
+      this.selectedExpiringDays = 1; // 👈 default value
+    }
+
     this.fetchBookings();
   },
 
@@ -178,14 +203,26 @@ export default {
       const offset = (this.page - 1) * this.limit;
 
       try {
+        const routeStatus = this.$route.params.status;
+        const isExpiredRoute = routeStatus === "expired";
+        const isDueExpiryRoute = routeStatus === "due-expiry";
+
         const { data } = await api.get(`/api/bookings`, {
           params: {
             limit: this.limit,
             offset,
             search: this.searchQuery || undefined,
             source_type: this.selectedSourceType,
-            status: this.booking_status,
-            sub_status: this.selectedSubStatus || undefined, // 👈 added
+            status:
+              !isExpiredRoute && !isDueExpiryRoute
+                ? this.booking_status
+                : undefined,
+            sub_status: isExpiredRoute
+              ? this.selectedSubStatus || "expired"
+              : undefined,
+            expiring_days: isDueExpiryRoute
+              ? this.selectedExpiringDays
+              : undefined, // 👈 new
           },
         });
 
@@ -198,7 +235,6 @@ export default {
         this.loading = false;
       }
     },
-
     viewBooking(id) {
       this.$router.push(`/booking/${id}`);
     },

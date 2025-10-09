@@ -40,6 +40,16 @@
           outlined
           dense
           hide-details
+          class="mr-2 rounded-lg"
+          @change="fetchOrders"
+        />
+        <v-select
+          v-model="paymentStatusFilter"
+          :items="paymentStatusOptions"
+          label="Payment Status"
+          outlined
+          dense
+          hide-details
           class="rounded-lg"
           @change="fetchOrders"
         />
@@ -153,6 +163,14 @@ export default {
       pageCount: 1,
       searchQuery: "",
       selectedBalanceFilter: "",
+      paymentStatusFilter: "paid",
+      paymentStatusOptions: [
+        { text: "All", value: "" },
+        { text: "Paid", value: "paid" },
+        { text: "Pending", value: "pending" },
+        { text: "Partially Paid", value: "partial_paid" },
+        { text: "Over Paid", value: "over_paid" },
+      ],
       sortBy: "",
       orderBalanceOptions: [
         { text: "All", value: "" },
@@ -193,6 +211,7 @@ export default {
             offset,
             order_balance: this.selectedBalanceFilter || undefined,
             sort_by: this.sortBy || undefined,
+            payment_status: this.paymentStatusFilter || undefined,
             search: this.searchQuery || undefined,
           },
         });
