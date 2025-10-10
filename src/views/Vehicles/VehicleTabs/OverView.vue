@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container fluid>
     <!-- Loading -->
     <div v-if="isLoading" class="text-center py-12">
       <v-progress-circular indeterminate color="primary" size="48" />
@@ -11,170 +11,221 @@
       <v-row dense>
         <!-- Vehicle Info -->
         <v-col cols="12" md="6">
-          <v-card class="pa-4" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-motorbike</v-icon>
-              <span class="text-h6">Vehicle Details</span>
-            </v-card-title>
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12"
-                  ><strong>Registration:</strong>
-                  {{ localvehicle.registration_number }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Status:</strong>
-                  {{ formatStatus(localvehicle.status) }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Type:</strong> {{ localvehicle.vehicle_type }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Color:</strong>
-                  {{ localvehicle.color || "Not specified" }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Created At:</strong>
-                  {{ formatDate(localvehicle.created_at) }}</v-col
-                >
-              </v-row>
-            </v-card-text>
+          <v-card outlined rounded="lg" height="100%">
+            <v-container>
+              <h3>
+                <v-icon class="mr-2">mdi-motorbike</v-icon>Vehicle Details
+              </h3>
+
+              <div class="my-4">
+                <div class="d-flex justify-space-between">
+                  <span>Registration</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.registration_number || "N/A"
+                  }}</span>
+                </div>
+
+                <div class="d-flex justify-space-between my-2">
+                  <span>Status</span>
+                  <span class="font-weight-bold">{{
+                    formatStatus(localvehicle.status) || "N/A"
+                  }}</span>
+                </div>
+
+                <div class="d-flex justify-space-between my-2">
+                  <span>Type</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle?.model_data?.body_type || "-"
+                  }}</span>
+                </div>
+
+                <div class="d-flex justify-space-between my-2">
+                  <span>Color</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.color || "Not specified"
+                  }}</span>
+                </div>
+
+                <div class="d-flex justify-space-between my-2">
+                  <span>Created At</span>
+                  <span class="font-weight-bold">{{
+                    formatDate(localvehicle.created_at) || "-"
+                  }}</span>
+                </div>
+              </div>
+            </v-container>
           </v-card>
         </v-col>
 
         <!-- Technical Specs -->
         <v-col cols="12" md="6">
-          <v-card class="pa-4" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-tools</v-icon>
-              <span class="text-h6">Technical Information</span>
-            </v-card-title>
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12"
-                  ><strong>Chassis Number:</strong>
-                  {{ localvehicle.chassis_number }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Engine Number:</strong>
-                  {{ localvehicle.engine_number }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Odometer:</strong>
-                  {{ localvehicle.current_km }} km</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Next Service @:</strong>
-                  {{ localvehicle.next_service_km }} km</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Service Date:</strong>
-                  {{ localvehicle.next_service_date }}</v-col
-                >
-              </v-row>
-            </v-card-text>
+          <v-card outlined rounded="lg" height="100%">
+            <v-container>
+              <h3>
+                <v-icon class="mr-2">mdi-tools</v-icon>Technical Information
+              </h3>
+
+              <div class="my-4">
+                <div class="d-flex justify-space-between my-2">
+                  <span>Chassis Number</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.chassis_number || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Engine Number</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.engine_number || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Odometer</span>
+                  <span class="font-weight-bold"
+                    >{{ localvehicle.current_km || "-" }} km</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Next Service </span>
+                  <span class="font-weight-bold"
+                    >{{ localvehicle.next_service_km || "-" }} km</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Service Date</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.next_service_date || "-"
+                  }}</span>
+                </div>
+              </div>
+            </v-container>
           </v-card>
         </v-col>
 
         <!-- Model Info -->
         <v-col cols="12" md="6" v-if="localvehicle.model_data">
-          <v-card class="pa-4" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-car-cog</v-icon>
-              <span class="text-h6">Model Specification</span>
-            </v-card-title>
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12"
-                  ><strong>Make:</strong>
-                  {{ localvehicle.model_data.make }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Model:</strong>
-                  {{ localvehicle.model_data.model_name }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Year:</strong>
-                  {{ localvehicle.model_data.year }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Engine Type:</strong>
-                  {{ localvehicle.model_data.engine_type }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Fuel Capacity:</strong>
-                  {{ localvehicle.model_data.fuel_capacity }} L</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Seats:</strong>
-                  {{ localvehicle.model_data.seat_capacity }}</v-col
-                >
-              </v-row>
-            </v-card-text>
+          <v-card outlined rounded="lg" height="100%">
+            <v-container>
+              <h3><v-icon class="mr-2">mdi-cogs</v-icon>Model Specification</h3>
+
+              <div class="my-4">
+                <div class="d-flex justify-space-between my-2">
+                  <span>Make</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.model_data.make || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Model</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.model_data.model_name || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Year</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.model_data.year || "-"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Engine Type</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.model_data.engine_type || "-"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Fuel Capacity</span>
+                  <span class="font-weight-bold"
+                    >{{ localvehicle.model_data.fuel_capacity || "-" }} L</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Seats</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.model_data.seat_capacity || "-"
+                  }}</span>
+                </div>
+              </div>
+            </v-container>
           </v-card>
         </v-col>
 
         <!-- Pricing Info -->
-        <v-col cols="12" md="6" v-if="localvehicle.model_data">
-          <v-card class="pa-4" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-cash</v-icon>
-              <span class="text-h6">Rental Pricing</span>
-            </v-card-title>
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12"
-                  ><strong>Hourly:</strong> ₹{{
-                    localvehicle.model_data.base_hourly_rate
-                  }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Daily:</strong> ₹{{
-                    localvehicle.model_data.base_daily_rate
-                  }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Weekly:</strong> ₹{{
-                    localvehicle.model_data.base_weekly_rate
-                  }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Monthly:</strong> ₹{{
-                    localvehicle.model_data.base_monthly_rate
-                  }}</v-col
-                >
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-col>
+        <!-- <v-col cols="12" md="6" v-if="localvehicle.model_data">
+          <v-card outlined rounded="lg" height="100%">
+            <v-container>
+              <h3><v-icon class="mr-2">mdi-cash</v-icon>Rental Pricing</h3>
 
-        <!-- Location -->
-        <v-col cols="12" md="12" v-if="localvehicle.location_data">
-          <v-card class="pa-4" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-map-marker</v-icon>
-              <span class="text-h6">Location Details</span>
-            </v-card-title>
-            <v-card-text>
-              <v-row dense>
-                <v-col cols="12"
-                  ><strong>Hub:</strong>
-                  {{ localvehicle.location_data.name }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Address:</strong>
-                  {{ localvehicle.location_data.address }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Contact:</strong>
-                  {{ localvehicle.location_data.contact_number }}</v-col
-                >
-                <v-col cols="12"
-                  ><strong>Pincode:</strong>
-                  {{ localvehicle.location_data.pincode }}</v-col
-                >
-              </v-row>
-            </v-card-text>
+              <div class="my-4">
+                <div class="d-flex justify-space-between my-2">
+                  <span>Hourly</span>
+                  <span class="font-weight-bold"
+                    >₹{{
+                      localvehicle.model_data.base_hourly_rate || "-"
+                    }}</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Daily</span>
+                  <span class="font-weight-bold"
+                    >₹{{ localvehicle.model_data.base_daily_rate || "-" }}</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Weekly</span>
+                  <span class="font-weight-bold"
+                    >₹{{
+                      localvehicle.model_data.base_weekly_rate || "-"
+                    }}</span
+                  >
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Monthly</span>
+                  <span class="font-weight-bold"
+                    >₹{{
+                      localvehicle.model_data.base_monthly_rate || "-"
+                    }}</span
+                  >
+                </div>
+              </div>
+            </v-container>
+          </v-card>
+        </v-col> -->
+
+        <!-- Location Info -->
+        <v-col cols="12" md="6" v-if="localvehicle.location_data">
+          <v-card outlined rounded="lg" height="100%">
+            <v-container>
+              <h3>
+                <v-icon class="mr-2">mdi-map-marker</v-icon>Location Details
+              </h3>
+
+              <div class="my-4">
+                <div class="d-flex justify-space-between my-2">
+                  <span>Hub</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.location_data.name || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Address</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.location_data.address || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Contact</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.location_data.contact_number || "N/A"
+                  }}</span>
+                </div>
+                <div class="d-flex justify-space-between my-2">
+                  <span>Pincode</span>
+                  <span class="font-weight-bold">{{
+                    localvehicle.location_data.pincode || "N/A"
+                  }}</span>
+                </div>
+              </div>
+            </v-container>
           </v-card>
         </v-col>
       </v-row>
