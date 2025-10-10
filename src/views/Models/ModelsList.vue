@@ -131,20 +131,19 @@
     <!-- Add Model Dialog -->
     <v-dialog
       v-model="AddModelDialog"
-      max-width="800px"
+      max-width="600px"
       scrollable
       @input="onDialogToggle"
     >
       <v-card>
-        <v-card-title class="headline">
-          Add Model
-          <v-spacer></v-spacer>
+        <div class="d-flex justify-space-between align-center pa-2 px-3">
+          <div class="text-h6 font-weight-bold">Add Model</div>
           <v-btn icon @click="closeDialog">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-        </v-card-title>
+        </div>
 
-        <v-card-text>
+        <v-card-text class="pa-0">
           <AddModel
             ref="addModelRef"
             @model-added="onModelAdded"

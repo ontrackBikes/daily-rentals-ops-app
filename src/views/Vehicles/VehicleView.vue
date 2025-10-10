@@ -14,8 +14,22 @@
         <!-- LEFT: Vehicle Summary -->
         <v-col cols="12" md="3">
           <v-card outlined class="pa-4 rounded-lg">
-            <!-- Status -->
-            <div class="d-flex align-center justify-space-between">
+            <!-- Header: Registration & Status -->
+            <div class="d-flex align-center justify-space-between mb-2">
+              <div class="d-flex align-center">
+                <h4 class="mb-0 mr-2">
+                  {{ vehicle.registration_number }}
+                </h4>
+                <v-btn
+                  icon
+                  small
+                  class="ma-0"
+                  @click="editVehicleDialog = true"
+                >
+                  <v-icon small color="primary">mdi-pencil</v-icon>
+                </v-btn>
+              </div>
+
               <v-chip
                 small
                 :color="statusColor"
@@ -26,29 +40,10 @@
               </v-chip>
             </div>
 
-            <!-- Registration Number -->
-            <div
-              class="text-subtitle-1 font-weight-bold mt-2 d-flex align-center"
-            >
-              {{ vehicle.registration_number }}
-              <v-btn
-                icon
-                rounded
-                small
-                @click="editVehicleDialog = true"
-                class="ml-2"
-              >
-                <v-icon small color="primary">mdi-pencil</v-icon>
-              </v-btn>
-            </div>
-
             <!-- Location -->
-            <div
-              class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
-              v-if="vehicle.location_data"
-            >
-              <v-icon small color="indigo" class="mr-1">mdi-map-marker</v-icon>
-              {{ vehicle.location_data.name }}
+            <div v-if="vehicle.location_data" class="d-flex align-center mb-2">
+              <v-icon color="indigo" small class="mr-1">mdi-map-marker</v-icon>
+              <span>{{ vehicle.location_data.name }}</span>
             </div>
 
             <!-- Google Maps Button -->
@@ -59,53 +54,48 @@
               rel="noopener"
               small
               rounded
-              depressed
               outlined
-              class="mt-2"
+              color="primary"
+              class="mb-2"
             >
-              <v-icon left small>mdi-directions</v-icon> Directions
+              <v-icon left small>mdi-directions</v-icon>
+              Directions
             </v-btn>
 
             <!-- Created Date -->
-            <div
-              class="grey--text text--darken-1 text-body-2 mt-2 d-flex align-center"
-            >
-              <v-icon small color="indigo" class="mr-1">mdi-calendar</v-icon>
-              Created: {{ formatDate(vehicle.created_at) }}
+            <div class="d-flex align-center mb-1">
+              <v-icon color="indigo" small class="mr-1">mdi-calendar</v-icon>
+              <span>Created: {{ formatDate(vehicle.created_at) }}</span>
             </div>
 
             <!-- Vehicle Type -->
-            <div
-              class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
-            >
-              <v-icon small color="indigo" class="mr-1">mdi-motorbike</v-icon>
-              {{ vehicle.vehicle_type }}
+            <div class="d-flex align-center mb-2">
+              <v-icon color="indigo" small class="mr-1">mdi-motorbike</v-icon>
+              <span
+                >{{ vehicle.model_data.model_name }} ({{
+                  vehicle.model_data.year
+                }})</span
+              >
             </div>
 
-            <!-- Model Info -->
-            <div
-              class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
-              v-if="vehicle.model_data"
-            >
-              <v-icon small color="indigo" class="mr-1">mdi-bike</v-icon>
-              {{ vehicle.model_data.make }}
-              {{ vehicle.model_data.model_name }} ({{
-                vehicle.model_data.year
-              }})
+            <v-divider class="my-3" />
+
+            <!-- KM & Service Details -->
+            <div class="d-flex align-center my-2 justify-space-between">
+              <span>Current KM</span>
+              <span class="font-weight-bold">{{ vehicle.current_km }} km</span>
             </div>
-
-            <!-- KM & Service -->
-            <v-divider class="my-2" />
-
-            <div class="text-body-2">
-              <div><strong>Current KM:</strong> {{ vehicle.current_km }}</div>
-              <div>
-                <strong>Next Service @:</strong>
-                {{ vehicle.next_service_km }} km
-              </div>
-              <div>
-                <strong>Service Date:</strong> {{ vehicle.next_service_date }}
-              </div>
+            <div class="d-flex align-center my-2 justify-space-between">
+              <span>Next Service</span>
+              <span class="font-weight-bold"
+                >{{ vehicle.next_service_km }} km</span
+              >
+            </div>
+            <div class="d-flex align-center my-2 justify-space-between">
+              <span>Service Date</span>
+              <span class="font-weight-bold">{{
+                vehicle.next_service_date
+              }}</span>
             </div>
 
             <!-- Image -->
@@ -118,9 +108,9 @@
                 contain
                 class="mx-auto rounded"
               />
-              <v-icon v-else size="80" color="grey lighten-2"
-                >mdi-motorcycle</v-icon
-              >
+              <v-icon v-else size="80" color="grey lighten-2">
+                mdi-motorcycle
+              </v-icon>
             </div>
           </v-card>
         </v-col>
@@ -163,7 +153,7 @@
     </v-container>
 
     <!-- Edit Vehicle Dialog -->
-    <v-dialog v-model="editVehicleDialog" max-width="700px">
+    <v-dialog v-model="editVehicleDialog" max-width="600px">
       <v-card :loading="loading">
         <v-container>
           <!-- Header -->
@@ -189,6 +179,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-car"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -202,6 +193,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-card-text"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -215,6 +207,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-identifier"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -228,6 +221,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-engine"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -242,6 +236,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-flag"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -256,6 +251,7 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-motorcycle"
+                  hide-details="auto"
                 />
               </v-col>
 
@@ -272,14 +268,19 @@
                   dense
                   :rules="[rules.required]"
                   prepend-inner-icon="mdi-map-marker"
+                  hide-details="auto"
                 />
               </v-col>
             </v-row>
           </v-form>
 
           <!-- Buttons -->
-          <div class="d-flex justify-end my-2">
-            <v-btn text rounded @click="editVehicleDialog = false" class="mr-2"
+          <div class="d-flex justify-end mt-6">
+            <v-btn
+              depressed
+              rounded
+              @click="editVehicleDialog = false"
+              class="mr-2"
               >Cancel</v-btn
             >
             <v-btn
@@ -287,6 +288,7 @@
               :disabled="!formValid || !isVehicleChanged"
               @click="updateVehicle"
               rounded
+              depressed
               >Update</v-btn
             >
           </div>

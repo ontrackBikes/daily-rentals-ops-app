@@ -1,86 +1,73 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container fluid>
     <v-row>
       <v-col cols="12" md="6">
-        <v-card elevation="2">
-          <v-card-title>
-            <v-icon left>mdi-flag</v-icon>
-            Status Management
-          </v-card-title>
-          <v-card-text class="pa-6">
-            <div class="text-body-1 mb-4">
-              Current Status:
-              <v-chip
-                :color="statusColor"
-                text-color="white"
-                small
-                class="ml-2"
-              >
-                {{ formatStatus(vehicle.status) }}
-              </v-chip>
-            </div>
-            <v-btn
-              color="primary"
-              @click="statusDialog = true"
-              outlined
-              rounded
-              depressed
-            >
-              <v-icon left>mdi-pencil</v-icon>
-              Change Status
-            </v-btn>
-          </v-card-text>
-        </v-card>
+        <v-card outlined rounded="lg" @click="statusDialog = true" class="py-2">
+          <v-container
+            ><div class="d-flex align-center justify-space-between">
+              <h4>Change Status</h4>
+              <div>
+                <v-chip
+                  :color="statusColor"
+                  text-color="white"
+                  small
+                  class="ml-2"
+                >
+                  {{ formatStatus(vehicle.status) }}
+                </v-chip>
+                <v-icon>mdi-chevron-right</v-icon>
+              </div>
+            </div></v-container
+          ></v-card
+        >
       </v-col>
     </v-row>
 
     <!-- Status Change Dialog -->
     <v-dialog v-model="statusDialog" max-width="500px" persistent>
       <v-card>
-        <v-card-title class="primary white--text">
-          <v-icon left color="white">mdi-flag</v-icon>
-          Change Vehicle Status
-          <v-spacer></v-spacer>
-          <v-btn icon dark @click="statusDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
+        <v-container>
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Change Vehicle Status</div>
+            <v-btn icon @click="statusDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
 
-        <v-card-text class="pa-6">
-          <div class="text-body-1 mb-4">Select new status for vehicle:</div>
-          <v-radio-group v-model="selectedStatus">
-            <v-radio
-              v-for="option in statusOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
+          <div>
+            <v-radio-group v-model="selectedStatus">
+              <v-radio
+                v-for="option in statusOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+                color="primary"
+              ></v-radio>
+            </v-radio-group>
+          </div>
+
+          <div class="d-flex justify-end my-2">
+            <v-btn
+              text
+              @click="statusDialog = false"
+              :disabled="loading"
+              rounded
+              depressed
+            >
+              Cancel
+            </v-btn>
+            <v-btn
               color="primary"
-            ></v-radio>
-          </v-radio-group>
-        </v-card-text>
-
-        <v-card-actions class="pa-6 pt-0">
-          <v-spacer></v-spacer>
-          <v-btn
-            text
-            @click="statusDialog = false"
-            :disabled="loading"
-            rounded
-            depressed
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="primary"
-            @click="updateVehicleStatus"
-            :loading="loading"
-            :disabled="selectedStatus === vehicle.status"
-            rounded
-            depressed
-          >
-            Update Status
-          </v-btn>
-        </v-card-actions>
+              @click="updateVehicleStatus"
+              :loading="loading"
+              :disabled="selectedStatus === vehicle.status"
+              rounded
+              depressed
+            >
+              Update Status
+            </v-btn>
+          </div>
+        </v-container>
       </v-card>
     </v-dialog>
   </v-container>

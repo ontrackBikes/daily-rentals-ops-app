@@ -34,6 +34,7 @@
                   <v-card
                     outlined
                     class="cursor-pointer rounded-lg hover-elevate"
+                    height="100%"
                     :class="{
                       'border-primary': form.pricing_id === item.pricing_id,
                     }"

@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card class="rounded-lg my-4" outlined>
+    <v-card outlined class="rounded-lg">
       <!-- Loading Skeleton -->
       <v-skeleton-loader
         v-if="loading"
@@ -10,62 +10,59 @@
       ></v-skeleton-loader>
 
       <!-- Table when not loading -->
-      <div v-else>
-        <v-simple-table>
-          <thead>
-            <tr>
-              <th class="text-left">Booking ID</th>
-              <th class="text-left">Reg. Number</th>
-              <th class="text-left">Model</th>
-              <th class="text-left">Customer</th>
-              <th class="text-left">Status</th>
-              <th class="text-left">Created At</th>
-              <th class="text-left">Source</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="booking in vehicleBookings" :key="booking.booking_id">
-              <td>{{ booking.booking_id }}</td>
-              <td>{{ vehicle.registration_number }}</td>
-              <td>{{ vehicle.model_data?.model_name }}</td>
-              <td>
-                {{
-                  booking.order_data?.customer_data?.user_data?.name || "N/A"
-                }}
-              </td>
-              <td>
-                <v-chip
-                  small
-                  :color="getStatusColor(booking.status)"
-                  text-color="white"
-                >
-                  {{ booking.status }}
-                </v-chip>
-              </td>
-              <td>{{ formatDate(booking.created_at) }}</td>
-              <td>{{ booking.source_type || "N/A" }}</td>
-            </tr>
-            <tr v-if="!vehicleBookings.length">
-              <td colspan="8" class="text-center grey--text">
-                No bookings found.
-              </td>
-            </tr>
-          </tbody>
-        </v-simple-table>
 
-        <v-divider></v-divider>
+      <v-simple-table>
+        <thead>
+          <tr>
+            <th class="text-left">Booking ID</th>
+            <th class="text-left">Reg. Number</th>
+            <th class="text-left">Model</th>
+            <th class="text-left">Customer</th>
+            <th class="text-left">Status</th>
+            <th class="text-left">Created At</th>
+            <th class="text-left">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="booking in vehicleBookings" :key="booking.booking_id">
+            <td>{{ booking.booking_id }}</td>
+            <td>{{ vehicle.registration_number }}</td>
+            <td>{{ vehicle.model_data?.model_name }}</td>
+            <td>
+              {{ booking.order_data?.customer_data?.user_data?.name || "N/A" }}
+            </td>
+            <td>
+              <v-chip
+                small
+                :color="getStatusColor(booking.status)"
+                text-color="white"
+              >
+                {{ booking.status }}
+              </v-chip>
+            </td>
+            <td>{{ formatDate(booking.created_at) }}</td>
+            <td>{{ booking.source_type || "N/A" }}</td>
+          </tr>
+          <tr v-if="!vehicleBookings.length">
+            <td colspan="8" class="text-center grey--text">
+              No bookings found.
+            </td>
+          </tr>
+        </tbody>
+      </v-simple-table>
 
-        <!-- Pagination Placeholder -->
-        <v-card-actions class="justify-center">
-          <v-pagination
-            v-model="page"
-            :length="pageCount"
-            circle
-            total-visible="5"
-            @input="fetchBookings"
-          />
-        </v-card-actions>
-      </div>
+      <v-divider></v-divider>
+
+      <!-- Pagination Placeholder -->
+      <v-card-actions class="justify-center">
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          circle
+          total-visible="5"
+          @input="fetchBookings"
+        />
+      </v-card-actions>
     </v-card>
   </v-container>
 </template>
@@ -83,7 +80,7 @@ export default {
       vehicle: null,
       vehicleBookings: [],
       page: 1,
-      limit: 5,
+      limit: 10,
       pageCount: 1,
       vehicle_id: this.$route.params.vehicle_id,
     };

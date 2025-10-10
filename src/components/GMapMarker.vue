@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-4" outlined>
+  <v-card class="pa-4 rounded-lg" outlined>
     <h3 class="text-h6 mb-2">Location Map</h3>
     <div v-if="hasCoordinates" style="height: 400px; width: 100%">
       <GmapMap

@@ -168,12 +168,12 @@
                     >Exchange</v-btn
                   >
                 </v-col>
-                <extend-booking-viewer
+                <!-- <extend-booking-viewer
                   v-model="openExtendDialog"
                   :booking_id="booking_id"
                   @confirm="handleConfirm"
                   @error="showError"
-                />
+                /> -->
               </v-row>
             </v-container>
           </v-card>

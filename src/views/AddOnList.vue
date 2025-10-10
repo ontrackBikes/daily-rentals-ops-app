@@ -45,7 +45,7 @@
               <th class="text-left">Base Price/Booking</th>
               <th class="text-left">Offer Price/Booking</th>
               <th class="text-left">Quantity</th>
-              <th class="text-left">Available</th>
+              <th class="text-left">Status</th>
               <th class="text-left">Actions</th>
             </tr>
           </thead>
@@ -60,9 +60,13 @@
               <td>{{ addon.offer_price_per_booking || "-" }}</td>
               <td>{{ addon.total_quantity }}</td>
               <td>
-                <p :style="{ color: addon.available ? 'green' : 'red' }">
-                  {{ addon.available }}
-                </p>
+                <v-chip
+                  outlined
+                  small
+                  :class="addon.available ? 'success--text' : 'error--text'"
+                >
+                  {{ addon.available ? "Available" : "Not Available" }}
+                </v-chip>
               </td>
 
               <td>
@@ -242,13 +246,14 @@
 
           <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn text rounded class="mr-2" @click="closeDialog">
+            <v-btn text rounded depressed class="mr-2" @click="closeDialog">
               Cancel
             </v-btn>
             <v-btn
               color="primary"
               :disabled="!formValid"
               rounded
+              depressed
               @click="isEditMode ? updateAddon() : createAddon()"
             >
               {{ isEditMode ? "Update" : "Add" }}
