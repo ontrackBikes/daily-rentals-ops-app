@@ -149,7 +149,7 @@ export default {
       searchQuery: "",
       selectedSourceType: "",
       selectedSubStatus: null,
-      selectedExpiringDays: null,
+      selectedExpiringDays: 1,
       sourceTypeOptions: [
         { text: "All", value: "" },
         { text: "New", value: "new" },

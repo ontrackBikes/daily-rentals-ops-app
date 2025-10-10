@@ -56,16 +56,27 @@
               <td>{{ location.address }}</td>
               <td>{{ location.created_at | moment }}</td>
               <td>
-                <v-btn
-                  small
-                  icon
-                  color="primary"
-                  @click="openEditDialog(location)"
-                  class="mr-2"
-                  rounded
-                >
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
+                <div class="d-flex">
+                  <v-btn
+                    small
+                    outlined
+                    color="primary"
+                    rounded
+                    @click="viewLocation(location.location_id)"
+                  >
+                    View
+                  </v-btn>
+                  <v-btn
+                    small
+                    icon
+                    color="primary"
+                    @click="openEditDialog(location)"
+                    class="mr-2"
+                    rounded
+                  >
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                </div>
               </td>
             </tr>
             <tr v-if="!locations.length">
@@ -496,6 +507,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    viewLocation(id) {
+      this.$router.push("/locations/" + id);
     },
   },
 };

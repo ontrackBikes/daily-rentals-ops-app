@@ -5,7 +5,8 @@ import Login from "@/views/Login.vue";
 import Vue from "vue";
 import Router from "vue-router";
 import CustomersList from "@/views/Customers/CustomersList.vue";
-import LocationList from "@/views/LocationList.vue";
+import LocationList from "@/views/Location/LocationList.vue";
+import LocationView from "@/views/Location/LocationView.vue";
 import VehiclesList from "@/views/Vehicles/VehiclesList.vue";
 import CustomerView from "@/views/Customers/CustomerView.vue";
 import OrdersTab from "@/views/Customers/CustomerTabs/OrdersTab.vue";
@@ -169,6 +170,12 @@ const router = new Router({
       ],
     },
 
+    // Location view
+    {
+      path: "/locations/:location_id",
+      name: "Location View",
+      component: LocationView,
+    },
     // Model view with tabs
     {
       path: "/models/:model_id",
