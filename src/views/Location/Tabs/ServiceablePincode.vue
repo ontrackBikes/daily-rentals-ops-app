@@ -90,87 +90,91 @@
         </v-card-title>
 
         <v-card-text>
-          <v-simple-table dense class="no-divider-table">
-            <thead>
-              <tr>
-                <th>Pincode</th>
-                <th>Pickup</th>
-                <th>Pickup Amount</th>
-                <th>Delivery</th>
-                <th>Delivery Amount</th>
-                <th>Active</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in bulkPincodes" :key="index">
-                <td>
-                  <v-text-field
-                    v-model="row.pincode"
-                    dense
-                    outlined
-                    hide-details
-                    placeholder="e.g. 560001"
-                    class="ma-0 pa-0"
-                    :rules="[(v) => !!v || 'Required']"
-                  />
-                </td>
-                <td>
-                  <v-checkbox
-                    v-model="row.is_pickup_serviceable"
-                    dense
-                    hide-details
-                    class="ma-0 pa-0"
-                  />
-                </td>
-                <td>
-                  <v-text-field
-                    v-model.number="row.pickup_amount"
-                    type="number"
-                    dense
-                    outlined
-                    hide-details
-                    min="0"
-                    class="ma-0 pa-0"
-                    :disabled="!row.is_pickup_serviceable"
-                  />
-                </td>
-                <td>
-                  <v-checkbox
-                    v-model="row.is_delivery_serviceable"
-                    dense
-                    hide-details
-                    class="ma-0 pa-0"
-                  />
-                </td>
-                <td>
-                  <v-text-field
-                    v-model.number="row.delivery_amount"
-                    type="number"
-                    dense
-                    outlined
-                    hide-details
-                    min="0"
-                    class="ma-0 pa-0"
-                    :disabled="!row.is_delivery_serviceable"
-                  />
-                </td>
-                <td>
-                  <v-checkbox
-                    v-model="row.is_active"
-                    dense
-                    hide-details
-                    class="ma-0 pa-0"
-                  />
-                </td>
-                <td>
-                  <v-btn icon small color="red" @click="removeRow(index)">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </td>
-              </tr>
-            </tbody>
-          </v-simple-table>
+          <v-data-table
+            :headers="pincodeHeaders"
+            :items="bulkPincodes"
+            item-key="pincode"
+            dense
+            hide-default-footer
+            mobile-breakpoint="0"
+            item-class="row-spacing"
+          >
+            <template v-slot:[`item.pincode`]="{ item }">
+              <v-text-field
+                v-model="item.pincode"
+                dense
+                outlined
+                hide-details
+                placeholder="e.g. 560001"
+                class="ma-0 pa-0"
+                :rules="[(v) => !!v || 'Required']"
+              />
+            </template>
+
+            <template v-slot:[`item.is_pickup_serviceable`]="{ item }">
+              <v-checkbox
+                v-model="item.is_pickup_serviceable"
+                dense
+                hide-details
+                class="ma-0 pa-0"
+              />
+            </template>
+
+            <template v-slot:[`item.pickup_amount`]="{ item }">
+              <v-text-field
+                v-model.number="item.pickup_amount"
+                type="number"
+                dense
+                outlined
+                hide-details
+                min="0"
+                class="ma-0 pa-0"
+                :disabled="!item.is_pickup_serviceable"
+              />
+            </template>
+
+            <template v-slot:[`item.is_delivery_serviceable`]="{ item }">
+              <v-checkbox
+                v-model="item.is_delivery_serviceable"
+                dense
+                hide-details
+                class="ma-0 pa-0"
+              />
+            </template>
+
+            <template v-slot:[`item.delivery_amount`]="{ item }">
+              <v-text-field
+                v-model.number="item.delivery_amount"
+                type="number"
+                dense
+                outlined
+                hide-details
+                min="0"
+                class="ma-0 pa-0"
+                :disabled="!item.is_delivery_serviceable"
+              />
+            </template>
+
+            <template v-slot:[`item.is_active`]="{ item }">
+              <v-checkbox
+                v-model="item.is_active"
+                dense
+                hide-details
+                class="ma-0 pa-0"
+              />
+            </template>
+
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-btn
+                icon
+                small
+                color="red"
+                @click="removeRow(bulkPincodes.indexOf(item))"
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-data-table>
 
           <v-btn small color="primary" outlined class="mt-3" @click="addRow">
             <v-icon left>mdi-plus</v-icon>Add Pincode
@@ -474,14 +478,12 @@ export default {
 </script>
 
 <style scoped>
-.no-divider-table {
-  border-collapse: collapse;
-  width: 100%;
+.row-spacing {
+  margin-bottom: 8px; /* space between rows */
+  background-color: white;
 }
 
-.no-divider-table th,
-.no-divider-table td {
-  /* border: none !important; */
-  padding: 8px;
+.v-data-table .v-data-table__wrapper tr {
+  border-bottom: none; /* optional: remove default line */
 }
 </style>

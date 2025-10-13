@@ -104,184 +104,9 @@
             <!-- Tabs Content -->
             <v-tabs-items v-model="activeTab">
               <!-- Overview -->
+
               <v-tab-item>
-                <v-card flat class="pa-6 elevation-1">
-                  <!-- Header Row with Optional Actions -->
-                  <div class="d-flex justify-space-between align-center mb-4">
-                    <!-- Uncomment for edit button if needed -->
-                    <!-- <v-btn small color="primary" @click="openOverviewEditor">Edit</v-btn> -->
-                  </div>
-
-                  <!-- Specifications Section -->
-                  <section class="mb-6">
-                    <h3 class="font-weight-bold mb-3">Specifications</h3>
-                    <v-row dense>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Body Type:</strong>
-                        {{ model.body_type || "N/A" }}
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Vehicle Type:</strong>
-                        {{ model.vehicle_type || "N/A" }}
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Start Type:</strong>
-                        {{ model.start_type || "N/A" }}
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4" v-if="model.fuel_capacity">
-                        <strong>Fuel Capacity:</strong>
-                        {{ model.fuel_capacity }} L
-                      </v-col>
-                      <v-col
-                        cols="12"
-                        sm="6"
-                        lg="4"
-                        v-if="model.battery_capacity"
-                      >
-                        <strong>Battery Capacity:</strong>
-                        {{ model.battery_capacity }} kWh
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4" v-if="model.range_km">
-                        <strong>Range:</strong> {{ model.range_km }} km
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Year:</strong> {{ model.year || "N/A" }}
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Make:</strong> {{ model.make || "N/A" }}
-                      </v-col>
-                      <v-col cols="12" sm="6" lg="4">
-                        <strong>Seat Capacity:</strong>
-                        {{ model.seat_capacity || "N/A" }}
-                      </v-col>
-                    </v-row>
-                  </section>
-
-                  <section class="mb-6">
-                    <h3 class="font-weight-bold mb-3">Pricing</h3>
-                    <v-row
-                      v-if="
-                        model.vehicle_model_pricing_data &&
-                        model.vehicle_model_pricing_data.length
-                      "
-                      class="gy-4"
-                    >
-                      <v-col
-                        v-for="plan in model.vehicle_model_pricing_data"
-                        :key="plan.pricing_id"
-                        cols="12"
-                        md="6"
-                        lg="4"
-                      >
-                        <v-card outlined class="pa-4 rounded-xl elevation-0">
-                          <div
-                            class="d-flex align-center justify-space-between mb-2"
-                          >
-                            <span class="font-weight-bold">{{
-                              plan.model_pricing_plan_data.plan_name
-                            }}</span>
-                            <v-chip small color="primary" outlined>
-                              {{ plan.model_pricing_plan_data.plan_type }}
-                            </v-chip>
-                          </div>
-
-                          <div class="my-2">
-                            <span class="font-weight-bold">Price:</span>
-                            <span
-                              v-if="
-                                plan.offer_rate &&
-                                Number(plan.offer_rate) < Number(plan.base_rate)
-                              "
-                            >
-                              <s class="grey--text"
-                                >₹{{
-                                  Number(plan.base_rate).toLocaleString()
-                                }}</s
-                              >
-                              <span class="ml-2 red--text font-weight-bold"
-                                >₹{{
-                                  Number(plan.offer_rate).toLocaleString()
-                                }}</span
-                              >
-                              <v-chip
-                                x-small
-                                color="green lighten-1"
-                                dark
-                                class="ml-2"
-                                >Offer</v-chip
-                              >
-                            </span>
-                            <span v-else>
-                              <span class="primary--text font-weight-bold"
-                                >₹{{
-                                  Number(plan.base_rate).toLocaleString()
-                                }}</span
-                              >
-                            </span>
-                          </div>
-
-                          <v-simple-table dense>
-                            <tbody>
-                              <tr>
-                                <td>KM Cap</td>
-                                <td>
-                                  {{ plan.model_pricing_plan_data.km_cap }} km
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Extra KM</td>
-                                <td>
-                                  ₹{{
-                                    plan.model_pricing_plan_data.extra_km_rate
-                                  }}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Deposit</td>
-                                <td>
-                                  ₹{{
-                                    Number(
-                                      plan.model_pricing_plan_data
-                                        .security_deposit
-                                    ).toLocaleString()
-                                  }}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </v-simple-table>
-                          <!-- Optionally, show "More" for plan description (collapsed by default) -->
-                          <div
-                            v-if="plan.model_pricing_plan_data.plan_description"
-                            class="mt-2 text-caption grey--text text--darken-1"
-                          >
-                            <span v-if="!plan.showDesc">
-                              {{
-                                plan.model_pricing_plan_data.plan_description
-                              }}
-                            </span>
-                          </div>
-                        </v-card>
-                      </v-col>
-                    </v-row>
-                    <v-alert type="info" outlined v-else>
-                      Pricing information is not available for this model.
-                    </v-alert>
-                  </section>
-
-                  <!-- Description Section -->
-                  <section>
-                    <h3 class="font-weight-bold mb-3">Description</h3>
-                    <p class="text-body-2 mb-0" v-if="model.description">
-                      {{ model.description }}
-                    </p>
-                    <p
-                      class="text-body-2 mb-0 grey--text text--darken-1"
-                      v-else
-                    >
-                      No description provided for this vehicle model.
-                    </p>
-                  </section>
-                </v-card>
+                <ModelOverview :model="model" @refresh-model="loadModel" />
               </v-tab-item>
 
               <!-- Vehicles -->
@@ -487,15 +312,16 @@
 </template>
 
 <script>
-import HTTP from "@/plugins/axios";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import AddModel from "@/components/AddModel.vue";
 import StatusService from "@/plugins/statusColor";
 import Swal from "sweetalert2";
+import api from "@/plugins/axios";
+import ModelOverview from "@/views/Models/Tabs/ModelOverview.vue";
 
 export default {
   name: "ModelView",
-  components: { DeepLayout, AddModel },
+  components: { DeepLayout, AddModel, ModelOverview },
   data() {
     return {
       model_id: this.$route.params.model_id,
@@ -516,6 +342,18 @@ export default {
         { text: "Current KM", value: "current_km" },
         { text: "Next Service", value: "next_service_km" },
       ],
+      loadingPlan: false,
+      addPlanDialog: false,
+      plans: [],
+      selectedPlanId: null,
+      baseRate: null,
+      offerRate: null,
+      isActive: true,
+      formValid: false,
+      rules: {
+        required: (v) => !!v || "Required.",
+        positive: (v) => v > 0 || "Must be greater than 0",
+      },
     };
   },
   mounted() {
@@ -537,7 +375,7 @@ export default {
     async loadModel() {
       this.loading = true;
       try {
-        const { data } = await HTTP.get(`/api/vehicle-model/${this.model_id}`);
+        const { data } = await api.get(`/api/vehicle-model/${this.model_id}`);
         this.model = data.data;
       } catch (err) {
         console.error("Error loading model:", err);
@@ -566,7 +404,7 @@ export default {
 
       this.overviewLoading = true;
       try {
-        await HTTP.put(
+        await api.put(
           `/api/vehicle-model/${this.model.model_id}`,
           this.overviewModel
         );

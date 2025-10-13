@@ -22,6 +22,8 @@ import SelectSubscription from "@/views/Bookings/SelectSubscription.vue";
 import SelectModels from "@/views/Bookings/SelectModels.vue";
 import CustomerDetails from "@/views/Bookings/CustomerDetails.vue";
 import AddOnList from "@/views/AddOnList.vue";
+import PlanList from "@/views/PlanList.vue";
+import ModelOverview from "@/views/Models/Tabs/ModelOverview.vue";
 
 Vue.use(Router);
 
@@ -57,6 +59,11 @@ const router = new Router({
           path: "/add-ons",
           name: "Add-Ons",
           component: AddOnList,
+        },
+        {
+          path: "/plans",
+          name: "Plans",
+          component: PlanList,
         },
       ],
     },
@@ -181,6 +188,13 @@ const router = new Router({
       path: "/models/:model_id",
       name: "Model View",
       component: ModelView,
+      children: [
+        {
+          path: "model-overview",
+          name: "Model Overview",
+          component: ModelOverview,
+        },
+      ],
     },
     {
       path: "/select-subscription/:model_id",

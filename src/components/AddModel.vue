@@ -185,7 +185,7 @@
         </v-col>
 
         <!-- Base Rates -->
-        <v-col cols="12" md="6">
+        <!-- <v-col cols="12" md="6">
           <label class="text-subtitle-2">
             Base Hourly Rate <span class="red--text">*</span>
           </label>
@@ -251,7 +251,7 @@
               hide-details
             />
           </div>
-        </v-col>
+        </v-col> -->
 
         <!-- Description -->
         <v-col cols="12">
@@ -262,6 +262,20 @@
             <v-textarea
               v-model="model.description"
               :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              rows="3"
+              required
+              hide-details
+            />
+          </div>
+        </v-col>
+        <!-- Footer content -->
+        <v-col cols="12">
+          <label class="text-subtitle-2"> Footer Content </label>
+          <div class="mb-3">
+            <v-textarea
+              v-model="model.footer_content"
               outlined
               dense
               rows="3"
@@ -351,11 +365,12 @@ export default {
         fuel_capacity: null,
         battery_capacity: null,
         range_km: null,
-        base_hourly_rate: null,
-        base_daily_rate: null,
-        base_weekly_rate: null,
-        base_monthly_rate: null,
+        // base_hourly_rate: null,
+        // base_daily_rate: null,
+        // base_weekly_rate: null,
+        // base_monthly_rate: null,
         description: "",
+        footer_content: "",
         image_url: "",
         status: "active",
       },
@@ -455,10 +470,10 @@ export default {
         fuel_capacity: null,
         battery_capacity: null,
         range_km: null,
-        base_hourly_rate: null,
-        base_daily_rate: null,
-        base_weekly_rate: null,
-        base_monthly_rate: null,
+        // base_hourly_rate: null,
+        // base_daily_rate: null,
+        // base_weekly_rate: null,
+        // base_monthly_rate: null,
         description: "",
         image_url: "",
         status: "active",

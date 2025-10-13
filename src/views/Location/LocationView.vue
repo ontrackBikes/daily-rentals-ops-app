@@ -95,11 +95,11 @@
             </div>
 
             <!-- Edit Button -->
-            <div class="text-center mt-4">
+            <!-- <div class="text-center mt-4">
               <v-btn rounded color="primary" @click="editDialog = true">
                 Edit Location
               </v-btn>
-            </div>
+            </div> -->
           </v-card>
         </v-col>
 

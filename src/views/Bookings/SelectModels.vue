@@ -66,7 +66,7 @@
                 </v-col>
 
                 <v-col cols="auto" class="pa-0">
-                  <v-card-title class="black--text pa-0">
+                  <v-card-title class="pa-0">
                     {{ vehicle.model_name }}
                   </v-card-title>
                 </v-col>
