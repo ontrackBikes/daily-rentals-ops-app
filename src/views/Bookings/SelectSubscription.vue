@@ -89,39 +89,84 @@
 
             <!-- Location Select -->
             <div v-if="model">
-              <h4 class="font-weight-medium my-2 d-flex align-center">
-                <v-icon small class="mr-2">mdi-map-marker</v-icon>
-                Select Pickup Location
-              </h4>
+              <v-tabs v-model="activeTab" background-color="transparent" grow>
+                <v-tab value="pickup">Pickup</v-tab>
+                <v-tab value="delivery">Delivery</v-tab>
+              </v-tabs>
 
-              <v-select
-                v-model="form.location"
-                :items="locations"
-                item-text="name"
-                item-value="location_id"
-                placeholder="Choose your preferred location"
+              <v-tabs-items v-model="activeTab" class="mt-4 pa-2">
+                <v-tab-item>
+                  <v-select
+                    v-model="pickupLocation"
+                    :items="locations"
+                    item-text="name"
+                    item-value="location_id"
+                    label="Pickup location"
+                    :loading="locationsLoading"
+                    outlined
+                    dense
+                    hide-details
+                  ></v-select>
+
+                  <!-- <v-btn
+                    class="mt-4"
+                    color="primary"
+                    :loading="checking"
+                    block
+                    @click="checkServiceability('pickup')"
+                    :disabled="!pickupLocation"
+                  >
+                    Check Serviceability
+                  </v-btn> -->
+                </v-tab-item>
+
+                <v-tab-item>
+                  <div class="d-flex">
+                    <v-select
+                      v-model="pickupLocation"
+                      :items="locations"
+                      item-text="name"
+                      item-value="location_id"
+                      label="Select provider location"
+                      :loading="locationsLoading"
+                      outlined
+                      dense
+                      hide-details
+                    ></v-select>
+                    <v-text-field
+                      v-model="deliveryPincode"
+                      label="Check for Delivery"
+                      outlined
+                      dense
+                      class="ml-3 flex-grow-1"
+                      hide-details
+                      type="number"
+                    ></v-text-field>
+                  </div>
+
+                  <v-btn
+                    class="mt-4"
+                    color="primary"
+                    :loading="checking"
+                    block
+                    @click="checkServiceability('delivery')"
+                    :disabled="!deliveryPincode || !pickupLocation"
+                  >
+                    Check Serviceability
+                  </v-btn>
+                </v-tab-item>
+              </v-tabs-items>
+
+              <!-- ================= Result ================= -->
+              <v-alert
+                v-if="serviceabilityMsg"
+                :type="isServiceable ? 'success' : 'error'"
+                dense
                 outlined
-                :loading="locationsLoading"
-                :disabled="locationsLoading"
+                class="mt-4 text-center"
               >
-                <template v-slot:item="{ item }">
-                  <div class="pa-2">
-                    <div class="font-weight-medium">{{ item.name }}</div>
-                    <div class="caption text--secondary">
-                      {{ item.address }} •
-                      {{ item.available_vehicle_count }} vehicles available
-                    </div>
-                  </div>
-                </template>
-                <template v-slot:selection="{ item }">
-                  <div>
-                    <span class="font-weight-medium">{{ item.name }}</span>
-                    <span class="text--secondary ml-2"
-                      >• {{ item.available_vehicle_count }} available</span
-                    >
-                  </div>
-                </template>
-              </v-select>
+                {{ serviceabilityMsg }}
+              </v-alert>
 
               <!-- Addons -->
               <h4 class="font-weight-medium my-2 d-flex align-center">
@@ -268,7 +313,7 @@
             outlined
             dense
             class="mt-4"
-            :disabled="!form.location || availableVehicles.length === 0"
+            :disabled="!pickupLocation || availableVehicles.length === 0"
             placeholder="Choose a vehicle"
           />
 
@@ -280,7 +325,9 @@
             depressed
             color="primary"
             class="text-capitalize my-4"
-            :disabled="!form.location"
+            :disabled="
+              !pickupLocation || (activeTab === 1 && isServiceable === false)
+            "
             @click="goToCustomerDetails()"
           >
             Continue ₹{{ grandTotal }}
@@ -304,15 +351,23 @@ export default {
       model_id: this.$route.params.model_id,
       form: {
         plan: "monthly",
-        location: null,
+        pickupLocation: null,
         addons: [],
         vehicle: null,
+        service_type: null,
       },
       model: null,
       locations: [],
       addons: [],
       loading: false,
       locationsLoading: false,
+      activeTab: 0,
+      pickupLocation: null,
+      deliveryPincode: "",
+
+      checking: false,
+      serviceabilityMsg: "",
+      isServiceable: false,
     };
   },
   async mounted() {
@@ -324,9 +379,9 @@ export default {
   },
   computed: {
     availableVehicles() {
-      if (!this.model || !this.form.location) return [];
+      if (!this.model || !this.pickupLocation) return [];
       return this.model.vehicle_data.filter(
-        (v) => v.location_id === this.form.location && v.status === "available"
+        (v) => v.location_id === this.pickupLocation && v.status === "available"
       );
     },
     subscriptionPrice() {
@@ -395,8 +450,36 @@ export default {
           pricingId: pricingId,
           addons: JSON.stringify(this.form.addons),
           vehicleId: this.form.vehicle,
+          type: this.activeTab === 0 ? "pickup" : "delivery",
+          locationId: this.pickupLocation,
+          pincode: this.deliveryPincode,
         },
       });
+    },
+    async checkServiceability(type) {
+      try {
+        this.checking = true;
+        this.serviceabilityMsg = "";
+
+        const payload = {
+          model_id: this.model_id,
+          location_id: this.pickupLocation || 1,
+          pincode: type === "pickup" ? "560001" : this.deliveryPincode,
+          service_type: type,
+        };
+
+        const res = await api.post(`api/serviceable-pincode/check`, payload);
+
+        const data = res.data?.data;
+        this.isServiceable = data?.is_serviceable;
+        this.serviceabilityMsg = res.data?.message || "Check completed";
+      } catch (err) {
+        console.error("Error checking serviceability:", err);
+        this.serviceabilityMsg = "Something went wrong. Please try again.";
+        this.isServiceable = false;
+      } finally {
+        this.checking = false;
+      }
     },
 
     async fetchAddons() {
