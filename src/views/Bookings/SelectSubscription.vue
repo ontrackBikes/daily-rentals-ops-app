@@ -12,7 +12,7 @@
       <v-row>
         <!-- Left Side: Subscription Plans + Addons -->
         <v-col cols="12" md="7">
-          <v-card outlined class="px-4 rounded-lg">
+          <v-card outlined class="pa-4 rounded-lg">
             <!-- Subscription Plans -->
             <v-radio-group v-model="form.plan">
               <v-row dense>
@@ -89,11 +89,10 @@
             <!-- Addons -->
             <div v-if="model && addons.length">
               <h4 class="font-weight-medium my-2 d-flex align-center">
-                <v-icon small class="mr-2">mdi-plus-circle</v-icon>
                 Enhance Your Experience
               </h4>
 
-              <v-card outlined rounded="xl" class="pa-4">
+              <v-card outlined rounded="lg" class="pa-4">
                 <div
                   v-for="addon in addons"
                   :key="addon.addon_id"

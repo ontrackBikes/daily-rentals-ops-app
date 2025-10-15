@@ -94,7 +94,7 @@
                 <v-tabs-items v-model="activeTab" class="mt-4 pa-2">
                   <v-tab-item>
                     <v-select
-                      v-model="pickupLocation"
+                      v-model="location_id"
                       :items="locations"
                       item-text="name"
                       item-value="location_id"
@@ -446,6 +446,14 @@ export default {
         this.serviceabilityMsg = null;
         this.total = parseFloat(this.$route.query.total || 0);
         this.deliveryCharges = 0;
+        this.selectedAddressId = null;
+        this.isServiceable = false;
+        this.location_id = null;
+      }
+    },
+    location_id(newLocationId, oldLocationId) {
+      if (newLocationId !== oldLocationId) {
+        this.resetServiceability();
       }
     },
   },
@@ -506,6 +514,13 @@ export default {
           "error"
         );
       }
+    },
+    resetServiceability() {
+      this.serviceabilityMsg = null;
+      this.total = parseFloat(this.$route.query.total || 0);
+      this.deliveryCharges = 0;
+      this.selectedAddressId = null;
+      this.isServiceable = false;
     },
     setSelectedAddress(addressId) {
       const address = this.addressList.find((a) => a.address_id === addressId);

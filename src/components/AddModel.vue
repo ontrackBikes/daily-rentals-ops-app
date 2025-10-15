@@ -183,6 +183,22 @@
             />
           </div>
         </v-col>
+        <v-col cols="12" md="6" v-if="model.vehicle_type === 'EV'">
+          <label class="text-subtitle-2">
+            Moter Power <span class="red--text">*</span>
+          </label>
+          <div class="mb-3">
+            <v-text-field
+              v-model="model.motor_power"
+              type="number"
+              :rules="[(v) => !!v || 'Required']"
+              outlined
+              dense
+              required
+              hide-details
+            />
+          </div>
+        </v-col>
 
         <!-- Base Rates -->
         <!-- <v-col cols="12" md="6">
@@ -365,6 +381,8 @@ export default {
         fuel_capacity: null,
         battery_capacity: null,
         range_km: null,
+        motor_power: null,
+        // moter_power: null,
         // base_hourly_rate: null,
         // base_daily_rate: null,
         // base_weekly_rate: null,
@@ -427,6 +445,7 @@ export default {
         if (payload.vehicle_type === "ICE") {
           delete payload.battery_capacity;
           delete payload.range_km;
+          delete payload.moter_power;
         } else if (payload.vehicle_type === "EV") {
           delete payload.fuel_capacity;
         }
@@ -470,6 +489,7 @@ export default {
         fuel_capacity: null,
         battery_capacity: null,
         range_km: null,
+        motor_power: null,
         // base_hourly_rate: null,
         // base_daily_rate: null,
         // base_weekly_rate: null,

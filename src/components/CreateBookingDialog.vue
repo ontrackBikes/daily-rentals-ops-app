@@ -125,6 +125,14 @@
                   }}</span
                 >
               </div>
+              <div class="d-flex justify-space-between text-body-2 mb-2">
+                <span>Security Deposit</span>
+                <span
+                  >₹{{
+                    formatAmount(bookingPreview.deliveryDetails.securityDeposit)
+                  }}</span
+                >
+              </div>
               <div
                 v-if="bookingPreview.deliveryDetails?.delivery_fee"
                 class="d-flex justify-space-between text-body-2 mb-2"
@@ -143,7 +151,7 @@
                 <span>Total Payable</span>
                 <span
                   >₹{{
-                    formatAmount(bookingPreview.pricingBreakdown.totalPayable)
+                    formatAmount(bookingPreview.pricingBreakdown.totalAmount)
                   }}</span
                 >
               </div>
