@@ -1,8 +1,7 @@
-// src/plugins/axios.js
 import axios from "axios";
-import router from "@/router"; // import router to redirect
+import router from "@/router";
 
-const baseURL = "http://localhost:3001/";
+const baseURL = process.env.VUE_APP_INVENTORY_API; // ✅ Correct for Vue 2 CLI
 
 const api = axios.create({
   baseURL,
