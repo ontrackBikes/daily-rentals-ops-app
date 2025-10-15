@@ -1,14 +1,20 @@
 <template>
   <deep-layout :backTo="'/orders'">
+    <!-- <v-overlay :value="loading" absolute>
+      <v-progress-circular indeterminate size="64" color="primary" />
+    </v-overlay> -->
     <v-container fluid>
       <v-row>
         <!-- LEFT: Order Summary -->
         <v-col cols="12" md="3">
-          <v-card outlined class="pa-4 rounded-lg">
+          <v-card :loading="loading" outlined class="pa-4 rounded-lg">
             <div class="d-flex justify-space-between align-center">
               <div class="text-subtitle-1 font-weight-bold">
                 {{ order?.internal_order_id }}
               </div>
+              <v-btn @click="getOrderData()" icon="mdi-refresh"
+                ><v-icon>mdi-refresh</v-icon></v-btn
+              >
 
               <!-- Status Chip -->
               <v-chip
@@ -136,6 +142,7 @@ export default {
       order: [],
       tab: null,
       selectedCustomer: null,
+      loading: false,
     };
   },
   computed: {
@@ -175,6 +182,7 @@ export default {
   },
   methods: {
     async getOrderData() {
+      this.loading = true;
       try {
         const res = await api.get(`/api/order/${this.orderId}`);
         this.order = res.data.data;
@@ -182,6 +190,7 @@ export default {
       } catch (e) {
         console.error("Failed to load order", e);
       }
+      this.loading = false;
     },
 
     getStatusColor(status, type) {

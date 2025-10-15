@@ -75,7 +75,6 @@
                         </span>
                       </div>
 
-                      <!-- Terms -->
                       <v-divider class="my-3" />
                       <p
                         class="caption text--secondary"
@@ -87,144 +86,85 @@
               </v-row>
             </v-radio-group>
 
-            <!-- Location Select -->
-            <div v-if="model">
-              <v-tabs v-model="activeTab" background-color="transparent" grow>
-                <v-tab value="pickup">Pickup</v-tab>
-                <v-tab value="delivery">Delivery</v-tab>
-              </v-tabs>
-
-              <v-tabs-items v-model="activeTab" class="mt-4 pa-2">
-                <v-tab-item>
-                  <v-select
-                    v-model="pickupLocation"
-                    :items="locations"
-                    item-text="name"
-                    item-value="location_id"
-                    label="Pickup location"
-                    :loading="locationsLoading"
-                    outlined
-                    dense
-                    hide-details
-                  ></v-select>
-
-                  <!-- <v-btn
-                    class="mt-4"
-                    color="primary"
-                    :loading="checking"
-                    block
-                    @click="checkServiceability('pickup')"
-                    :disabled="!pickupLocation"
-                  >
-                    Check Serviceability
-                  </v-btn> -->
-                </v-tab-item>
-
-                <v-tab-item>
-                  <div class="d-flex">
-                    <v-select
-                      v-model="pickupLocation"
-                      :items="locations"
-                      item-text="name"
-                      item-value="location_id"
-                      label="Select provider location"
-                      :loading="locationsLoading"
-                      outlined
-                      dense
-                      hide-details
-                    ></v-select>
-                    <v-text-field
-                      v-model="deliveryPincode"
-                      label="Check for Delivery"
-                      outlined
-                      dense
-                      class="ml-3 flex-grow-1"
-                      hide-details
-                      type="number"
-                    ></v-text-field>
-                  </div>
-
-                  <v-btn
-                    class="mt-4"
-                    color="primary"
-                    :loading="checking"
-                    block
-                    @click="checkServiceability('delivery')"
-                    :disabled="!deliveryPincode || !pickupLocation"
-                  >
-                    Check Serviceability
-                  </v-btn>
-                </v-tab-item>
-              </v-tabs-items>
-
-              <!-- ================= Result ================= -->
-              <v-alert
-                v-if="serviceabilityMsg"
-                :type="isServiceable ? 'success' : 'error'"
-                dense
-                outlined
-                class="mt-4 text-center"
-              >
-                {{ serviceabilityMsg }}
-              </v-alert>
-
-              <!-- Addons -->
+            <!-- Addons -->
+            <div v-if="model && addons.length">
               <h4 class="font-weight-medium my-2 d-flex align-center">
                 <v-icon small class="mr-2">mdi-plus-circle</v-icon>
                 Enhance Your Experience
               </h4>
 
-              <v-row dense>
-                <v-col
-                  cols="12"
+              <v-card outlined rounded="xl" class="pa-4">
+                <div
                   v-for="addon in addons"
-                  :key="addon.value"
-                  class="mb-2"
+                  :key="addon.addon_id"
+                  class="d-flex justify-space-between align-center py-3 addon-item"
                 >
-                  <v-card
-                    outlined
-                    class="cursor-pointer rounded-lg"
-                    :color="form.addons.includes(addon.value) ? 'primary' : ''"
-                    :dark="form.addons.includes(addon.value)"
-                    @click="toggleAddon(addon.value)"
-                  >
-                    <v-card-text class="pa-3 d-flex align-center">
-                      <v-icon
-                        size="20"
-                        class="mr-3"
-                        :color="
-                          form.addons.includes(addon.value) ? 'white' : 'grey'
-                        "
-                      >
-                        {{ addon.icon }}
-                      </v-icon>
-                      <div class="text-left flex-grow-1">
-                        <div class="font-weight-medium">{{ addon.label }}</div>
-                        <div
-                          class="caption"
-                          :class="
-                            form.addons.includes(addon.value)
-                              ? 'white--text'
-                              : 'text--secondary'
-                          "
-                        >
-                          {{ addon.description }}
-                        </div>
+                  <!-- Left Side -->
+                  <div class="d-flex align-center">
+                    <v-avatar size="45" class="mr-3" color="grey lighten-4">
+                      <v-icon size="26">{{ getAddonIcon(addon.name) }}</v-icon>
+                    </v-avatar>
+
+                    <div>
+                      <div class="font-weight-medium">
+                        {{ addon.name }}
+                        <span class="text-primary text-caption">
+                          (₹{{ addon.price }} /
+                          {{
+                            addon.type === "per_booking" ? "booking" : "day"
+                          }})
+                        </span>
                       </div>
-                      <div
-                        class="font-weight-medium ml-3"
-                        :class="
-                          form.addons.includes(addon.value)
-                            ? 'white--text'
-                            : 'primary--text'
-                        "
-                      >
-                        +₹{{ addon.price }}
+                      <div class="text-primary text-caption">
+                        {{ addon.description }}
                       </div>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-              </v-row>
+                    </div>
+                  </div>
+
+                  <!-- Right Side -->
+                  <div class="d-flex align-center">
+                    <v-chip
+                      v-if="addon.quantity_left < 5"
+                      outlined
+                      small
+                      :color="addon.quantity_left > 2 ? 'warning' : 'error'"
+                      class="mr-4"
+                    >
+                      {{ addon.quantity_left }} left
+                    </v-chip>
+
+                    <div
+                      class="d-flex align-center grey lighten-4 px-2 py-1 rounded-pill"
+                    >
+                      <v-btn
+                        icon
+                        small
+                        :disabled="getAddonQty(addon.provider_addon_id) === 0"
+                        @click="decreaseAddonQty(addon.provider_addon_id)"
+                      >
+                        <v-icon>mdi-minus</v-icon>
+                      </v-btn>
+
+                      <span class="mx-3 text-body-2 font-weight-medium">
+                        {{ getAddonQty(addon.provider_addon_id) }}
+                      </span>
+
+                      <v-btn
+                        icon
+                        small
+                        color="primary"
+                        :disabled="
+                          getAddonQty(addon.provider_addon_id) >=
+                          addon.quantity_left
+                        "
+                        @click="increaseAddonQty(addon)"
+                      >
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </div>
+              </v-card>
             </div>
 
             <!-- Error State -->
@@ -265,7 +205,6 @@
               </template>
             </v-img>
 
-            <!-- Model Info -->
             <div class="overline text--secondary mb-1">
               {{ model?.make?.toUpperCase() }}
             </div>
@@ -273,7 +212,6 @@
               {{ model?.model_name }}
             </h2>
 
-            <!-- Chips -->
             <div class="mb-3">
               <v-chip small class="mr-2 mb-1" color="success" outlined>
                 <v-icon small left>mdi-leaf</v-icon>
@@ -289,12 +227,10 @@
               </v-chip>
             </div>
 
-            <!-- Description -->
             <p class="body-2 text--secondary">
               {{ model?.description?.substring(0, 120) }}...
             </p>
 
-            <!-- Pricing Summary -->
             <v-divider class="my-3" />
             <div class="d-flex justify-space-between align-center">
               <span class="subtitle-2 text--secondary">Selected Plan</span>
@@ -304,20 +240,6 @@
             </div>
           </v-card>
 
-          <v-select
-            v-model="form.vehicle"
-            :items="availableVehicles"
-            item-text="registration_number"
-            item-value="vehicle_id"
-            label="Select Vehicle"
-            outlined
-            dense
-            class="mt-4"
-            :disabled="!pickupLocation || availableVehicles.length === 0"
-            placeholder="Choose a vehicle"
-          />
-
-          <!-- Continue Button -->
           <v-btn
             large
             block
@@ -325,9 +247,6 @@
             depressed
             color="primary"
             class="text-capitalize my-4"
-            :disabled="
-              !pickupLocation || (activeTab === 1 && isServiceable === false)
-            "
             @click="goToCustomerDetails()"
           >
             Continue ₹{{ grandTotal }}
@@ -349,41 +268,20 @@ export default {
   data() {
     return {
       model_id: this.$route.params.model_id,
+      loading: false,
       form: {
         plan: "monthly",
-        pickupLocation: null,
         addons: [],
-        vehicle: null,
-        service_type: null,
       },
       model: null,
-      locations: [],
       addons: [],
-      loading: false,
-      locationsLoading: false,
-      activeTab: 0,
-      pickupLocation: null,
-      deliveryPincode: "",
-
-      checking: false,
-      serviceabilityMsg: "",
-      isServiceable: false,
     };
   },
   async mounted() {
     await this.loadModel(this.model_id);
-    if (this.model) {
-      await this.fetchLocations(this.model_id);
-    }
-    this.fetchAddons();
+    await this.fetchAddons();
   },
   computed: {
-    availableVehicles() {
-      if (!this.model || !this.pickupLocation) return [];
-      return this.model.vehicle_data.filter(
-        (v) => v.location_id === this.pickupLocation && v.status === "available"
-      );
-    },
     subscriptionPrice() {
       if (!this.model || !this.form.plan) return 0;
       const plan = this.model.vehicle_model_pricing_data.find(
@@ -392,15 +290,17 @@ export default {
       return plan ? Number(plan.offer_rate || plan.base_rate) : 0;
     },
     addonsTotal() {
-      return this.addons
-        .filter((a) => this.form.addons.includes(a.value))
-        .reduce((sum, a) => sum + Number(a.price), 0);
+      return this.form.addons.reduce((sum, a) => {
+        const addon = this.addons.find(
+          (x) => x.provider_addon_id === a.provider_addon_id
+        );
+        return addon ? sum + addon.price * a.qty : sum;
+      }, 0);
     },
     grandTotal() {
       return this.subscriptionPrice + this.addonsTotal;
     },
   },
-
   methods: {
     async loadModel(modelId) {
       this.loading = true;
@@ -414,95 +314,83 @@ export default {
         this.loading = false;
       }
     },
-    async fetchLocations(modelId) {
-      try {
-        this.locationsLoading = true;
-        const res = await api.get(`/api/vehicle-model/${modelId}/locations`);
-        this.locations = res.data?.data?.locations || [];
-      } catch (err) {
-        console.error("Error fetching locations:", err);
-        this.locations = [];
-      } finally {
-        this.locationsLoading = false;
-      }
-    },
-    toggleAddon(addonValue) {
-      const index = this.form.addons.indexOf(addonValue);
-      if (index > -1) {
-        this.form.addons.splice(index, 1);
-      } else {
-        this.form.addons.push(addonValue);
-      }
-    },
-
     goToCustomerDetails() {
       const selectedPlan = this.model.vehicle_model_pricing_data.find(
         (p) => p.model_pricing_plan_data.plan_type === this.form.plan
       );
-
-      const pricingId = selectedPlan ? selectedPlan.pricing_id : null;
       this.$router.push({
         path: "/customer-details",
         query: {
           modelId: this.model_id,
           total: this.grandTotal,
           subscription: this.form.plan,
-          pricingId: pricingId,
+          pricingId: selectedPlan?.pricing_id || null,
           addons: JSON.stringify(this.form.addons),
-          vehicleId: this.form.vehicle,
-          type: this.activeTab === 0 ? "pickup" : "delivery",
-          locationId: this.pickupLocation,
-          pincode: this.deliveryPincode,
         },
       });
     },
-    async checkServiceability(type) {
-      try {
-        this.checking = true;
-        this.serviceabilityMsg = "";
+    getAddonIcon(name) {
+      const lower = name.toLowerCase();
+      if (lower.includes("helmet")) return "mdi-racing-helmet";
+      if (lower.includes("phone")) return "mdi-cellphone-dock";
+      if (lower.includes("lock")) return "mdi-lock";
+      if (lower.includes("rain")) return "mdi-umbrella";
+      return "mdi-plus-circle";
+    },
+    getAddonQty(addonId) {
+      const item = this.form.addons.find(
+        (a) => a.provider_addon_id === addonId
+      );
+      return item ? item.qty : 0;
+    },
+    increaseAddonQty(addon) {
+      const existing = this.form.addons.find(
+        (a) => a.provider_addon_id === addon.provider_addon_id
+      );
+      if (existing) {
+        if (existing.qty < addon.quantity_left) existing.qty++;
+      } else {
+        this.form.addons.push({
+          provider_addon_id: addon.provider_addon_id,
+          addon_name: addon.name, // ✅ include addon name here
+          qty: 1,
+        });
+      }
+    },
 
-        const payload = {
-          model_id: this.model_id,
-          location_id: this.pickupLocation || 1,
-          pincode: type === "pickup" ? "560001" : this.deliveryPincode,
-          service_type: type,
-        };
-
-        const res = await api.post(`api/serviceable-pincode/check`, payload);
-
-        const data = res.data?.data;
-        this.isServiceable = data?.is_serviceable;
-        this.serviceabilityMsg = res.data?.message || "Check completed";
-      } catch (err) {
-        console.error("Error checking serviceability:", err);
-        this.serviceabilityMsg = "Something went wrong. Please try again.";
-        this.isServiceable = false;
-      } finally {
-        this.checking = false;
+    decreaseAddonQty(addonId) {
+      const index = this.form.addons.findIndex(
+        (a) => a.provider_addon_id === addonId
+      );
+      if (index > -1) {
+        const item = this.form.addons[index];
+        if (item.qty > 1) item.qty--;
+        else this.form.addons.splice(index, 1);
       }
     },
 
     async fetchAddons() {
+      this.loading = true;
       try {
-        this.loading = true;
-        const res = await api.get(`/api/addons`);
-        const rawAddons = res.data?.data?.addons || [];
+        const { data } = await api.get("/api/addons");
+        const rawAddons = data?.data?.addons ?? [];
 
-        this.addons = rawAddons.map((a) => ({
-          label: a.addon_name,
-          value: a.provider_addon_id,
-          price:
-            a.addon_type === "per_day"
-              ? Number(a.offer_price_per_day || a.base_price_per_day)
-              : Number(a.offer_price_per_booking || a.base_price_per_booking),
-          icon:
-            a.description === "Protective helmet"
-              ? "mdi-racing-helmet"
-              : "mdi-cellphone-dock",
-          description: a.description,
-        }));
-      } catch (err) {
-        console.error("Error fetching addons:", err);
+        this.addons = rawAddons
+          .filter((addon) => addon.available !== false)
+          .map((addon) => ({
+            provider_addon_id: addon.provider_addon_id,
+            name: addon.addon_name,
+            type: addon.addon_type,
+            description: addon.description,
+            price: Number(
+              addon.addon_type === "per_day"
+                ? addon.offer_price_per_day || addon.base_price_per_day
+                : addon.offer_price_per_booking || addon.base_price_per_booking
+            ),
+            quantity_left: addon.quantity_left ?? 5, // fallback if not returned
+          }));
+      } catch (error) {
+        console.error("❌ Failed to fetch addons:", error);
         this.addons = [];
       } finally {
         this.loading = false;

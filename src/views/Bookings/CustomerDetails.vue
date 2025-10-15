@@ -34,7 +34,7 @@
                 <!-- Personal Details -->
                 <v-subheader class="px-0 text-subtitle-1 font-weight-bold mb-4">
                   <v-icon left>mdi-account</v-icon>
-                  Personal Details
+                  Customer Details
                 </v-subheader>
 
                 <v-row>
@@ -72,42 +72,8 @@
                   class="mb-4"
                 />
 
-                <v-select
-                  v-if="type === 'delivery'"
-                  v-model="selectedAddressId"
-                  :items="addressList"
-                  item-text="address_line"
-                  item-value="address_id"
-                  label="Select Saved Address"
-                  outlined
-                  dense
-                  prepend-inner-icon="mdi-map-marker"
-                  class="mb-4"
-                  :rules="[(v) => !!v || 'Please select an address']"
-                  @change="setSelectedAddress"
-                >
-                  <template v-slot:item="{ item, on, attrs }">
-                    <v-list-item v-bind="attrs" v-on="on">
-                      <v-list-item-content>
-                        <v-list-item-title>{{
-                          item.address_line
-                        }}</v-list-item-title>
-                        <v-list-item-subtitle>{{
-                          item.postal_code
-                        }}</v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </template>
-
-                  <template v-slot:selection="{ item }">
-                    <span
-                      >{{ item.address_line }} - {{ item.postal_code }}</span
-                    >
-                  </template>
-                </v-select>
-
-                <v-textarea
-                  v-else
+                <!-- <v-textarea
+                  v-if="type === 'pickup'"
                   v-model="form.address"
                   label="Complete Address"
                   outlined
@@ -116,8 +82,119 @@
                   :disabled="true"
                   prepend-inner-icon="mdi-map-marker"
                   class="mb-6"
-                />
+                /> -->
               </v-form>
+
+              <div v-if="selectedCustomer">
+                <v-tabs v-model="activeTab" background-color="transparent" grow>
+                  <v-tab value="pickup">Pickup</v-tab>
+                  <v-tab value="delivery">Delivery</v-tab>
+                </v-tabs>
+
+                <v-tabs-items v-model="activeTab" class="mt-4 pa-2">
+                  <v-tab-item>
+                    <v-select
+                      v-model="pickupLocation"
+                      :items="locations"
+                      item-text="name"
+                      item-value="location_id"
+                      label="Pickup location"
+                      :loading="locationsLoading"
+                      outlined
+                      dense
+                      hide-details
+                    ></v-select>
+
+                    <!-- <v-btn
+                    class="mt-4"
+                    color="primary"
+                    :loading="checking"
+                    block
+                    @click="checkServiceability('pickup')"
+                    :disabled="!pickupLocation"
+                  >
+                    Check Serviceability
+                  </v-btn> -->
+                  </v-tab-item>
+
+                  <v-tab-item>
+                    <div>
+                      <!-- Pickup Location -->
+                      <v-select
+                        v-model="location_id"
+                        :items="locations"
+                        item-text="name"
+                        item-value="location_id"
+                        label="Select provider location"
+                        :loading="locationsLoading"
+                        outlined
+                        dense
+                        hide-details
+                      ></v-select>
+
+                      <!-- Delivery Pincode (optional manual entry) -->
+                      <!-- <v-text-field
+                        v-model="deliveryPincode"
+                        label="Check for Delivery"
+                        outlined
+                        dense
+                        class="ml-3 flex-grow-1"
+                        hide-details
+                        type="number"
+                      ></v-text-field> -->
+
+                      <!-- Saved Address Dropdown -->
+                      <v-select
+                        v-if="type === 'delivery'"
+                        v-model="selectedAddressId"
+                        :items="addressList"
+                        item-text="address_line"
+                        item-value="address_id"
+                        label="Select Saved Address"
+                        outlined
+                        dense
+                        prepend-inner-icon="mdi-map-marker"
+                        class="mt-3"
+                        :rules="[(v) => !!v || 'Please select an address']"
+                        @change="
+                          setSelectedAddress && checkServiceability('delivery')
+                        "
+                      >
+                        <template v-slot:item="{ item, on, attrs }">
+                          <v-list-item v-bind="attrs" v-on="on">
+                            <v-list-item-content>
+                              <v-list-item-title>{{
+                                item.address_line
+                              }}</v-list-item-title>
+                              <v-list-item-subtitle>{{
+                                item.postal_code
+                              }}</v-list-item-subtitle>
+                            </v-list-item-content>
+                          </v-list-item>
+                        </template>
+
+                        <template v-slot:selection="{ item }">
+                          <span
+                            >{{ item.address_line }} -
+                            {{ item.postal_code }}</span
+                          >
+                        </template>
+                      </v-select>
+                    </div>
+                  </v-tab-item>
+                </v-tabs-items>
+
+                <!-- ================= Result ================= -->
+                <v-alert
+                  v-if="serviceabilityMsg"
+                  :type="isServiceable ? 'success' : 'error'"
+                  dense
+                  outlined
+                  class="mt-4 text-center"
+                >
+                  {{ serviceabilityMsg }}
+                </v-alert>
+              </div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -161,6 +238,18 @@
             <p class="body-2 text--secondary">
               {{ (model?.description || "").substring(0, 120) }}...
             </p>
+            <v-select
+              v-model="vehicle_id"
+              :items="availableVehicles"
+              item-text="registration_number"
+              item-value="vehicle_id"
+              label="Select Vehicle"
+              outlined
+              dense
+              class="mt-4"
+              :disabled="!pickupLocation || availableVehicles.length === 0"
+              placeholder="Choose a vehicle"
+            />
 
             <v-divider class="my-4"></v-divider>
             <div class="subtitle-1 font-weight-bold">Payment Summary</div>
@@ -173,10 +262,10 @@
 
               <div
                 v-if="addons && addons.length > 0"
-                class="d-flex justify-space-between align-center mb-3"
+                class="d-flex justify-space-between mb-3"
               >
-                <span class="text-subtitle-2">Add-ons</span>
-                <div class="mt-2">
+                <span class="text-subtitle-2" style="width: 90px">Add-ons</span>
+                <div class="d-flex flex-wrap justify-end">
                   <v-chip
                     v-for="(addon, i) in addons"
                     :key="i"
@@ -184,10 +273,19 @@
                     outlined
                     small
                   >
-                    <v-icon left small>mdi-check</v-icon>
-                    {{ addon.name || addon.title || addon }}
+                    {{ addon.addon_name }} x{{ addon.qty }}
                   </v-chip>
                 </div>
+              </div>
+
+              <div
+                class="d-flex justify-space-between align-center mb-3"
+                v-if="deliveryCharges > 0"
+              >
+                <span class="text-subtitle-2">Delivery Charges</span>
+                <span class="font-weight-bold"
+                  >₹{{ formatAmount(deliveryCharges) }}</span
+                >
               </div>
 
               <v-divider class="my-4"></v-divider>
@@ -205,7 +303,12 @@
                 block
                 large
                 rounded
-                :disabled="!formValid || previewLoading"
+                :disabled="
+                  !formValid ||
+                  previewLoading ||
+                  !location_id ||
+                  (activeTab === 1 && isServiceable === false)
+                "
                 :loading="previewLoading"
                 @click="previewBooking"
               >
@@ -226,7 +329,12 @@
       @update:open="previewDialog = $event"
       :customer-id="selectedCustomer?.customer_id"
       :pricing-id="pricing_id"
-      :addons="addons"
+      :addons="
+        addons.map((a) => ({
+          provider_addon_id: a.provider_addon_id,
+          qty: a.qty,
+        }))
+      "
       :vehicle-id="vehicle_id"
       :location-id="location_id"
       :delivery-details="{ type, address_id: selectedAddressId, pincode }"
@@ -262,29 +370,38 @@ export default {
           /^[6-9]\d{9}$/.test(v) || "Enter a valid 10-digit phone number",
       },
       total: null,
+      deliveryCharges: 0,
       subscription: null,
       addons: [],
       model_id: null,
       pricing_id: null,
       vehicle_id: null,
-      type: "pickup",
+
       pincode: null,
       location_id: null,
       previewDialog: false,
+      previewLoading: false,
       isConfirmMode: false,
       addressList: [],
       selectedAddressId: null,
+      pickupLocation: null,
+      locations: [],
+      locationsLoading: false,
+      activeTab: 0,
+      deliveryPincode: "",
+
+      checking: false,
+      serviceabilityMsg: "",
+      isServiceable: false,
     };
   },
   async created() {
     this.model_id = this.$route.query.modelId || null;
     this.total = parseFloat(this.$route.query.total || 0);
     this.pricing_id = this.$route.query.pricingId || null;
-    this.vehicle_id = this.$route.query.vehicleId || null;
     this.subscription = this.$route.query.subscription || "N/A";
-    this.type = this.$route.query.type || "pickup";
+
     this.pincode = this.$route.query.pincode || null;
-    this.location_id = this.$route.query.locationId || null;
 
     try {
       this.addons = this.$route.query.addons
@@ -295,6 +412,42 @@ export default {
     }
 
     if (this.model_id) await this.loadModel(this.model_id);
+  },
+  mounted() {
+    this.fetchLocations(this.model_id);
+  },
+  computed: {
+    availableVehicles() {
+      if (!this.model || !this.pickupLocation) return [];
+      return this.model.vehicle_data.filter(
+        (v) => v.location_id === this.pickupLocation && v.status === "available"
+      );
+    },
+    type() {
+      return this.activeTab === 0 ? "pickup" : "delivery";
+    },
+  },
+  watch: {
+    selectedCustomer(newCustomer) {
+      if (newCustomer) {
+        // Reset fields when customer changes
+        this.location_id = null;
+
+        this.activeTab = 0;
+        this.deliveryPincode = "";
+        this.serviceabilityMsg = "";
+        this.isServiceable = false;
+      }
+    },
+    type(newType) {
+      if (newType === "delivery") {
+        this.fetchCustomerAddresses(this.selectedCustomer.customer_id);
+      } else if (newType === "pickup") {
+        this.serviceabilityMsg = null;
+        this.total = parseFloat(this.$route.query.total || 0);
+        this.deliveryCharges = 0;
+      }
+    },
   },
   methods: {
     async loadModel(modelId) {
@@ -320,8 +473,6 @@ export default {
         this.form.email = emailContact?.value || "";
         this.form.phone = customer.user_data?.phone || this.form.phone || "";
         this.form.address = customer.address || this.form.address || "";
-        if (this.type === "delivery")
-          this.fetchCustomerAddresses(customer.customer_id);
       }
     },
     formatAmount(v) {
@@ -364,14 +515,76 @@ export default {
       }
     },
     previewBooking() {
+      this.previewLoading = true;
       if (!this.selectedCustomer)
         return this.$swal.fire("Select customer", "", "warning");
       this.isConfirmMode = false;
       this.previewDialog = true;
+      this.pricingId;
+      this.previewLoading = false;
     },
     handlePreviewConfirm() {
       this.isConfirmMode = true;
       // optionally store previewData
+    },
+    async fetchLocations(modelId) {
+      try {
+        this.locationsLoading = true;
+        const res = await api.get(`/api/vehicle-model/${modelId}/locations`);
+        this.locations = res.data?.data?.locations || [];
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+        this.locations = [];
+      } finally {
+        this.locationsLoading = false;
+      }
+    },
+    async checkServiceability(type) {
+      try {
+        this.checking = true;
+        this.serviceabilityMsg = "";
+        this.deliveryCharges = 0; // reset before checking
+
+        const pincode =
+          type === "pickup"
+            ? "560001"
+            : this.selectedAddressId
+            ? this.addressList.find(
+                (a) => a.address_id === this.selectedAddressId
+              )?.postal_code
+            : this.deliveryPincode;
+
+        const payload = {
+          model_id: this.model_id,
+          location_id: this.pickupLocation || 1,
+          pincode,
+          service_type: type,
+        };
+
+        const res = await api.post(`api/serviceable-pincode/check`, payload);
+
+        const data = res.data?.data;
+        this.isServiceable = data?.is_serviceable;
+        this.serviceabilityMsg = res.data?.message || "Check completed";
+
+        // If delivery and serviceable, store delivery_amount
+        if (
+          type === "delivery" &&
+          this.isServiceable &&
+          data?.charges?.delivery_amount
+        ) {
+          const deliveryAmount = parseFloat(data.charges.delivery_amount) || 0;
+          this.deliveryCharges = deliveryAmount;
+          this.total = (parseFloat(this.total) || 0) + deliveryAmount;
+        }
+      } catch (err) {
+        console.error("Error checking serviceability:", err);
+        this.serviceabilityMsg = "Something went wrong. Please try again.";
+        this.isServiceable = false;
+        this.deliveryCharges = 0;
+      } finally {
+        this.checking = false;
+      }
     },
   },
 };

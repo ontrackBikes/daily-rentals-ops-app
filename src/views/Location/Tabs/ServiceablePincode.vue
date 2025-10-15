@@ -90,91 +90,122 @@
         </v-card-title>
 
         <v-card-text>
-          <v-data-table
-            :headers="pincodeHeaders"
-            :items="bulkPincodes"
-            item-key="pincode"
-            dense
-            hide-default-footer
-            mobile-breakpoint="0"
-            item-class="row-spacing"
-          >
-            <template v-slot:[`item.pincode`]="{ item }">
-              <v-text-field
-                v-model="item.pincode"
-                dense
-                outlined
-                hide-details
-                placeholder="e.g. 560001"
-                class="ma-0 pa-0"
-                :rules="[(v) => !!v || 'Required']"
-              />
-            </template>
+          <v-simple-table dense>
+            <thead>
+              <tr>
+                <th>Pincode</th>
+                <th>Pickup</th>
+                <th>Pickup Amount</th>
+                <th>Delivery</th>
+                <th>Delivery Amount</th>
+                <th>Active</th>
 
-            <template v-slot:[`item.is_pickup_serviceable`]="{ item }">
-              <v-checkbox
-                v-model="item.is_pickup_serviceable"
-                dense
-                hide-details
-                class="ma-0 pa-0"
-              />
-            </template>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, index) in bulkPincodes" :key="row.localId">
+                <td>
+                  <v-text-field
+                    v-model="row.pincode"
+                    dense
+                    outlined
+                    placeholder="e.g. 560001"
+                    :disabled="row.isExisting && !row.isEditing"
+                    :rules="[(v) => !!v || 'Required']"
+                  />
+                </td>
+                <td>
+                  <v-checkbox
+                    v-model="row.is_pickup_serviceable"
+                    dense
+                    :disabled="row.isExisting && !row.isEditing"
+                  />
+                </td>
+                <td>
+                  <v-text-field
+                    v-model.number="row.pickup_amount"
+                    type="number"
+                    dense
+                    outlined
+                    :disabled="
+                      !row.is_pickup_serviceable ||
+                      (row.isExisting && !row.isEditing)
+                    "
+                    min="0"
+                  />
+                </td>
+                <td>
+                  <v-checkbox
+                    v-model="row.is_delivery_serviceable"
+                    dense
+                    :disabled="row.isExisting && !row.isEditing"
+                  />
+                </td>
+                <td>
+                  <v-text-field
+                    v-model.number="row.delivery_amount"
+                    type="number"
+                    dense
+                    outlined
+                    :disabled="
+                      !row.is_delivery_serviceable ||
+                      (row.isExisting && !row.isEditing)
+                    "
+                    min="0"
+                  />
+                </td>
+                <td>
+                  <v-checkbox
+                    v-model="row.is_active"
+                    dense
+                    :disabled="row.isExisting && !row.isEditing"
+                  />
+                </td>
 
-            <template v-slot:[`item.pickup_amount`]="{ item }">
-              <v-text-field
-                v-model.number="item.pickup_amount"
-                type="number"
-                dense
-                outlined
-                hide-details
-                min="0"
-                class="ma-0 pa-0"
-                :disabled="!item.is_pickup_serviceable"
-              />
-            </template>
+                <td class="text-right">
+                  <!-- Existing Record -->
+                  <template v-if="row.isExisting">
+                    <v-btn
+                      icon
+                      small
+                      color="primary"
+                      v-if="!row.isEditing"
+                      @click="row.isEditing = true"
+                    >
+                      <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      small
+                      color="success"
+                      v-if="row.isEditing"
+                      :loading="row.loading"
+                      @click="updateExisting(row)"
+                    >
+                      <v-icon>mdi-content-save</v-icon>
+                    </v-btn>
+                    <v-btn
+                      icon
+                      small
+                      color="grey"
+                      v-if="row.isEditing"
+                      @click="cancelEdit(row)"
+                    >
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                  </template>
 
-            <template v-slot:[`item.is_delivery_serviceable`]="{ item }">
-              <v-checkbox
-                v-model="item.is_delivery_serviceable"
-                dense
-                hide-details
-                class="ma-0 pa-0"
-              />
-            </template>
-
-            <template v-slot:[`item.delivery_amount`]="{ item }">
-              <v-text-field
-                v-model.number="item.delivery_amount"
-                type="number"
-                dense
-                outlined
-                hide-details
-                min="0"
-                class="ma-0 pa-0"
-                :disabled="!item.is_delivery_serviceable"
-              />
-            </template>
-
-            <template v-slot:[`item.is_active`]="{ item }">
-              <v-checkbox
-                v-model="item.is_active"
-                dense
-                hide-details
-                class="ma-0 pa-0"
-              />
-            </template>
-
-            <template v-slot:[`item.actions`]="{ item }">
-              <v-btn
-                icon
-                small
-                color="red"
-                @click="removeRow(bulkPincodes.indexOf(item))"
-              >
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </template>
-          </v-data-table>
+                  <!-- New Record -->
+                  <template v-else>
+                    <v-btn icon small color="red" @click="removeRow(index)">
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </v-simple-table>
 
           <v-btn small color="primary" outlined class="mt-3" @click="addRow">
             <v-icon left>mdi-plus</v-icon>Add Pincode
