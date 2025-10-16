@@ -217,6 +217,21 @@
                 hide-details
               />
             </div>
+            <!-- Total Quantity -->
+            <label class="text-subtitle-2">
+              Maximum Quantity Per Booking <span class="red--text">*</span>
+            </label>
+            <div class="mb-3">
+              <v-text-field
+                v-model.number="form.max_bookable_per_booking"
+                type="number"
+                :rules="[rules.required, rules.positive]"
+                required
+                outlined
+                dense
+                hide-details
+              />
+            </div>
 
             <!-- Addon Type -->
             <label class="text-subtitle-2">
@@ -291,7 +306,8 @@ export default {
         offer_price_per_day: null,
         base_price_per_booking: 0,
         offer_price_per_booking: null,
-        total_quantity: 1,
+        total_quantity: 0,
+        max_bookable_per_booking: 0,
         available: true,
         addon_type: "per_booking",
       },
@@ -395,6 +411,7 @@ export default {
           base_price_per_booking: this.form.base_price_per_booking,
           offer_price_per_booking: this.form.offer_price_per_booking,
           total_quantity: this.form.total_quantity,
+          max_bookable_per_booking: this.form.max_bookable_per_booking,
           quantity_left: this.form.quantity_left || null,
           available: this.form.available,
           addon_type: this.form.addon_type,

@@ -1,5 +1,5 @@
 <template>
-  <v-card flat class="pa-6 elevation-1">
+  <v-card v-if="model" flat class="pa-6 elevation-1">
     <!-- Optional Header Actions -->
     <div class="d-flex justify-space-between align-center mb-4">
       <!-- You can add edit button here if needed -->
@@ -74,12 +74,31 @@
         >
           <v-card outlined class="pa-4 rounded-xl elevation-0">
             <div class="d-flex align-center justify-space-between mb-2">
-              <span class="font-weight-bold">{{
-                plan.model_pricing_plan_data.plan_name
-              }}</span>
-              <v-chip small color="primary" outlined>
-                {{ plan.model_pricing_plan_data.plan_type }}
-              </v-chip>
+              <span class="font-weight-bold">
+                {{ plan.model_pricing_plan_data.plan_name }}
+              </span>
+
+              <div class="d-flex align-center">
+                <!-- Active / Inactive Status -->
+                <v-chip
+                  x-small
+                  :color="plan.is_active ? 'green' : 'red'"
+                  dark
+                  class="mr-2"
+                >
+                  {{ plan.is_active ? "Active" : "Inactive" }}
+                </v-chip>
+
+                <!-- Plan Type -->
+                <v-chip small color="primary" outlined>
+                  {{ plan.model_pricing_plan_data.plan_type }}
+                </v-chip>
+
+                <!-- Edit Button -->
+                <v-btn icon small @click="openEditDialog(plan.pricing_id)">
+                  <v-icon small>mdi-pencil</v-icon>
+                </v-btn>
+              </div>
             </div>
 
             <div class="my-2">
@@ -143,35 +162,39 @@
         Pricing information is not available for this model.
       </v-alert>
 
-      <!-- Add Plan Dialog -->
-      <v-dialog v-model="addPlanDialog" max-width="600px">
+      <!-- Add/Edit Plan Dialog -->
+      <v-dialog v-model="planDialog" max-width="600px">
         <v-card :loading="loading">
           <v-container>
             <div class="d-flex justify-space-between align-center mb-2">
-              <div class="text-h6 font-weight-bold">Add Plan</div>
-              <v-btn icon @click="closeAddPlanDialog">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
+              <div class="text-h6 font-weight-bold">
+                {{ dialogMode === "add" ? "Add Plan" : "Edit Pricing" }}
+              </div>
+              <v-btn icon @click="closePlanDialog"
+                ><v-icon>mdi-close</v-icon></v-btn
+              >
             </div>
 
             <v-form ref="form" v-model="formValid" class="my-4">
-              <!-- Select Plan -->
-              <label class="text-subtitle-2">
-                Select Plan <span class="red--text">*</span>
-              </label>
-              <div class="mb-3">
-                <v-select
-                  v-model="selectedPlanId"
-                  :items="plans"
-                  item-text="plan_name"
-                  item-value="plan_id"
-                  outlined
-                  dense
-                  :rules="[rules.required]"
-                  hide-details
-                  required
-                  placeholder="Choose a plan"
-                />
+              <!-- Show select only for add mode -->
+              <div v-if="dialogMode === 'add'">
+                <label class="text-subtitle-2">
+                  Select Plan <span class="red--text">*</span>
+                </label>
+                <div class="mb-3">
+                  <v-select
+                    v-model="selectedPlanId"
+                    :items="plans"
+                    item-text="plan_name"
+                    item-value="plan_id"
+                    outlined
+                    dense
+                    :rules="[rules.required]"
+                    hide-details
+                    placeholder="Choose a plan"
+                    required
+                  />
+                </div>
               </div>
 
               <!-- Base Rate -->
@@ -219,7 +242,7 @@
                 rounded
                 depressed
                 class="mr-2"
-                @click="closeAddPlanDialog"
+                @click="closePlanDialog"
               >
                 Cancel
               </v-btn>
@@ -228,9 +251,11 @@
                 rounded
                 depressed
                 :disabled="!formValid"
-                @click="addPlanToModel"
+                @click="
+                  dialogMode === 'add' ? addPlanToModel() : updatePricing()
+                "
               >
-                Add
+                {{ dialogMode === "add" ? "Add" : "Update" }}
               </v-btn>
             </div>
           </v-container>
@@ -249,6 +274,7 @@
       </p>
     </section>
   </v-card>
+  <v-skeleton-loader v-else type="article" />
 </template>
 
 <script>
@@ -261,17 +287,20 @@ export default {
     model: {
       type: Object,
       required: true,
+      default: () => ({}),
     },
   },
   data() {
     return {
-      addPlanDialog: false,
+      planDialog: false,
+      dialogMode: "add",
       plans: [],
       selectedPlanId: null,
       baseRate: null,
       offerRate: null,
       isActive: true,
       formValid: false,
+
       loading: false,
       rules: {
         required: (v) => !!v || "Required.",
@@ -280,38 +309,71 @@ export default {
     };
   },
   methods: {
-    async fetchPlans() {
-      this.loading = true;
-      try {
-        const { data } = await api.get("/api/plans", {
-          params: { limit: 50, offset: 0 },
-        });
-        this.plans = data?.data?.plans || [];
-      } catch (err) {
-        console.error(err);
-        this.$swal.fire("Error", "Failed to fetch plans", "error");
-      } finally {
-        this.loading = false;
-      }
-    },
+    // Open Add Dialog
     openAddPlanDialog() {
+      this.dialogMode = "add";
       this.resetForm();
       this.fetchPlans();
-      this.addPlanDialog = true;
+      this.planDialog = true;
     },
-    closeAddPlanDialog() {
-      this.addPlanDialog = false;
+
+    // Open Edit Dialog
+    async openEditDialog(pricingId) {
+      this.dialogMode = "edit";
+      this.resetForm();
+      this.currentPricingId = pricingId;
+      this.planDialog = true;
+      await this.fetchPricingDetails(pricingId);
+    },
+    closePlanDialog() {
+      this.planDialog = false;
       this.resetForm();
     },
+
     resetForm() {
       this.selectedPlanId = null;
       this.baseRate = null;
       this.offerRate = null;
       this.isActive = true;
       this.formValid = false;
+      this.currentPricingId = null;
     },
+    async fetchPlans() {
+      try {
+        this.loading = true;
+        const { data } = await api.get("/api/plans", {
+          params: { limit: 50, offset: 0 },
+        });
+        this.plans = data?.data?.plans || [];
+      } catch (err) {
+        this.$swal.fire("Error", "Failed to fetch plans", "error");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchPricingDetails(pricingId) {
+      try {
+        this.loading = true;
+        const { data } = await api.get(`/api/model-pricing/${pricingId}`);
+        const pricing = data?.data || {};
+        this.baseRate = pricing.base_rate;
+        this.offerRate = pricing.offer_rate;
+        this.isActive = pricing.is_active;
+      } catch (err) {
+        this.$swal.fire("Error", "Failed to fetch pricing", "error");
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async addPlanToModel() {
+      if (!this.model || !this.model.model_id) {
+        this.$swal.fire("Error", "Model data is not loaded yet.", "error");
+        return;
+      }
       if (!this.$refs.form.validate()) return;
+
       this.loading = true;
       try {
         await api.post(`/api/vehicle-model/${this.model.model_id}/add-plan`, {
@@ -322,13 +384,38 @@ export default {
           model_status: "active",
         });
         this.$swal.fire("Success", "Plan added successfully!", "success");
-        this.closeAddPlanDialog();
-        this.$emit("refresh-model"); // so parent can refetch model data
+        this.closePlanDialog();
+        this.$emit("refresh-model");
       } catch (err) {
-        console.error(err);
         this.$swal.fire(
           "Error",
           err.response?.data?.message || "Failed to add plan",
+          "error"
+        );
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updatePricing() {
+      if (!this.$refs.form.validate()) return;
+      this.loading = true;
+      try {
+        await api.put(
+          `/api/model-pricing/${this.currentPricingId}/update-details`,
+          {
+            base_rate: this.baseRate,
+            offer_rate: this.offerRate,
+            is_active: this.isActive,
+          }
+        );
+        this.$swal.fire("Success", "Pricing updated successfully!", "success");
+        this.closePlanDialog();
+        this.$emit("refresh-model");
+      } catch (err) {
+        this.$swal.fire(
+          "Error",
+          err.response?.data?.message || "Failed to update pricing",
           "error"
         );
       } finally {

@@ -347,7 +347,11 @@ export default {
         (a) => a.provider_addon_id === addon.provider_addon_id
       );
       if (existing) {
-        if (existing.qty < addon.quantity_left) existing.qty++;
+        if (
+          existing.qty < addon.quantity_left &&
+          existing.qty < addon.max_bookable_per_booking
+        )
+          existing.qty++;
       } else {
         this.form.addons.push({
           provider_addon_id: addon.provider_addon_id,
@@ -381,6 +385,7 @@ export default {
             name: addon.addon_name,
             type: addon.addon_type,
             description: addon.description,
+            max_bookable_per_booking: addon.max_bookable_per_booking,
             price: Number(
               addon.addon_type === "per_day"
                 ? addon.offer_price_per_day || addon.base_price_per_day
