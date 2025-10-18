@@ -23,6 +23,7 @@
       <div class="d-flex justify-space-between align-center">
         <div class="text-subtitle-1 font-weight-bold">
           {{ customerData.display_name }}
+          {{ customerData.dl_verification_data.verified }}
           <v-btn icon small @click="openUpdateCustomerDialog(customerData)">
             <v-icon small color="primary">mdi-pencil</v-icon>
           </v-btn>
@@ -350,16 +351,16 @@
 
     <v-dialog
       v-model="openIDVerifyDialog"
-      max-width="500px"
+      max-width="600px"
       @input="onDialogToggle('id')"
     >
       <v-card :loading="verifyingID">
         <v-container>
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">ID Verification</div>
-            <v-btn icon @click="openIDVerifyDialog = false"
-              ><v-icon>mdi-close</v-icon></v-btn
-            >
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="text-h6 font-weight-bold">Manual KYC Verification</div>
+            <v-btn icon @click="openIDVerifyDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </div>
 
           <v-form
@@ -368,58 +369,193 @@
             lazy-validation
             class="my-4"
           >
-            <label class="text-subtitle-2">
-              ID Type <span class="red--text">*</span>
-            </label>
+            <!-- Document Type -->
+            <label class="text-subtitle-2"
+              >Document Type <span class="red--text">*</span></label
+            >
+            <v-select
+              v-model="idForm.document_type"
+              :items="[
+                'aadhaar',
+                'pan',
+                'passport',
+                'voter_id',
+                'bank_account',
+                'upi',
+              ]"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Document Number -->
+            <label class="text-subtitle-2"
+              >Document Number <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.document_number"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Name -->
+            <label class="text-subtitle-2"
+              >Name on Document <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.name"
+              :rules="[rules.required, rules.alphaOnly]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Date of Birth -->
+            <label class="text-subtitle-2"
+              >Date of Birth <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.date_of_birth"
+              type="date"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Gender -->
+            <label class="text-subtitle-2"
+              >Gender <span class="red--text">*</span></label
+            >
+            <v-select
+              v-model="idForm.gender"
+              :items="['male', 'female', 'other']"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Father Name -->
+            <label class="text-subtitle-2"
+              >Father Name <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.father_name"
+              :rules="[rules.required, rules.alphaOnly]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Address -->
+            <div class="mt-4 mb-2 font-weight-bold text-subtitle-1">
+              Address
+            </div>
+
+            <label class="text-subtitle-2"
+              >Address Line <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.address.address_line"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <label class="text-subtitle-2"
+              >Pincode <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.address.pincode"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Dynamic State Dropdown -->
+            <label class="text-subtitle-2"
+              >State <span class="red--text">*</span></label
+            >
+            <v-select
+              v-model="idForm.address.state_id"
+              :items="states"
+              item-text="state_name"
+              item-value="state_id"
+              :loading="statesLoading"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+              placeholder="Select state"
+            />
+
+            <label class="text-subtitle-2"
+              >District <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.address.district"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <label class="text-subtitle-2"
+              >Country <span class="red--text">*</span></label
+            >
+            <v-text-field
+              v-model="idForm.address.country"
+              :rules="[rules.required]"
+              outlined
+              dense
+              hide-details="auto"
+              class="mb-3"
+            />
+
+            <!-- Upload Front Image -->
+            <!-- Document Front Image -->
+            <label class="text-subtitle-2"
+              >Front Image <span class="red--text">*</span></label
+            >
             <div class="mb-3">
-              <v-select
-                v-model="idForm.id_type"
-                :items="['Aadhaar', 'PAN', 'Voter ID']"
-                :rules="[rules.required]"
+              <v-file-input
+                v-model="frontImageFile"
                 outlined
                 dense
                 hide-details="auto"
-                placeholder="Select ID Type"
+                accept="image/*"
+                @change="uploadImage('front')"
               />
             </div>
 
-            <label class="text-subtitle-2">
-              ID Number <span class="red--text">*</span>
-            </label>
+            <!-- Document Back Image -->
+            <label class="text-subtitle-2"
+              >Back Image <span class="red--text">*</span></label
+            >
             <div class="mb-3">
-              <v-text-field
-                v-model="idForm.id_number"
-                :rules="[rules.required, rules.idFormat]"
+              <v-file-input
+                v-model="backImageFile"
                 outlined
                 dense
                 hide-details="auto"
-              />
-            </div>
-
-            <label class="text-subtitle-2">
-              Name on ID <span class="red--text">*</span>
-            </label>
-            <div class="mb-3">
-              <v-text-field
-                v-model="idForm.name"
-                :rules="[rules.required, rules.alphaOnly]"
-                outlined
-                dense
-                hide-details="auto"
-              />
-            </div>
-
-            <label class="text-subtitle-2">
-              Date of Birth <span class="red--text">*</span>
-            </label>
-            <div class="mb-3">
-              <v-text-field
-                v-model="idForm.dob"
-                type="date"
-                :rules="[rules.required, rules.dob]"
-                outlined
-                dense
-                hide-details="auto"
+                accept="image/*"
+                @change="uploadImage('back')"
               />
             </div>
           </v-form>
@@ -431,7 +567,7 @@
             <v-btn
               color="primary"
               :loading="verifyingID"
-              :disabled="!valid.id"
+              :disabled="!valid.id || uploading.front || uploading.back"
               @click="submitIDVerify"
               rounded
               depressed
@@ -467,7 +603,10 @@ export default {
       verifyingDL: false,
       verifyingManualDL: false,
       verifyingID: false,
-
+      uploading: {
+        front: false,
+        back: false,
+      },
       // dialogs
       updateCustomerDialog: false,
       openDLVerifyDialog: false,
@@ -501,7 +640,26 @@ export default {
         hill_valid_till: "",
         class_of_vehicle: "",
       },
-      idForm: { id_type: "", id_number: "", name: "", dob: "" },
+      frontImageFile: null,
+      backImageFile: null,
+      states: [],
+      idForm: {
+        document_type: null,
+        document_number: "",
+        name: "",
+        date_of_birth: "",
+        gender: "",
+        father_name: "",
+        address: {
+          address_line: "",
+          pincode: "",
+          state_id: "",
+          district: "",
+          country: "",
+        },
+        document_front_image_url: "",
+        document_back_image_url: "",
+      },
 
       // validity
       valid: { update: false, dl: false, manual: false, id: false },
@@ -535,7 +693,10 @@ export default {
     },
     isDLVerified() {
       const c = this.customerData || {};
-      return c.verification_status === "verified" || c.dl_verified === true;
+      const dlData = Array.isArray(c.dl_verification_data)
+        ? c.dl_verification_data[0]
+        : null;
+      return (dlData && dlData.verified === true) || c.dl_verified === true;
     },
     isIDVerified() {
       const c = this.customerData || {};
@@ -599,6 +760,7 @@ export default {
   },
   mounted() {
     this.loadCustomer();
+    this.fetchStates();
   },
   methods: {
     parseError(error) {
@@ -768,22 +930,87 @@ export default {
         this.verifyingManualDL = false;
       }
     },
+    async fetchStates() {
+      this.statesLoading = true;
+      try {
+        const { data } = await api.get("/api/states");
+        this.states = data?.data?.states || [];
+      } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Load States",
+          text: this.parseError(e),
+        });
+      } finally {
+        this.statesLoading = false;
+      }
+    },
+    async uploadImage(side) {
+      try {
+        const file =
+          side === "front" ? this.frontImageFile : this.backImageFile;
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("type", "kyc");
+        formData.append("image", file, file.name);
+
+        const res = await api.post("/api/document/upload-image", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (res.data?.success) {
+          const imageUrl = res.data.data.url;
+          if (side === "front") {
+            this.idForm.document_front_image_url = imageUrl;
+          } else {
+            this.idForm.document_back_image_url = imageUrl;
+          }
+          Swal.fire("Success", "Image uploaded successfully", "success");
+        }
+      } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: "Upload Failed",
+          text: this.parseError(e),
+        });
+      }
+    },
+
     async submitIDVerify() {
       if (this.$refs.idFormRef && !this.$refs.idFormRef.validate()) return;
       this.verifyingID = true;
       try {
-        const payload = Object.assign(
-          { customer_id: this.customerData.customer_id },
-          this.idForm
-        );
-        await api.post("/api/customer/verify-id", payload);
-        Swal.fire("Success", "ID Verified", "success");
-        this.customerData.id_verified = true;
+        const payload = {
+          document_type: this.idForm.document_type,
+          document_number: this.idForm.document_number,
+          name: this.idForm.name,
+          date_of_birth: this.idForm.date_of_birth,
+          gender: this.idForm.gender,
+          father_name: this.idForm.father_name,
+          address: {
+            address_line: this.idForm.address.address_line,
+            pincode: this.idForm.address.pincode,
+            state_id: Number(this.idForm.address.state_id),
+            district: this.idForm.address.district,
+            country: this.idForm.address.country,
+          },
+          document_front_image_url: this.idForm.document_front_image_url,
+          document_back_image_url: this.idForm.document_back_image_url,
+          remarks: "Manual verification completed by admin",
+        };
+
+        const customerId = this.customerData.customer_id;
+        await api.post(`/api/customer/${customerId}/kyc-manual`, payload);
+
+        Swal.fire("Success", "KYC verified successfully", "success");
+        this.customerData.verification_status = "verified";
+        this.loadCustomer();
         this.openIDVerifyDialog = false;
       } catch (e) {
         Swal.fire({
           icon: "error",
-          title: "ID Verification Failed",
+          title: "KYC Verification Failed",
           text: this.parseError(e),
         });
       } finally {
