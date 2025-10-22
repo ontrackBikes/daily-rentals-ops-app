@@ -8,6 +8,7 @@
           <v-card outlined class="pa-4 rounded-lg">
             <CustomerViewer v-if="customer" :customer_id="customer_id" />
           </v-card>
+          <touchpoints v-if="customer_id" :customer-id="customer_id" />
         </v-col>
 
         <!-- RIGHT: Tabs Section -->
@@ -36,9 +37,10 @@ import Swal from "sweetalert2";
 import OrdersTab from "./CustomerTabs/OrdersTab.vue";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import CustomerViewer from "@/components/CustomerViewer.vue";
+import Touchpoints from "@/components/Touchpoints.vue";
 
 export default {
-  components: { OrdersTab, DeepLayout, CustomerViewer },
+  components: { OrdersTab, DeepLayout, CustomerViewer, Touchpoints },
   data() {
     return {
       customer_id: null,

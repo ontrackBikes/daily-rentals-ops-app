@@ -12,7 +12,7 @@
               <div class="text-subtitle-1 font-weight-bold">
                 {{ order?.internal_order_id }}
               </div>
-              <v-btn @click="getOrderData()" icon="mdi-refresh"
+              <v-btn @click="getOrderData()"
                 ><v-icon>mdi-refresh</v-icon></v-btn
               >
 
@@ -82,6 +82,11 @@
               :customer_id="selectedCustomer"
             />
           </v-card>
+
+          <touchpoints
+            v-if="selectedCustomer"
+            :customer-id="selectedCustomer"
+          />
         </v-col>
 
         <!-- RIGHT: Tabs + Content -->
@@ -132,9 +137,9 @@ import api from "@/plugins/axios";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
 import CustomerViewer from "@/components/CustomerViewer.vue";
 import StatusService from "@/plugins/statusColor";
-
+import Touchpoints from "@/components/Touchpoints.vue";
 export default {
-  components: { DeepLayout, CustomerViewer },
+  components: { DeepLayout, CustomerViewer, Touchpoints },
   name: "OrderView",
   data() {
     return {

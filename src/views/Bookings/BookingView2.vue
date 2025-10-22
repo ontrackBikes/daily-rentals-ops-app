@@ -177,6 +177,12 @@
               </v-row>
             </v-container>
           </v-card>
+          <touchpoints
+            class="mt-2"
+            v-if="booking.order_data.customer_id"
+            :customer-id="booking.order_data.customer_id"
+            :booking-id="booking_id"
+          />
         </v-col>
         <v-col cols="12" md="9">
           <!-- <v-card outlined v-if="booking?.booking_line_item_data?.length">
@@ -580,9 +586,10 @@ import DeepLayout from "@/Layouts/DeepLayout.vue";
 import ExtendBookingViewer from "@/components/ExtendBookingViewer.vue";
 import StatusService from "@/plugins/statusColor";
 import ExchangeViewer from "@/components/ExchangeViewer.vue";
+import Touchpoints from "@/components/Touchpoints.vue";
 
 export default {
-  components: { DeepLayout, ExtendBookingViewer, ExchangeViewer },
+  components: { DeepLayout, ExtendBookingViewer, ExchangeViewer, Touchpoints },
   data() {
     return {
       booking_id: null,

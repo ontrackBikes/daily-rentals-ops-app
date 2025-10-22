@@ -39,19 +39,21 @@
         </v-chip>
       </div>
 
-      <div
-        class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
-      >
-        <v-icon small color="indigo" class="mr-1">mdi-phone</v-icon>
-        {{ customerPhone }}
-      </div>
+      <div class="d-flex">
+        <div
+          class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
+        >
+          <v-icon small color="indigo" class="mr-1">mdi-phone</v-icon>
+          {{ customerPhone }}
+        </div>
 
-      <div class="text-body-2 mt-1">
-        <v-icon small color="indigo" class="mr-1">mdi-email</v-icon>
-        {{
-          customerData.customer_contact_data.find((c) => c.type === "email")
-            ?.value
-        }}
+        <div class="text-body-2 mt-1 align-center ml-4 d-flex">
+          <v-icon small color="indigo" class="ml-1">mdi-email</v-icon>
+          {{
+            customerData.customer_contact_data.find((c) => c.type === "email")
+              ?.value
+          }}
+        </div>
       </div>
 
       <v-divider class="my-4" />
@@ -182,16 +184,31 @@
     <v-dialog
       v-model="openIDVerifyDialog"
       max-width="600px"
+      persistent
       @input="onDialogToggle('id')"
     >
       <v-card :loading="verifyingID">
         <v-container>
+          <!-- Header -->
           <div class="d-flex justify-space-between align-center mb-2">
             <div class="text-h6 font-weight-bold">Manual KYC Verification</div>
-            <v-btn icon @click="openIDVerifyDialog = false">
+            <v-btn icon @click="closeDialog">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
+
+          <!-- Global Error -->
+          <v-alert
+            v-if="idError"
+            type="error"
+            outlined
+            dense
+            class="mb-3"
+            dismissible
+            @input="idError = ''"
+          >
+            {{ idError }}
+          </v-alert>
 
           <v-form
             ref="idFormRef"
@@ -200,9 +217,9 @@
             class="my-4"
           >
             <!-- Document Type -->
-            <label class="text-subtitle-2"
-              >Document Type <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Document Type <span class="red--text">*</span>
+            </label>
             <v-select
               v-model="idForm.document_type"
               :items="[
@@ -221,9 +238,9 @@
             />
 
             <!-- Document Number -->
-            <label class="text-subtitle-2"
-              >Document Number <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Document Number <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.document_number"
               :rules="[rules.required]"
@@ -234,9 +251,9 @@
             />
 
             <!-- Name -->
-            <label class="text-subtitle-2"
-              >Name on Document <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Name on Document <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.name"
               :rules="[rules.required, rules.alphaOnly]"
@@ -246,10 +263,10 @@
               class="mb-3"
             />
 
-            <!-- Date of Birth -->
-            <label class="text-subtitle-2"
-              >Date of Birth <span class="red--text">*</span></label
-            >
+            <!-- DOB -->
+            <label class="text-subtitle-2">
+              Date of Birth <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.date_of_birth"
               type="date"
@@ -261,9 +278,9 @@
             />
 
             <!-- Gender -->
-            <label class="text-subtitle-2"
-              >Gender <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Gender <span class="red--text">*</span>
+            </label>
             <v-select
               v-model="idForm.gender"
               :items="['male', 'female', 'other']"
@@ -275,9 +292,9 @@
             />
 
             <!-- Father Name -->
-            <label class="text-subtitle-2"
-              >Father Name <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Father Name <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.father_name"
               :rules="[rules.required, rules.alphaOnly]"
@@ -292,9 +309,9 @@
               Address
             </div>
 
-            <label class="text-subtitle-2"
-              >Address Line <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Address Line <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.address.address_line"
               :rules="[rules.required]"
@@ -304,9 +321,9 @@
               class="mb-3"
             />
 
-            <label class="text-subtitle-2"
-              >Pincode <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Pincode <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.address.pincode"
               :rules="[rules.required]"
@@ -316,10 +333,9 @@
               class="mb-3"
             />
 
-            <!-- Dynamic State Dropdown -->
-            <label class="text-subtitle-2"
-              >State <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              State <span class="red--text">*</span>
+            </label>
             <v-select
               v-model="idForm.address.state_id"
               :items="states"
@@ -334,9 +350,9 @@
               placeholder="Select state"
             />
 
-            <label class="text-subtitle-2"
-              >District <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              District <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.address.district"
               :rules="[rules.required]"
@@ -346,9 +362,9 @@
               class="mb-3"
             />
 
-            <label class="text-subtitle-2"
-              >Country <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Country <span class="red--text">*</span>
+            </label>
             <v-text-field
               v-model="idForm.address.country"
               :rules="[rules.required]"
@@ -359,33 +375,33 @@
             />
 
             <!-- Upload Front Image -->
-            <!-- Document Front Image -->
-            <label class="text-subtitle-2"
-              >Front Image <span class="red--text">*</span></label
-            >
+            <label class="text-subtitle-2">
+              Front Image <span class="red--text">*</span>
+            </label>
             <upload-image
               type="kyc"
               @uploaded="(url) => (idForm.document_front_image_url = url)"
+              @error="onUploadError"
             />
 
-            <!-- Document Back Image -->
-            <label class="text-subtitle-2"
-              >Back Image <span class="red--text">*</span></label
-            >
+            <!-- Upload Back Image -->
+            <label class="text-subtitle-2">
+              Back Image <span class="red--text">*</span>
+            </label>
             <upload-image
               type="kyc"
               @uploaded="(url) => (idForm.document_back_image_url = url)"
+              @error="onUploadError"
             />
           </v-form>
 
+          <!-- Actions -->
           <div class="d-flex justify-end my-2">
-            <v-btn rounded text class="mr-2" @click="openIDVerifyDialog = false"
-              >Cancel</v-btn
-            >
+            <v-btn rounded text class="mr-2" @click="closeDialog">Cancel</v-btn>
             <v-btn
               color="primary"
               :loading="verifyingID"
-              :disabled="!valid.id || uploading.front || uploading.back"
+              :disabled="isVerifyDisabled"
               @click="submitIDVerify"
               rounded
               depressed
@@ -421,6 +437,8 @@ export default {
       loading: false,
       loadError: "",
       customerData: null,
+      idError: "",
+      statesLoading: false,
 
       // actions
       updating: false,
@@ -501,6 +519,33 @@ export default {
     isIDVerified() {
       const c = this.customerData || {};
       return !!c.id_verified;
+    },
+    isVerifyDisabled() {
+      const f = this.idForm;
+
+      // Required fields
+      const requiredFilled =
+        f.document_type &&
+        f.document_number &&
+        f.name &&
+        f.date_of_birth &&
+        f.gender &&
+        f.father_name &&
+        f.address.address_line &&
+        f.address.pincode &&
+        f.address.state_id &&
+        f.address.district &&
+        f.address.country &&
+        f.document_front_image_url &&
+        f.document_back_image_url;
+
+      // If any required field is missing OR uploading is in progress OR form is invalid → disable
+      return (
+        !requiredFilled ||
+        !this.valid.id ||
+        this.uploading.front ||
+        this.uploading.back
+      );
     },
   },
   mounted() {
@@ -651,6 +696,13 @@ export default {
       } finally {
         this.verifyingID = false;
       }
+    },
+    closeDialog() {
+      this.openIDVerifyDialog = false;
+      this.resetForm();
+    },
+    onUploadError(err) {
+      this.idError = err || "Image upload failed. Please try again.";
     },
     openManualFromDL() {
       this.manualDLForm.dl_number =
