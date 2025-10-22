@@ -107,7 +107,7 @@
               >
                 View
               </v-btn>
-              <v-btn icon="mdi-pencil"></v-btn>
+              <!-- <v-btn icon="mdi-pencil"></v-btn> -->
             </td>
           </tr>
           <tr v-if="!models.length">

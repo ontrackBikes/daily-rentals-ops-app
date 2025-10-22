@@ -10,31 +10,40 @@
       <h3 class="font-weight-bold mb-3">Specifications</h3>
       <v-row dense>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Body Type:</strong> {{ model.body_type || "N/A" }}
+          <span class="grey--text">Body Type:</span>
+          {{ model.body_type || "N/A" }}
         </v-col>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Vehicle Type:</strong> {{ model.vehicle_type || "N/A" }}
+          <span class="grey--text">Vehicle Type:</span>
+          {{ model.vehicle_type || "N/A" }}
         </v-col>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Start Type:</strong> {{ model.start_type || "N/A" }}
+          <span class="grey--text">Start Type:</span>
+          {{ model.start_type || "N/A" }}
         </v-col>
         <v-col cols="12" sm="6" lg="4" v-if="model.fuel_capacity">
-          <strong>Fuel Capacity:</strong> {{ model.fuel_capacity }} L
+          <span class="grey--text">Fuel Capacity:</span>
+          {{ model.fuel_capacity }} L
         </v-col>
         <v-col cols="12" sm="6" lg="4" v-if="model.battery_capacity">
-          <strong>Battery Capacity:</strong> {{ model.battery_capacity }} kWh
+          <span class="grey--text">Battery Capacity:</span>
+          {{ model.battery_capacity }} kWh
         </v-col>
         <v-col cols="12" sm="6" lg="4" v-if="model.range_km">
-          <strong>Range:</strong> {{ model.range_km }} km
+          <span class="grey--text">Range:</span>
+          {{ model.range_km }} km
         </v-col>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Year:</strong> {{ model.year || "N/A" }}
+          <span class="grey--text">Year:</span>
+          {{ model.year || "N/A" }}
         </v-col>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Make:</strong> {{ model.make || "N/A" }}
+          <span class="grey--text">Make:</span>
+          {{ model.make || "N/A" }}
         </v-col>
         <v-col cols="12" sm="6" lg="4">
-          <strong>Seat Capacity:</strong> {{ model.seat_capacity || "N/A" }}
+          <span class="grey--text">Seat Capacity:</span>
+          {{ model.seat_capacity || "N/A" }}
         </v-col>
       </v-row>
     </section>
@@ -66,79 +75,88 @@
         class="gy-4"
       >
         <v-col
-          v-for="plan in model.vehicle_model_pricing_data"
+          v-for="plan in model.vehicle_model_pricing_data.filter(
+            (p) => p.model_pricing_plan_data.is_active
+          )"
           :key="plan.pricing_id"
           cols="12"
           md="6"
           lg="4"
         >
-          <v-card outlined class="pa-4 rounded-xl elevation-0">
-            <div class="d-flex align-center justify-space-between mb-2">
-              <span class="font-weight-bold">
-                {{ plan.model_pricing_plan_data.plan_name }}
-              </span>
+          <v-card outlined class="pa-4 rounded-xl elevation-1">
+            <!-- Header -->
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <div class="text-subtitle-1 font-weight-bold">
+                  {{ plan.model_pricing_plan_data.plan_name }}
+                </div>
+                <div class="grey--text text-caption">
+                  {{ plan.model_pricing_plan_data.plan_type }}
+                </div>
+              </div>
 
               <div class="d-flex align-center">
-                <!-- Active / Inactive Status -->
                 <v-chip
                   x-small
                   :color="plan.is_active ? 'green' : 'red'"
                   dark
-                  class="mr-2"
+                  class="mr-2 text-capitalize"
                 >
                   {{ plan.is_active ? "Active" : "Inactive" }}
                 </v-chip>
 
-                <!-- Plan Type -->
-                <v-chip small color="primary" outlined>
-                  {{ plan.model_pricing_plan_data.plan_type }}
-                </v-chip>
-
-                <!-- Edit Button -->
-                <v-btn icon small @click="openEditDialog(plan.pricing_id)">
+                <v-btn
+                  icon
+                  small
+                  color="primary"
+                  @click="openEditDialog(plan.pricing_id)"
+                >
                   <v-icon small>mdi-pencil</v-icon>
                 </v-btn>
               </div>
             </div>
 
-            <div class="my-2">
-              <span class="font-weight-bold">Price:</span>
+            <!-- Price Section -->
+            <div>
               <span
                 v-if="
                   plan.offer_rate &&
                   Number(plan.offer_rate) < Number(plan.base_rate)
                 "
               >
-                <s class="grey--text"
-                  >₹{{ Number(plan.base_rate).toLocaleString() }}</s
-                >
-                <span class="ml-2 red--text font-weight-bold">
+                <s class="grey--text mr-2">
+                  ₹{{ Number(plan.base_rate).toLocaleString() }}
+                </s>
+                <span class="red--text font-weight-bold text-h6">
                   ₹{{ Number(plan.offer_rate).toLocaleString() }}
                 </span>
-                <v-chip x-small color="green lighten-1" dark class="ml-2"
-                  >Offer</v-chip
-                >
+                <v-chip x-small color="green lighten-1" dark class="ml-2">
+                  Offer
+                </v-chip>
               </span>
-              <span v-else>
-                <span class="primary--text font-weight-bold">
-                  ₹{{ Number(plan.base_rate).toLocaleString() }}
-                </span>
+              <span v-else class="primary--text font-weight-bold text-h6">
+                ₹{{ Number(plan.base_rate).toLocaleString() }}
               </span>
             </div>
 
-            <v-simple-table dense>
+            <!-- Details Table -->
+            <v-simple-table dense class="rounded-lg grey lighten-5">
               <tbody>
                 <tr>
-                  <td>KM Cap</td>
-                  <td>{{ plan.model_pricing_plan_data.km_cap }} km</td>
+                  <td class="grey--text text-caption">KM Cap</td>
+                  <td class="text-right font-weight-medium">
+                    {{ plan.model_pricing_plan_data.km_cap }} km
+                  </td>
                 </tr>
                 <tr>
-                  <td>Extra KM</td>
-                  <td>₹{{ plan.model_pricing_plan_data.extra_km_rate }}</td>
+                  <td class="grey--text text-caption">Extra KM</td>
+                  <td class="text-right font-weight-medium">
+                    ₹{{ plan.model_pricing_plan_data.extra_km_rate }}
+                  </td>
                 </tr>
                 <tr>
-                  <td>Deposit</td>
-                  <td>
+                  <td class="grey--text text-caption">Deposit</td>
+                  <td class="text-right font-weight-medium">
                     ₹{{
                       Number(
                         plan.model_pricing_plan_data.security_deposit
@@ -149,15 +167,17 @@
               </tbody>
             </v-simple-table>
 
+            <!-- Description -->
             <div
               v-if="plan.model_pricing_plan_data.plan_description"
-              class="mt-2 text-caption grey--text text--darken-1"
+              class="mt-3 text-body-2 grey--text"
             >
               {{ plan.model_pricing_plan_data.plan_description }}
             </div>
           </v-card>
         </v-col>
       </v-row>
+
       <v-alert type="info" outlined v-else>
         Pricing information is not available for this model.
       </v-alert>
@@ -269,7 +289,7 @@
       <p class="text-body-2 mb-0" v-if="model.description">
         {{ model.description }}
       </p>
-      <p class="text-body-2 mb-0 grey--text text--darken-1" v-else>
+      <p class="text-body-2 mb-0 grey--text" v-else>
         No description provided for this vehicle model.
       </p>
     </section>

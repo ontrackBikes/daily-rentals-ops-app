@@ -117,7 +117,7 @@
                     :items="model.vehicle_data"
                     item-key="vehicle_id"
                     dense
-                    class="elevation-2 rounded-lg"
+                    class="rounded-lg"
                     hide-default-footer
                   >
                     <!-- Color -->
@@ -208,7 +208,7 @@
             <!-- Form Content -->
             <div class="my-4">
               <AddModel
-                :modelId="model.model_id"
+                :modelId="model?.model_id"
                 @model-saved="reloadModel"
                 :editDialog.sync="editDialog"
               />

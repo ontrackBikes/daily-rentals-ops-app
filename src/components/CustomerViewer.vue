@@ -57,28 +57,11 @@
       <v-divider class="my-4" />
 
       <div class="text-subtitle-2 font-weight-medium mb-1">DL Verification</div>
-      <div class="d-flex align-center">
-        <v-icon small class="mr-1" :color="isDLVerified ? 'green' : 'red'">
-          {{
-            isDLVerified
-              ? "mdi-check-circle-outline"
-              : "mdi-close-circle-outline"
-          }}
-        </v-icon>
-        <span class="text-body-2 grey--text">
-          {{ isDLVerified ? "Verified" : "Not Verified" }}
-        </span>
-        <v-chip
-          v-if="!isDLVerified"
-          small
-          class="ml-2"
-          color="amber darken-2"
-          text-color="black"
-          @click="openDLVerifyDialog = true"
-        >
-          Verify Now
-        </v-chip>
-      </div>
+      <DLVerification
+        :customer-id="customerData.customer_id"
+        :dl-verified="isDLVerified"
+        @verified="loadCustomer"
+      />
 
       <div class="text-subtitle-2 font-weight-medium mt-3 mb-1">
         ID Verification
@@ -190,159 +173,6 @@
               depressed
             >
               Update
-            </v-btn>
-          </div>
-        </v-container>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="openDLVerifyDialog"
-      max-width="500px"
-      @input="onDialogToggle('dl')"
-    >
-      <v-card :loading="verifyingDL">
-        <v-container>
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">DL Verification</div>
-            <v-btn icon @click="openDLVerifyDialog = false"
-              ><v-icon>mdi-close</v-icon></v-btn
-            >
-          </div>
-
-          <v-form
-            ref="dlVerifyForm"
-            v-model="valid.dl"
-            lazy-validation
-            class="my-4"
-          >
-            <label class="text-subtitle-2">
-              DL Number <span class="red--text">*</span>
-            </label>
-            <div class="mb-3">
-              <v-text-field
-                v-model="dlForm.dl_number"
-                :rules="[rules.required, rules.dlNumber]"
-                outlined
-                dense
-                hide-details="auto"
-                persistent-hint
-              />
-            </div>
-
-            <label class="text-subtitle-2">
-              Date of Birth <span class="red--text">*</span>
-            </label>
-            <div class="mb-3">
-              <v-text-field
-                v-model="dlForm.dob"
-                type="date"
-                :rules="[rules.required]"
-                outlined
-                dense
-                hide-details="auto"
-              />
-            </div>
-          </v-form>
-
-          <div class="d-flex justify-end my-2">
-            <v-btn
-              text
-              rounded
-              depressed
-              class="mr-2"
-              @click="openDLVerifyDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn
-              text
-              rounded
-              depressed
-              color="primary"
-              class="mr-2"
-              @click="openManualFromDL"
-              >Manual Verification</v-btn
-            >
-            <v-btn
-              color="primary"
-              :loading="verifyingDL"
-              :disabled="!valid.dl"
-              @click="verifyDL"
-              rounded
-              depressed
-            >
-              Verify Now
-            </v-btn>
-          </div>
-        </v-container>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="openManualDLDialog"
-      max-width="500px"
-      @input="onDialogToggle('manual')"
-    >
-      <v-card :loading="verifyingManualDL">
-        <v-container>
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">Manual DL Entry</div>
-            <v-btn icon @click="openManualDLDialog = false"
-              ><v-icon>mdi-close</v-icon></v-btn
-            >
-          </div>
-
-          <v-form
-            ref="manualDLForm"
-            v-model="valid.manual"
-            lazy-validation
-            class="my-4"
-          >
-            <div v-for="field in manualFields" :key="field.model" class="mb-3">
-              <label class="text-subtitle-2">
-                {{ field.label }}
-                <span v-if="field.required" class="red--text">*</span>
-              </label>
-
-              <v-select
-                v-if="field.type === 'select'"
-                v-model="manualDLForm[field.model]"
-                :items="field.items"
-                :rules="field.required ? [rules.required] : []"
-                outlined
-                dense
-                hide-details="auto"
-              />
-              <v-text-field
-                v-else
-                v-model="manualDLForm[field.model]"
-                :type="field.type || 'text'"
-                :rules="field.required ? [rules.required] : []"
-                outlined
-                dense
-                hide-details="auto"
-              />
-            </div>
-          </v-form>
-
-          <div class="d-flex justify-end my-2">
-            <v-btn
-              rounded
-              depressed
-              text
-              class="mr-2"
-              @click="openManualDLDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn
-              color="primary"
-              :loading="verifyingManualDL"
-              :disabled="!valid.manual"
-              @click="submitManualDL"
-              rounded
-              depressed
-            >
-              Verify
             </v-btn>
           </div>
         </v-container>
@@ -533,31 +363,19 @@
             <label class="text-subtitle-2"
               >Front Image <span class="red--text">*</span></label
             >
-            <div class="mb-3">
-              <v-file-input
-                v-model="frontImageFile"
-                outlined
-                dense
-                hide-details="auto"
-                accept="image/*"
-                @change="uploadImage('front')"
-              />
-            </div>
+            <upload-image
+              type="kyc"
+              @uploaded="(url) => (idForm.document_front_image_url = url)"
+            />
 
             <!-- Document Back Image -->
             <label class="text-subtitle-2"
               >Back Image <span class="red--text">*</span></label
             >
-            <div class="mb-3">
-              <v-file-input
-                v-model="backImageFile"
-                outlined
-                dense
-                hide-details="auto"
-                accept="image/*"
-                @change="uploadImage('back')"
-              />
-            </div>
+            <upload-image
+              type="kyc"
+              @uploaded="(url) => (idForm.document_back_image_url = url)"
+            />
           </v-form>
 
           <div class="d-flex justify-end my-2">
@@ -585,11 +403,17 @@
 import api from "@/plugins/axios";
 import Swal from "sweetalert2";
 import StatusService from "@/plugins/statusColor";
+import UploadImage from "@/components/UploadImage.vue";
+import DLVerification from "@/components/DLVerification.vue";
 
 export default {
   name: "CustomerDetails",
   props: {
     customer_id: { type: Number, required: true },
+  },
+  components: {
+    UploadImage,
+    DLVerification,
   },
   data() {
     return {
@@ -600,8 +424,6 @@ export default {
 
       // actions
       updating: false,
-      verifyingDL: false,
-      verifyingManualDL: false,
       verifyingID: false,
       uploading: {
         front: false,
@@ -609,8 +431,6 @@ export default {
       },
       // dialogs
       updateCustomerDialog: false,
-      openDLVerifyDialog: false,
-      openManualDLDialog: false,
       openIDVerifyDialog: false,
 
       // forms
@@ -619,26 +439,6 @@ export default {
         user_data: { phone: "" },
         address: "",
         email: "",
-      },
-      dlForm: { dl_number: "", dob: "" },
-      manualDLForm: {
-        dl_number: "",
-        name_on_dl: "",
-        father_or_husband_name: "",
-        dob: "",
-        address: "",
-        pincode: "",
-        district: "",
-        state: "",
-        country: "",
-        issue_date: "",
-        non_transport_valid_from: "",
-        non_transport_valid_to: "",
-        transport_valid_from: "",
-        transport_valid_to: "",
-        hazardous_valid_till: "",
-        hill_valid_till: "",
-        class_of_vehicle: "",
       },
       frontImageFile: null,
       backImageFile: null,
@@ -701,61 +501,6 @@ export default {
     isIDVerified() {
       const c = this.customerData || {};
       return !!c.id_verified;
-    },
-    manualFields() {
-      return [
-        { model: "dl_number", label: "DL Number", required: true },
-        { model: "name_on_dl", label: "Name on DL", required: true },
-        {
-          model: "father_or_husband_name",
-          label: "Father/Husband's Name",
-          required: true,
-        },
-        { model: "dob", label: "Date of Birth", type: "date", required: true },
-        { model: "address", label: "Address", required: true },
-        { model: "pincode", label: "Pincode", required: true },
-        { model: "district", label: "District", required: true },
-        { model: "state", label: "State", required: true },
-        { model: "country", label: "Country", required: true },
-        {
-          model: "issue_date",
-          label: "Issue Date",
-          type: "date",
-          required: true,
-        },
-        {
-          model: "class_of_vehicle",
-          label: "Class of Vehicle",
-          required: true,
-        },
-        // optional validity windows
-        {
-          model: "non_transport_valid_from",
-          label: "Non-Transport Valid From",
-          type: "date",
-        },
-        {
-          model: "non_transport_valid_to",
-          label: "Non-Transport Valid To",
-          type: "date",
-        },
-        {
-          model: "transport_valid_from",
-          label: "Transport Valid From",
-          type: "date",
-        },
-        {
-          model: "transport_valid_to",
-          label: "Transport Valid To",
-          type: "date",
-        },
-        {
-          model: "hazardous_valid_till",
-          label: "Hazardous Valid Till",
-          type: "date",
-        },
-        { model: "hill_valid_till", label: "Hill Valid Till", type: "date" },
-      ];
     },
   },
   mounted() {
@@ -851,85 +596,6 @@ export default {
         this.updating = false;
       }
     },
-    async verifyDL() {
-      if (this.$refs.dlVerifyForm && !this.$refs.dlVerifyForm.validate())
-        return;
-      this.verifyingDL = true;
-      try {
-        const payload = {
-          customer_id: this.customerData.customer_id,
-          dl_no: this.dlForm.dl_number,
-          dob: this.dlForm.dob,
-        };
-        const res = await api.post("/api/customer/verify-dl", payload);
-        const ok = res && res.data && res.data.success;
-        if (ok) {
-          Swal.fire({
-            icon: "success",
-            title: "DL Verified",
-            text: "Driving License verification successful.",
-          });
-          this.customerData.dl_verified = true;
-          this.openDLVerifyDialog = false;
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "DL Not Verified",
-            text:
-              (res && res.data && res.data.message) ||
-              "DL details not found. Try manual entry.",
-            confirmButtonText: "Verify Manually",
-          }).then(() => {
-            // prefill manual with available info
-            this.manualDLForm.dl_number = this.dlForm.dl_number;
-            this.manualDLForm.dob = this.dlForm.dob;
-            this.openDLVerifyDialog = false;
-            this.openManualDLDialog = true;
-          });
-        }
-      } catch (e) {
-        Swal.fire({
-          icon: "error",
-          title: "Verification Failed",
-          text: this.parseError(e),
-        });
-      } finally {
-        this.verifyingDL = false;
-      }
-    },
-    async submitManualDL() {
-      if (this.$refs.manualDLForm && !this.$refs.manualDLForm.validate())
-        return;
-      this.verifyingManualDL = true;
-      try {
-        const payload = Object.assign(
-          { customer_id: this.customerData.customer_id },
-          this.manualDLForm
-        );
-        const res = await api.post("/api/customer/verify-dl-manual", payload); // uses axios baseURL
-        const body = (res && res.data) || {};
-        if (body.success) {
-          Swal.fire(
-            "Verified",
-            body.message || "Manual DL verification successful",
-            "success"
-          );
-          // trust server as source of truth and refresh
-          this.openManualDLDialog = false;
-          await this.loadCustomer();
-        } else {
-          throw new Error(body.message || "Manual verification failed");
-        }
-      } catch (e) {
-        Swal.fire({
-          icon: "error",
-          title: "Manual Verification Failed",
-          text: this.parseError(e),
-        });
-      } finally {
-        this.verifyingManualDL = false;
-      }
-    },
     async fetchStates() {
       this.statesLoading = true;
       try {
@@ -943,37 +609,6 @@ export default {
         });
       } finally {
         this.statesLoading = false;
-      }
-    },
-    async uploadImage(side) {
-      try {
-        const file =
-          side === "front" ? this.frontImageFile : this.backImageFile;
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append("type", "kyc");
-        formData.append("image", file, file.name);
-
-        const res = await api.post("/api/document/upload-image", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        if (res.data?.success) {
-          const imageUrl = res.data.data.url;
-          if (side === "front") {
-            this.idForm.document_front_image_url = imageUrl;
-          } else {
-            this.idForm.document_back_image_url = imageUrl;
-          }
-          Swal.fire("Success", "Image uploaded successfully", "success");
-        }
-      } catch (e) {
-        Swal.fire({
-          icon: "error",
-          title: "Upload Failed",
-          text: this.parseError(e),
-        });
       }
     },
 
