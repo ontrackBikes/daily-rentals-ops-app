@@ -2,7 +2,15 @@
   <v-container>
     <!-- Top Button -->
     <div class="d-flex justify-space-between align-center my-2">
-      <h4 class="my-auto">Total Paid = {{ totalNetPaid }}</h4>
+      <h4 class="my-auto">
+        Total Paid =
+        <v-progress-circular
+          v-if="PaymentsLoading"
+          indeterminate
+          :size="26"
+        ></v-progress-circular>
+        <span v-else>{{ totalNetPaid }}</span>
+      </h4>
       <v-btn
         class="my-auto"
         color="primary"
@@ -15,7 +23,12 @@
 
     <!-- Payments Table -->
     <v-card outlined class="rounded-lg">
-      <v-simple-table>
+      <v-skeleton-loader
+        v-if="PaymentsLoading"
+        type="table-thead, table-row@6"
+        class="mx-2 my-4"
+      />
+      <v-simple-table v-else>
         <thead>
           <tr>
             <th>ID</th>
@@ -199,145 +212,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Add Payment Dialog -->
-    <!-- <v-dialog v-model="openAddPaymentDialog" max-width="550px">
-      <v-card :loading="loading">
-        <v-container>
-       
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">Add Payment</div>
-            <v-btn icon @click="openAddPaymentDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
-
-         
-          <div class="mt-2 text-subtitle-2">
-            <strong>Order ID:</strong> {{ orderId }}
-          </div>
-
-        
-          <v-form ref="form" v-model="formValid" class="mt-4">
-            <v-row dense>
-            
-              <v-col cols="12" md="6">
-                <label class="text-subtitle-2">Amount</label>
-                <v-text-field
-                  v-model="paymentForm.amount"
-                  placeholder="Amount paid"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required]"
-                />
-              </v-col>
-
-        
-              <v-col cols="12" md="6">
-                <label class="text-subtitle-2">Gateway Provider</label>
-                <v-select
-                  v-model="paymentForm.gateway_provider"
-                  :items="['razorpay', 'cash', 'others']"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required]"
-                  placeholder="Select gateway"
-                />
-              </v-col>
-
-           
-              <v-col
-                cols="12"
-                v-if="paymentForm.gateway_provider === 'razorpay'"
-              >
-                <label class="text-subtitle-2">Provider Payment ID</label>
-                <v-text-field
-                  v-model="paymentForm.provider_payment_id"
-                  placeholder="Razorpay Payment ID"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required]"
-                />
-              </v-col>
-
-             
-              <template
-                v-if="
-                  paymentForm.gateway_provider === 'cash' ||
-                  paymentForm.gateway_provider === 'others'
-                "
-              >
-               
-                <v-col cols="12" md="6">
-                  <label class="text-subtitle-2">Method</label>
-                  <v-select
-                    v-model="paymentForm.method"
-                    :items="['cash', 'upi', 'scanner', 'bank_transfer', 'card']"
-                    dense
-                    outlined
-                    hide-details
-                    :rules="[rules.required]"
-                    placeholder="Select method"
-                  />
-                </v-col>
-
-              
-                <v-col cols="12" md="6">
-                  <label class="text-subtitle-2">Collection Location</label>
-                  <v-text-field
-                    v-model="paymentForm.collection_location"
-                    placeholder="e.g. Koramangala Hub"
-                    dense
-                    outlined
-                    hide-details
-                  />
-                </v-col>
-
-        
-                <v-col cols="12">
-                  <label class="text-subtitle-2">Notes</label>
-                  <v-textarea
-                    v-model="paymentForm.notes"
-                    placeholder="Optional notes"
-                    outlined
-                    dense
-                    rows="2"
-                    hide-details
-                  />
-                </v-col>
-              </template>
-
-         
-              <v-col cols="12">
-                <label class="text-subtitle-2">Payment Date</label>
-                <v-text-field
-                  v-model="paymentForm.date"
-                  type="date"
-                  dense
-                  outlined
-                  hide-details
-                  :rules="[rules.required]"
-                />
-              </v-col>
-            </v-row>
-          </v-form>
-
-  
-          <div class="d-flex justify-end mt-4">
-            <v-btn
-              color="primary"
-              :disabled="!formValid"
-              @click="confirmPayment"
-            >
-              Confirm
-            </v-btn>
-          </div>
-        </v-container>
-      </v-card>
-    </v-dialog> -->
-
     <!-- Refund Payment Dailog -->
     <v-dialog v-model="openRefundPaymentDialog" max-width="500px">
       <v-card :loading="loading">
@@ -470,6 +344,7 @@ export default {
       openAddPaymentDialog: false,
       openRefundPaymentDialog: false,
       loading: false,
+      PaymentsLoading: false,
       formValid: false,
 
       // Updated payment form according to API
@@ -541,6 +416,7 @@ export default {
       this.openRefundPaymentDialog = true;
     },
     async loadPayments() {
+      this.PaymentsLoading = true;
       try {
         const { data } = await api.get(`/api/orders/${this.orderId}/payments`);
         this.totalPaid = data.total_paid || 0;
@@ -550,6 +426,7 @@ export default {
         console.error("Failed to load payments:", error);
         this.payments = [];
       }
+      this.PaymentsLoading = false;
     },
 
     // async confirmPayment() {

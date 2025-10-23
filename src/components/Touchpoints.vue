@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-4">
+  <v-card rounded="lg" outlined class="pa-4 mt-2">
     <!-- Header -->
     <div class="font-weight-bold mb-2 d-flex align-center">
       <v-icon left>mdi-comment-multiple</v-icon>
@@ -20,7 +20,7 @@
     </v-alert>
 
     <!-- Add/Edit Comment Box -->
-    <v-card outlined class="pa-4 mb-4">
+    <div class="pa-2">
       <v-text-field
         v-show="!editingComment"
         v-model="booking_Id"
@@ -66,7 +66,7 @@
           {{ editingComment ? "Update" : "Add" }}
         </v-btn>
       </div>
-    </v-card>
+    </div>
 
     <!-- Comments Header -->
     <div
@@ -85,7 +85,7 @@
     />
 
     <!-- Timeline -->
-    <v-card v-if="total > 0" outlined class="pa-4" v-lazy="lazyOptions">
+    <v-card v-if="total > 0" outlined class="pa-2" v-lazy="lazyOptions">
       <v-timeline dense align-top class="mb-0">
         <v-timeline-item
           v-for="comment in displayedComments"
@@ -101,7 +101,7 @@
             rounded="lg"
             :outlined="editingComment?.comment_id !== comment.comment_id"
           >
-            <div class="pa-2">
+            <div class="px-2">
               <div class="d-flex justify-space-between align-start">
                 <p class="mb-0 text-body2">{{ comment.comment }}</p>
                 <v-btn

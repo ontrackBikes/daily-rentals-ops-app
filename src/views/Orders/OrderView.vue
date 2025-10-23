@@ -12,10 +12,25 @@
               <div class="text-subtitle-1 font-weight-bold">
                 {{ order?.internal_order_id }}
               </div>
-              <v-btn @click="getOrderData()"
-                ><v-icon>mdi-refresh</v-icon></v-btn
-              >
 
+              <v-btn
+                icon
+                color="grey"
+                @click.stop="getOrderData()"
+                :disabled="loading"
+                class="ml-2"
+                small
+                depressed
+              >
+                <v-icon v-if="!loading">mdi-refresh</v-icon>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="20"
+                  width="2"
+                  color="grey"
+                ></v-progress-circular>
+              </v-btn>
               <!-- Status Chip -->
               <v-chip
                 small

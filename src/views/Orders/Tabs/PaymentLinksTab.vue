@@ -16,11 +16,13 @@
 
     <!-- Payment Links Table -->
     <v-card outlined class="rounded-lg">
-      <v-overlay :value="loading">
-        <v-progress-circular indeterminate size="64" color="primary" />
-      </v-overlay>
+      <v-skeleton-loader
+        v-if="loading"
+        type="table-thead, table-row@6"
+        class="mx-2 my-4"
+      />
 
-      <v-simple-table>
+      <v-simple-table v-else>
         <thead>
           <tr>
             <th>ID</th>

@@ -49,7 +49,12 @@
       </v-row>
 
       <v-card class="rounded-lg my-4" outlined :loading="loading">
-        <v-simple-table>
+        <v-skeleton-loader
+          v-if="loading"
+          type="table-thead, table-row@6"
+          class="mx-2 my-4"
+        />
+        <v-simple-table v-else>
           <thead>
             <tr>
               <th class="text-left">ID</th>
