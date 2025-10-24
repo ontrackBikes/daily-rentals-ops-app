@@ -1,7 +1,14 @@
 <template>
   <v-row class="pa-4" dense>
+    <v-progress-circular
+      v-if="loading"
+      indeterminate
+      color="grey"
+      class="mx-auto"
+      size="64"
+    ></v-progress-circular>
     <!-- Images List -->
-    <v-col cols="12">
+    <v-col cols="12" v-else>
       <v-row dense>
         <!-- Image cards -->
         <v-col
@@ -157,7 +164,7 @@ export default {
   methods: {
     async fetchBookingImages() {
       if (!this.booking?.booking_id) return;
-
+      this.loading = true;
       try {
         const res = await api.get(
           `/api/bookings/${this.booking.booking_id}/images`
@@ -167,6 +174,7 @@ export default {
         console.error("Failed to fetch booking images:", err);
         this.bookingImages = [];
       }
+      this.loading = false;
     },
 
     async uploadImage() {

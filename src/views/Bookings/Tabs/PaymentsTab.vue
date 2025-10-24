@@ -1,7 +1,12 @@
 <template>
   <v-container>
     <v-card outlined class="rounded-lg">
-      <v-simple-table>
+      <v-skeleton-loader
+        v-if="loading"
+        type="table-thead, table-row@6"
+        class="mx-2 my-4"
+      />
+      <v-simple-table v-else>
         <thead>
           <tr>
             <th>Amount</th>
@@ -37,6 +42,7 @@ export default {
   data() {
     return {
       payments: [],
+      loading: false,
     };
   },
   mounted() {
@@ -44,6 +50,7 @@ export default {
   },
   methods: {
     async loadPayments() {
+      this.loading = true;
       try {
         const { data } = await api.get(
           `/api/bookings/${this.booking.booking_id}/payments`
@@ -53,6 +60,7 @@ export default {
         console.error("Failed to load payments:", error);
         this.payments = [];
       }
+      this.loading = false;
     },
   },
 };

@@ -11,7 +11,7 @@
 
       <!-- Table when not loading -->
 
-      <v-simple-table>
+      <v-simple-table v-else>
         <thead>
           <tr>
             <th class="text-left">Booking ID</th>

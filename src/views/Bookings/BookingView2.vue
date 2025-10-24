@@ -153,7 +153,7 @@
                     depressed
                     color="primary"
                     block
-                    @click="openExtendDialog = true"
+                    @click="extendDialog = true"
                   >
                     Extend Booking
                   </v-btn>
@@ -481,14 +481,21 @@
       </v-card>
     </v-dialog>
 
-    <extend-booking-viewer
+    <!-- <extend-booking
       v-if="booking_id"
       v-model="openExtendDialog"
-      :booking_id="booking_id"
+      :booking="booking"
       :model_id="booking.model_id"
       @confirm="handleConfirm"
       @error="showError"
-    />
+    /> -->
+    <v-dialog v-model="extendDialog" max-width="500px">
+      <extend-booking
+        @extendConfirmed="handleConfirm"
+        :booking="booking"
+        @close-modal="extendDialog = false"
+      />
+    </v-dialog>
 
     <v-dialog v-model="openExchangeDialog" max-width="600px">
       <v-card flat>
@@ -583,13 +590,13 @@
 import api from "@/plugins/axios";
 import Swal from "sweetalert2";
 import DeepLayout from "@/Layouts/DeepLayout.vue";
-import ExtendBookingViewer from "@/components/ExtendBookingViewer.vue";
+import ExtendBooking from "@/components/ExtendBooking.vue";
 import StatusService from "@/plugins/statusColor";
 import ExchangeViewer from "@/components/ExchangeViewer.vue";
 import Touchpoints from "@/components/Touchpoints.vue";
 
 export default {
-  components: { DeepLayout, ExtendBookingViewer, ExchangeViewer, Touchpoints },
+  components: { DeepLayout, ExtendBooking, ExchangeViewer, Touchpoints },
   data() {
     return {
       booking_id: null,
@@ -632,7 +639,7 @@ export default {
       // extendForm: {
       //   newEndDate: null,
       // },
-      openExtendDialog: false,
+      extendDialog: false,
       dateMenu: false,
       minDate: new Date().toISOString().substr(0, 10),
       step: 1,
@@ -678,7 +685,9 @@ export default {
     async fetchBookingDetails() {
       this.loading = true;
       try {
-        const { data } = await api.get(`/api/booking/${this.booking_id}`);
+        const { data } = await api.get(`/api/booking/${this.booking_id}`, {
+          params: { booking_type: "extension" },
+        });
         this.booking = data.data || {};
       } catch (error) {
         console.error("Error loading booking:", error);
@@ -984,7 +993,7 @@ export default {
         title: "Confirmed",
         text: "Extension has been confirmed successfully!",
       });
-      this.openExtendDialog = false;
+      this.extendDialog = false;
       this.fetchBookingDetails(); // Refresh data
     },
 

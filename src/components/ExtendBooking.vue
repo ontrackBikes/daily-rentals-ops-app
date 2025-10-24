@@ -12,9 +12,20 @@
 
     <v-divider />
 
+    <!-- Global Error Message -->
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      dense
+      colored-border
+      class="mb-3"
+      @click="errorMessage = ''"
+    >
+      {{ errorMessage }}
+    </v-alert>
+
     <!-- Stepper -->
     <v-stepper v-model="step" flat>
-      <!-- Step Headers -->
       <v-stepper-header>
         <v-stepper-step :complete="step > 1" step="1"
           >Choose Plan</v-stepper-step
@@ -31,6 +42,7 @@
           <div v-if="loadingPlans" class="text-center pa-4">
             <v-progress-circular indeterminate color="primary" />
           </div>
+
           <div v-else>
             <v-radio-group v-model="selectedPlan" column>
               <v-radio
@@ -43,6 +55,7 @@
               />
             </v-radio-group>
           </div>
+
           <v-btn
             color="primary"
             class="mt-3"
@@ -56,11 +69,11 @@
         </v-stepper-content>
 
         <!-- Step 2: Preview -->
-        <!-- Step 2: Preview -->
         <v-stepper-content step="2">
           <div v-if="previewing" class="text-center pa-4">
             <v-progress-circular indeterminate color="primary" />
           </div>
+
           <div v-else-if="preview">
             <v-alert type="info" class="mt-3">
               <div><strong>Extension Preview</strong></div>
@@ -83,6 +96,7 @@
               </div>
             </v-alert>
           </div>
+
           <v-btn text rounded class="mt-3" @click="step = 1">Back</v-btn>
           <v-btn
             color="primary"
@@ -123,7 +137,7 @@ import api from "@/plugins/axios";
 export default {
   name: "ExtendBooking",
   props: {
-    booking: { type: String, required: true },
+    booking: { type: Object, required: true },
   },
   data() {
     return {
@@ -136,6 +150,7 @@ export default {
       loadingPlans: false,
       previewing: false,
       confirming: false,
+      errorMessage: "",
     };
   },
   created() {
@@ -147,44 +162,72 @@ export default {
   methods: {
     async fetchPlans() {
       this.loadingPlans = true;
+      this.errorMessage = "";
       try {
         const res = await api.get(`/api/vehicle-model/${this.model_id}`);
-        this.plans = res.data?.data.vehicle_model_pricing_data || [];
+        this.plans = res.data?.data?.vehicle_model_pricing_data || [];
+        if (!this.plans.length) {
+          this.errorMessage = "No active plans found for this model.";
+        }
       } catch (err) {
-        console.error("Error fetching plans", err);
+        this.errorMessage =
+          err.response?.data?.message ||
+          "Failed to fetch plans. Please try again.";
+        console.error("Error fetching plans:", err);
       } finally {
         this.loadingPlans = false;
       }
     },
+
     async goToPreview() {
       this.previewing = true;
+      this.errorMessage = "";
       this.step = 2;
       try {
         const res = await api.post(
           `/api/booking/${this.booking_id}/extension/preview`,
           { pricing_id: this.selectedPlan }
         );
-        this.preview = res.data?.data;
+        if (res.data?.success) {
+          this.preview = res.data.data;
+        } else {
+          this.errorMessage =
+            res.data?.message || "Unable to generate preview.";
+          this.step = 1;
+        }
       } catch (err) {
-        console.error("Error previewing extension", err);
+        this.errorMessage =
+          err.response?.data?.message || "Error generating preview.";
+        this.step = 1;
+        console.error("Preview error:", err);
       } finally {
         this.previewing = false;
       }
     },
+
     async extendBooking() {
       this.confirming = true;
+      this.errorMessage = "";
       try {
-        await api.post(`/api/booking/${this.booking_id}/extend`, {
+        const res = await api.post(`/api/booking/${this.booking_id}/extend`, {
           pricing_id: this.selectedPlan,
         });
-        this.$emit("extendConfirmed"); // ✅ notify parent
-        this.$emit("close-modal"); // ✅ close the modal/dialog
+        if (res.data?.success) {
+          this.$emit("extendConfirmed");
+          this.$emit("close-modal");
+          this.step = 1;
+        } else {
+          this.errorMessage = res.data?.message || "Failed to extend booking.";
+        }
       } catch (err) {
-        console.error("Error extending booking", err);
+        this.errorMessage =
+          err.response?.data?.message || "Error extending booking.";
+        console.error("Extend error:", err);
       } finally {
         this.confirming = false;
       }
     },
+
     displayAmount(plan) {
       const offer = parseFloat(plan.offer_rate);
       const base = parseFloat(plan.base_rate);
@@ -193,5 +236,3 @@ export default {
   },
 };
 </script>
-
-<style scoped></style>

@@ -39,7 +39,7 @@
         </v-chip>
       </div>
 
-      <div class="d-flex">
+      <div>
         <div
           class="grey--text text--darken-1 text-body-2 mt-1 d-flex align-center"
         >
@@ -47,8 +47,8 @@
           {{ customerPhone }}
         </div>
 
-        <div class="text-body-2 mt-1 align-center ml-4 d-flex">
-          <v-icon small color="indigo" class="ml-1">mdi-email</v-icon>
+        <div class="text-body-2 mt-1 align-center d-flex">
+          <v-icon small color="indigo" class="mr-1">mdi-email</v-icon>
           {{
             customerData.customer_contact_data.find((c) => c.type === "email")
               ?.value
@@ -85,7 +85,7 @@
           class="ml-2"
           color="amber darken-2"
           text-color="black"
-          @click="openIDVerifyDialog = true"
+          @click="openIDVerifyDialog = true && fetchStates()"
         >
           Verify Now
         </v-chip>
@@ -550,7 +550,6 @@ export default {
   },
   mounted() {
     this.loadCustomer();
-    this.fetchStates();
   },
   methods: {
     parseError(error) {

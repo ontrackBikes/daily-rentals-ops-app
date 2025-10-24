@@ -13,22 +13,23 @@
         </thead>
         <tbody>
           <tr v-for="(ext, i) in extensions" :key="i">
-            <td>{{ ext.extension_id || "N/A" }}</td>
+            <td>{{ ext.line_item_id || "N/A" }}</td>
             <td>
               <v-chip
                 small
-                :color="ext.payment_status === 'pending' ? 'orange' : 'green'"
+                :color="
+                  booking.order_data.payment_status === 'pending'
+                    ? 'orange'
+                    : 'green'
+                "
                 dark
               >
-                {{ ext.payment_status }}
-                <span v-if="ext.payment_status === 'pending'" class="ml-1"
-                  >Update</span
-                >
+                {{ booking.order_data.payment_status }}
               </v-chip>
             </td>
-            <td>{{ formatDate(ext.old_end_date) }}</td>
-            <td>{{ formatDate(ext.new_end_date) }}</td>
-            <td>{{ ext.amount || "N/A" }}</td>
+            <td>{{ formatDate(ext.old_end_date || booking.start_date) }}</td>
+            <td>{{ formatDate(ext.new_end_date || booking.end_date) }}</td>
+            <td>{{ ext.net_total || "N/A" }}</td>
           </tr>
           <tr v-if="!extensions.length">
             <td colspan="5" class="text-center">No extensions found</td>
@@ -41,7 +42,6 @@
 
 <script>
 import moment from "moment";
-import api from "@/plugins/axios";
 
 export default {
   name: "ExtensionsTab",
@@ -60,14 +60,13 @@ export default {
     formatDate(date) {
       return date ? moment(date).format("DD/MM/YYYY") : "N/A";
     },
-    async loadExtensions() {
-      try {
-        const { data } = await api.get(
-          `/api/bookings/${this.booking.booking_id}/extensions`
+    loadExtensions() {
+      // ✅ Filter extensions from booking data
+      if (this.booking?.booking_line_item_data?.length) {
+        this.extensions = this.booking.booking_line_item_data.filter(
+          (item) => item.product_subtype === "extension"
         );
-        this.extensions = data.extensions || [];
-      } catch (error) {
-        console.error("Failed to load extensions:", error);
+      } else {
         this.extensions = [];
       }
     },

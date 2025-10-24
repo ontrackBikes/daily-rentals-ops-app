@@ -361,7 +361,7 @@
               <!-- Extend  -->
               <v-dialog v-model="extendDialog" max-width="500px">
                 <extend-booking
-                  @exchangeConfirmed="refreshPage"
+                  @extendConfirmed="refreshPage"
                   :booking="selectedBooking"
                   @close-modal="extendDialog = false"
                 />
@@ -467,30 +467,38 @@ export default {
       this.extendDialog = true;
     },
     refreshPage() {
+      // ✅ Reset before re-fetch
+      this.offset = 0;
+      this.bookings = [];
+      this.total = 0;
       this.fetchBookings();
       this.refreshOrder();
     },
+
     async fetchBookings() {
-      if (this.loading) return; // ✅ prevent multiple clicks
+      if (this.loading) return;
       this.loading = true;
       try {
         const res = await api.get(`/api/order/${this.orderId}/bookings`, {
-          params: { limit: this.limit, offset: this.offset },
+          params: {
+            limit: this.limit,
+            offset: this.offset,
+          },
         });
 
         const data = res.data.data;
 
         if (data?.bookings?.length > 0) {
-          // ✅ Append results
-          this.bookings.push(...data.bookings);
+          // ✅ Replace instead of append when offset = 0
+          if (this.offset === 0) {
+            this.bookings = data.bookings;
+          } else {
+            this.bookings.push(...data.bookings);
+          }
 
-          // ✅ Update total count from API
           this.total = data.meta.total;
-
-          // ✅ Only increase offset by number of records fetched
           this.offset += data.bookings.length;
         } else {
-          // No more records
           this.total = this.bookings.length;
         }
       } catch (err) {
