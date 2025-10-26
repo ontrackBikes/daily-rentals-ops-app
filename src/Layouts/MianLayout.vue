@@ -272,6 +272,7 @@ export default {
         { title: "Customers", icon: "mdi-account-group", route: "/customers" },
         { title: "Locations", icon: "mdi-map-marker", route: "/locations" },
         { title: "Models", icon: "mdi-bike", route: "/models" },
+        { title: "Incidents", icon: "mdi-alert-circle", route: "/ims" },
         { title: "Add-Ons", icon: "mdi-plus-box", route: "/add-ons" },
         { title: "Plans", icon: "mdi-file-document", route: "/plans" },
       ],

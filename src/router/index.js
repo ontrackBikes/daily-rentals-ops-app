@@ -24,6 +24,8 @@ import CustomerDetails from "@/views/Bookings/CustomerDetails.vue";
 import AddOnList from "@/views/AddOnList.vue";
 import PlanList from "@/views/PlanList.vue";
 import ModelOverview from "@/views/Models/Tabs/ModelOverview.vue";
+import ImsList from "@/views/InsidentManagement/ImsList.vue";
+import ImsOverview from "@/views/InsidentManagement/ImsOverview.vue";
 
 Vue.use(Router);
 
@@ -55,6 +57,7 @@ const router = new Router({
         { path: "/customers", name: "Customer", component: CustomersList },
         { path: "/locations", name: "Location", component: LocationList },
         { path: "/models", name: "Model", component: ModelsList },
+        { path: "/ims", name: "Incident Management", component: ImsList },
         {
           path: "/add-ons",
           name: "Add-Ons",
@@ -175,6 +178,12 @@ const router = new Router({
             import("@/views/Vehicles/VehicleTabs/SettingsTab.vue"),
         },
       ],
+    },
+
+    {
+      path: "/ims/:incident_id",
+      name: "IMS View",
+      component: ImsOverview,
     },
 
     // Location view
