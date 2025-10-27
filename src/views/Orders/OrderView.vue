@@ -32,6 +32,11 @@
                 ></v-progress-circular>
               </v-btn>
               <!-- Status Chip -->
+            </div>
+            <div class="d-flex justify-space-between align-center my-2">
+              <span class="text-subtitle-1 font-weight-medium"
+                >Order Status</span
+              >
               <v-chip
                 small
                 class="font-weight-medium"

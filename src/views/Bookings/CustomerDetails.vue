@@ -87,8 +87,8 @@
 
               <div v-if="selectedCustomer">
                 <v-tabs v-model="activeTab" background-color="transparent" grow>
-                  <v-tab value="pickup">Pickup</v-tab>
-                  <v-tab value="delivery">Delivery</v-tab>
+                  <v-tab>Pickup</v-tab>
+                  <v-tab>Delivery</v-tab>
                 </v-tabs>
 
                 <v-tabs-items v-model="activeTab" class="mt-4 pa-2">
@@ -98,54 +98,32 @@
                       :items="locations"
                       item-text="name"
                       item-value="location_id"
-                      label="Pickup location"
+                      label="Pickup Location"
                       :loading="locationsLoading"
                       outlined
                       dense
                       hide-details
-                    ></v-select>
-
-                    <!-- <v-btn
-                    class="mt-4"
-                    color="primary"
-                    :loading="checking"
-                    block
-                    @click="checkServiceability('pickup')"
-                    :disabled="!pickupLocation"
-                  >
-                    Check Serviceability
-                  </v-btn> -->
+                    />
                   </v-tab-item>
 
                   <v-tab-item>
                     <div>
-                      <!-- Pickup Location -->
+                      <!-- Provider location -->
                       <v-select
                         v-model="location_id"
                         :items="locations"
                         item-text="name"
                         item-value="location_id"
-                        label="Select provider location"
+                        label="Select Provider Location"
                         :loading="locationsLoading"
                         outlined
                         dense
                         hide-details
-                      ></v-select>
+                      />
 
-                      <!-- Delivery Pincode (optional manual entry) -->
-                      <!-- <v-text-field
-                        v-model="deliveryPincode"
-                        label="Check for Delivery"
-                        outlined
-                        dense
-                        class="ml-3 flex-grow-1"
-                        hide-details
-                        type="number"
-                      ></v-text-field> -->
-
-                      <!-- Saved Address Dropdown -->
+                      <!-- Saved Addresses -->
                       <v-select
-                        v-if="type === 'delivery'"
+                        :key="addressList.length"
                         v-model="selectedAddressId"
                         :items="addressList"
                         item-text="address_line"
@@ -160,32 +138,59 @@
                           setSelectedAddress && checkServiceability('delivery')
                         "
                       >
+                        <!-- Dropdown items -->
                         <template v-slot:item="{ item, on, attrs }">
                           <v-list-item v-bind="attrs" v-on="on">
                             <v-list-item-content>
                               <v-list-item-title>{{
                                 item.address_line
                               }}</v-list-item-title>
-                              <v-list-item-subtitle>{{
-                                item.postal_code
-                              }}</v-list-item-subtitle>
+                              <v-list-item-subtitle>
+                                {{ item.postal_code }} | {{ item.type }}
+                              </v-list-item-subtitle>
                             </v-list-item-content>
+
+                            <v-list-item-action>
+                              <v-btn
+                                icon
+                                x-small
+                                @click.stop="openEditDialog(item)"
+                              >
+                                <v-icon color="blue">mdi-pencil</v-icon>
+                              </v-btn>
+                              <v-btn
+                                icon
+                                x-small
+                                @click.stop="deleteAddress(item.address_id)"
+                              >
+                                <v-icon color="red">mdi-delete</v-icon>
+                              </v-btn>
+                            </v-list-item-action>
                           </v-list-item>
                         </template>
 
                         <template v-slot:selection="{ item }">
-                          <span
-                            >{{ item.address_line }} -
-                            {{ item.postal_code }}</span
-                          >
+                          <span v-if="item">
+                            {{ item.address_line }} - {{ item.postal_code }}
+                          </span>
+                          <span v-else>Select Saved Address</span>
                         </template>
                       </v-select>
-                      <v-btn>+Add Address</v-btn>
+
+                      <v-btn
+                        color="primary"
+                        outlined
+                        class="mt-2"
+                        small
+                        v-model="selectedAddressId"
+                        @click="openAddDialog"
+                      >
+                        + Add Address
+                      </v-btn>
                     </div>
                   </v-tab-item>
                 </v-tabs-items>
 
-                <!-- ================= Result ================= -->
                 <v-alert
                   v-if="serviceabilityMsg"
                   :type="isServiceable ? 'success' : 'error'"
@@ -195,6 +200,73 @@
                 >
                   {{ serviceabilityMsg }}
                 </v-alert>
+
+                <!-- Address Dialog -->
+                <v-dialog v-model="addressDialog" max-width="500px">
+                  <v-card>
+                    <v-card-title class="text-h6">
+                      {{ editMode ? "Edit Address" : "Add Address" }}
+                    </v-card-title>
+
+                    <v-card-text>
+                      <v-text-field
+                        v-model="AddresForm.address_line"
+                        label="Address Line"
+                        outlined
+                        dense
+                        required
+                      />
+                      <v-text-field
+                        v-model="AddresForm.postal_code"
+                        label="Postal Code"
+                        outlined
+                        dense
+                        required
+                      />
+                      <v-select
+                        v-model="AddresForm.city_id"
+                        :items="cities"
+                        item-text="name"
+                        item-value="id"
+                        label="City"
+                        outlined
+                        dense
+                        required
+                      />
+                      <v-text-field
+                        v-model="AddresForm.country"
+                        label="Country"
+                        outlined
+                        dense
+                        required
+                      />
+                      <v-select
+                        v-model="AddresForm.type"
+                        :items="['home', 'work', 'other']"
+                        label="Type"
+                        outlined
+                        dense
+                      />
+                      <v-switch
+                        v-model="AddresForm.is_default"
+                        label="Set as Default"
+                        inset
+                      ></v-switch>
+                    </v-card-text>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn text @click="addressDialog = false">Cancel</v-btn>
+                      <v-btn
+                        color="primary"
+                        @click="saveAddress"
+                        :loading="saving"
+                      >
+                        {{ editMode ? "Update" : "Save" }}
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </div>
             </v-card-text>
           </v-card>
@@ -248,7 +320,7 @@
               outlined
               dense
               class="mt-4"
-              :disabled="!pickupLocation || availableVehicles.length === 0"
+              :disabled="!location_id || availableVehicles.length === 0"
               placeholder="Choose a vehicle"
             />
 
@@ -385,11 +457,31 @@ export default {
       isConfirmMode: false,
       addressList: [],
       selectedAddressId: null,
-      pickupLocation: null,
+
       locations: [],
       locationsLoading: false,
       activeTab: 0,
       deliveryPincode: "",
+
+      addressDialog: false,
+      editMode: false,
+      saving: false,
+
+      AddresForm: {
+        address_line: "",
+        postal_code: "",
+        city_id: "",
+        country: "India",
+        latitude: "",
+        longitude: "",
+        is_default: false,
+        type: "home",
+      },
+      cities: [
+        { id: 1, name: "Bangalore" },
+        { id: 2, name: "Mumbai" },
+        { id: 3, name: "Delhi" },
+      ],
 
       checking: false,
       serviceabilityMsg: "",
@@ -419,9 +511,9 @@ export default {
   },
   computed: {
     availableVehicles() {
-      if (!this.model || !this.pickupLocation) return [];
+      if (!this.model || !this.location_id) return [];
       return this.model.vehicle_data.filter(
-        (v) => v.location_id === this.pickupLocation && v.status === "available"
+        (v) => v.location_id === this.location_id && v.status === "available"
       );
     },
     type() {
@@ -455,6 +547,12 @@ export default {
     location_id(newLocationId, oldLocationId) {
       if (newLocationId !== oldLocationId) {
         this.resetServiceability();
+      }
+    },
+    addressList(newList) {
+      if (Array.isArray(newList) && newList.length === 1) {
+        // Automatically select the only available address
+        this.selectedAddressId = newList[0].address_id;
       }
     },
   },
@@ -516,6 +614,94 @@ export default {
         );
       }
     },
+    openAddDialog() {
+      this.editMode = false;
+      this.resetForm();
+      this.addressDialog = true;
+    },
+
+    openEditDialog(item) {
+      this.editMode = true;
+
+      this.AddresForm = { ...item };
+      this.addressDialog = true;
+    },
+
+    resetForm() {
+      this.AddresForm = {
+        address_id: null,
+        address_line: "",
+        postal_code: "",
+        city_id: "",
+        country: "India",
+        latitude: "",
+        longitude: "",
+        is_default: false,
+        type: "home",
+      };
+    },
+
+    async saveAddress() {
+      const customerId = this.selectedCustomer?.customer_id;
+      if (!customerId) return;
+
+      this.saving = true;
+      try {
+        if (this.editMode) {
+          await api.put(
+            `/api/customer/${customerId}/address/${this.AddresForm.address_id}`,
+            this.AddresForm
+          );
+          this.$swal.fire("Updated", "Address updated successfully", "success");
+        } else {
+          await api.post(
+            `/api/customer/${customerId}/address`,
+            this.AddresForm
+          );
+          this.$swal.fire("Added", "Address added successfully", "success");
+        }
+
+        this.addressDialog = false;
+        await this.fetchCustomerAddresses(customerId);
+      } catch (err) {
+        console.error(err);
+        this.$swal.fire(
+          "Error",
+          err?.response?.data?.message || "Failed to save address",
+          "error"
+        );
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    async deleteAddress(addressId) {
+      const customerId = this.selectedCustomer?.customer_id;
+      if (!customerId) return;
+
+      const confirm = await this.$swal.fire({
+        title: "Delete Address?",
+        text: "This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Delete",
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      try {
+        await api.delete(`/api/customer/${customerId}/address/${addressId}`);
+        this.$swal.fire("Deleted", "Address deleted successfully", "success");
+        await this.fetchCustomerAddresses(customerId);
+      } catch (err) {
+        console.error(err);
+        this.$swal.fire(
+          "Error",
+          err?.response?.data?.message || "Failed to delete address",
+          "error"
+        );
+      }
+    },
     resetServiceability() {
       this.serviceabilityMsg = null;
       this.total = parseFloat(this.$route.query.total || 0);
@@ -572,7 +758,7 @@ export default {
 
         const payload = {
           model_id: this.model_id,
-          location_id: this.pickupLocation || 1,
+          location_id: this.location_id || 1,
           pincode,
           service_type: type,
         };

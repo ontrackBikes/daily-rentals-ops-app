@@ -182,7 +182,7 @@ const router = new Router({
 
     {
       path: "/ims/:incident_id",
-      name: "IMS View",
+      name: "Incident Management View",
       component: ImsOverview,
     },
 

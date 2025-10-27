@@ -9,6 +9,20 @@
           <v-card v-else outlined class="pa-4 rounded-lg mb-4">
             <div class="text-h6 mb-2 font-weight-bold">Booking Details</div>
             <v-row dense>
+              <v-col cols="6" class="grey--text text--darken-1">Order ID</v-col>
+              <v-col cols="6" class="font-weight-medium text-right">
+                <div v-if="incident.booking_data.order_id">
+                  <router-link
+                    :to="`/orders/${incident.booking_data.order_id}`"
+                    class="primary--text font-weight-bold text-decoration-none d-inline-flex align-center"
+                  >
+                    {{ incident.booking_data?.order_id || "-" }}
+                    <v-icon small color="primary" class="ml-1"
+                      >mdi-open-in-new</v-icon
+                    >
+                  </router-link>
+                </div>
+              </v-col>
               <v-col cols="6" class="grey--text text--darken-1"
                 >Booking ID</v-col
               >
