@@ -31,13 +31,17 @@
                     width="60"
                     class="rounded-lg mr-4"
                     contain
-                  ></v-img>
+                  >
+                  </v-img>
 
                   <v-icon v-else size="48" color="grey" class="rounded-lg mr-4">
                     mdi-motorbike
                   </v-icon>
 
                   <div class="text-truncate">
+                    <div class="caption grey--text">
+                      {{ booking.sub_status }}
+                    </div>
                     <div class="subtitle-1 font-weight-medium text-truncate">
                       #{{ booking.booking_id }} —
                       {{ booking.model_data?.model_name }}
@@ -61,9 +65,6 @@
                   </v-chip>
                   <div class="text-right">
                     <h4>₹{{ booking.net_amount }}</h4>
-                    <div class="caption grey--text">
-                      {{ booking.sub_status }}
-                    </div>
                   </div>
                 </div>
               </div>
