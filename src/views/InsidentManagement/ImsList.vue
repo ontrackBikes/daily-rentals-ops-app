@@ -1,6 +1,19 @@
 <template>
   <v-container>
     <!-- Header + Filters -->
+
+    <v-row>
+      <v-col cols="12" md="2" v-for="(data, index) in typeOption" :key="index">
+        <v-card
+          :color="selectedType == data.value ? 'primary lighten-4' : ''"
+          @click="selectedType = data.value"
+        >
+          <v-container>
+            <div>{{ data.text }}</div>
+          </v-container>
+        </v-card>
+      </v-col>
+    </v-row>
     <v-row align="center" class="mb-4">
       <v-col cols="12" md="4">
         <div class="text-h6 font-weight-bold">Incidents ({{ total }})</div>
@@ -16,7 +29,6 @@
           outlined
           hide-details
           class="rounded-lg"
-          @change="fetchIncidents"
         />
       </v-col>
 
@@ -231,7 +243,7 @@ export default {
 
       // Filters
       selectedStatus: "open",
-      selectedType: "booking",
+      selectedType: "km_bills",
       statusOptions: [
         { text: "All", value: "" },
         { text: "Open", value: "open" },
@@ -245,6 +257,15 @@ export default {
         "general",
         "expired_booking",
         "due_expiry",
+        "km_bills",
+      ],
+      typeOption: [
+        { text: "KM Bills", value: "km_bills" },
+        { text: "Expired Booking", value: "expired_booking" },
+        { text: "Due Expiry", value: "due_expiry" },
+        { text: "Booking", value: "booking" },
+        { text: "Customer Query", value: "customer_query" },
+        { text: "General", value: "general" },
       ],
       priorityOptions: ["low", "medium", "high"],
 
@@ -270,6 +291,11 @@ export default {
     this.fetchIncidents();
   },
 
+  watch: {
+    selectedType() {
+      this.fetchIncidents();
+    },
+  },
   methods: {
     async fetchIncidents() {
       this.loading = true;
