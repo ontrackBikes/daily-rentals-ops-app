@@ -1,7 +1,8 @@
 import axios from "axios";
 import router from "@/router";
 
-const baseURL = process.env.VUE_APP_INVENTORY_API; // ✅ Correct for Vue 2 CLI
+const baseURL =
+  process.env.VUE_APP_INVENTORY_API || "https://dailyapi.on-track.in"; // ✅ Correct for Vue 2 CLI
 
 const api = axios.create({
   baseURL,
