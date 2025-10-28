@@ -56,7 +56,21 @@
             </td>
             <td>{{ payment.amount }}</td>
             <td>{{ payment.total_refunded }}</td>
-            <td>{{ payment.total_credit_note }}</td>
+            <td>
+              <v-btn
+                small
+                color="primary"
+                text
+                rounded
+                depressed
+                @click="openCreditNoteSnap"
+                v-if="totalCreditUsed > 0"
+              >
+                ₹{{ totalCreditUsed }}
+              </v-btn>
+              <span v-else>—</span>
+            </td>
+
             <td>{{ payment.net_paid }}</td>
             <th>{{ payment.gateway_provider }}</th>
             <td>{{ payment.status }}</td>
@@ -78,7 +92,7 @@
                 text
                 color="primary"
                 class="ml-2"
-                @click="updateRefund(payment)"
+                @click="showCreditNoteDialog = true"
                 >Issue Credit Note</v-btn
               >
             </td>
@@ -324,6 +338,111 @@
         </v-container>
       </v-card>
     </v-dialog>
+    <!-- add credit note dialog -->
+    <v-dialog v-model="showCreditNoteDialog" max-width="500">
+      <v-card class="pa-4 rounded-lg">
+        <v-card-title class="text-h6 font-weight-bold">
+          Issue Credit Note
+        </v-card-title>
+
+        <v-card-text>
+          <v-text-field
+            v-model="creditNoteData.original_amount"
+            label="Amount"
+            type="number"
+            outlined
+            dense
+          ></v-text-field>
+
+          <v-text-field
+            v-model="creditNoteData.expires_on"
+            label="Expiry Date"
+            type="date"
+            outlined
+            dense
+          ></v-text-field>
+
+          <v-textarea
+            v-model="creditNoteData.reason"
+            label="Reason"
+            outlined
+            dense
+          ></v-textarea>
+        </v-card-text>
+
+        <v-card-actions class="d-flex justify-end">
+          <v-btn text @click="showCreditNoteDialog = false">Cancel</v-btn>
+          <v-btn color="primary" @click="issueCreditNote">Submit</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Credit Note Snap Dialog -->
+    <v-dialog v-model="viewCreditNoteSnap" max-width="800px">
+      <v-card :loading="loading" min-height="400" class="rounded-lg">
+        <v-container>
+          <!-- Header -->
+          <div class="d-flex justify-space-between align-center">
+            <div class="text-h6 font-weight-bold">Credit Note Details</div>
+            <v-btn icon @click="viewCreditNoteSnap = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <v-divider class="my-2"></v-divider>
+
+          <div v-if="selectedCreditNote">
+            <v-row>
+              <v-col cols="12" md="6">
+                <strong>ID:</strong> {{ selectedCreditNote.credit_note_id }}
+              </v-col>
+              <v-col cols="12" md="6">
+                <strong>Reason:</strong> {{ selectedCreditNote.reason }}
+              </v-col>
+              <v-col cols="12" md="6">
+                <strong>Original Amount:</strong> ₹{{
+                  selectedCreditNote.original_amount
+                }}
+              </v-col>
+              <v-col cols="12" md="6">
+                <strong>Total Used:</strong> ₹{{
+                  selectedCreditNote.total_used
+                }}
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-3"></v-divider>
+            <div class="text-subtitle-1 font-weight-medium mb-2">
+              Transactions
+            </div>
+
+            <v-simple-table dense>
+              <thead>
+                <tr>
+                  <th>Ledger ID</th>
+                  <th>Booking ID</th>
+                  <th>Amount Used</th>
+                  <th>Applied On</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(txn, idx) in selectedCreditNote.transactions"
+                  :key="idx"
+                >
+                  <td>{{ txn.ledger_id }}</td>
+                  <td>{{ txn.booking_id }}</td>
+                  <td>₹{{ txn.amount_used }}</td>
+                  <td>{{ new Date(txn.applied_on).toLocaleString() }}</td>
+                </tr>
+              </tbody>
+            </v-simple-table>
+          </div>
+          <div v-else class="text-center my-6 grey--text">
+            No credit note details available.
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -343,9 +462,20 @@ export default {
       payments: [],
       openAddPaymentDialog: false,
       openRefundPaymentDialog: false,
+      showCreditNoteDialog: false,
+      creditNoteData: {
+        original_amount: "",
+        expires_on: "",
+        reason: "",
+      },
       loading: false,
       PaymentsLoading: false,
       formValid: false,
+      viewCreditNoteSnap: false,
+      selectedCreditNote: null,
+      creditNoteDetails: [],
+      totalCreditUsed: 0,
+      booking_id: this.$route.params.id,
 
       // Updated payment form according to API
       paymentForm: {
@@ -419,14 +549,34 @@ export default {
       this.PaymentsLoading = true;
       try {
         const { data } = await api.get(`/api/orders/${this.orderId}/payments`);
-        this.totalPaid = data.total_paid || 0;
-        this.totalNetPaid = data.total_net_paid || 0;
-        this.payments = data.payments || [];
+
+        const paymentSummary = data.data?.payment_summary || {};
+        const creditNoteSummary = data.data?.credit_note_summary || {};
+
+        this.totalPaid = paymentSummary.total_captured || 0;
+        this.totalNetPaid = paymentSummary.net_total || 0;
+        this.payments = paymentSummary.payments || [];
+
+        // store credit note details for tooltip
+        this.creditNoteDetails = creditNoteSummary.credit_note_details || [];
+        this.totalCreditUsed = creditNoteSummary.total_amount_used || 0;
       } catch (error) {
         console.error("Failed to load payments:", error);
         this.payments = [];
       }
       this.PaymentsLoading = false;
+    },
+    openCreditNoteSnap() {
+      if (this.creditNoteDetails && this.creditNoteDetails.length) {
+        this.selectedCreditNote = this.creditNoteDetails[0]; // if only one
+        this.viewCreditNoteSnap = true;
+      } else {
+        this.$swal.fire({
+          icon: "info",
+          title: "No Credit Note",
+          text: "There are no credit note details available.",
+        });
+      }
     },
 
     // async confirmPayment() {
@@ -586,6 +736,33 @@ export default {
         });
       } finally {
         this.loading = false;
+      }
+    },
+    async issueCreditNote() {
+      try {
+        const res = await fetch(
+          `/api/credit-note/booking/${this.booking_id}/issue`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(this.creditNoteData),
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          this.$emit("credit-note-issued", data);
+          this.$nextTick(() => {
+            this.showCreditNoteDialog = false;
+          });
+          alert("Credit note issued successfully!");
+        } else {
+          alert(data.message || "Failed to issue credit note.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("An error occurred while issuing the credit note.");
       }
     },
   },

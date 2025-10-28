@@ -68,24 +68,23 @@
       <div class="text-subtitle-2 font-weight-medium mt-3 mb-1">
         ID Verification
       </div>
+
       <div class="d-flex align-center">
-        <v-icon small class="mr-1" :color="isIDVerified ? 'green' : 'red'">
-          {{
-            isIDVerified
-              ? "mdi-check-circle-outline"
-              : "mdi-close-circle-outline"
-          }}
+        <v-icon small class="mr-1" :color="kycColor">
+          {{ kycIcon }}
         </v-icon>
+
         <span class="text-body-2 grey--text">
-          {{ isIDVerified ? "Verified" : "Not Verified" }}
+          {{ kycLabel }}
         </span>
+
         <v-chip
-          v-if="!isIDVerified"
+          v-if="kycStatus === 'not_verified'"
           small
           class="ml-2"
           color="amber darken-2"
           text-color="black"
-          @click="openIDVerifyDialog = true && fetchStates()"
+          @click="(openIDVerifyDialog = true), fetchStates()"
         >
           Verify Now
         </v-chip>
@@ -516,9 +515,32 @@ export default {
         : null;
       return (dlData && dlData.verified === true) || c.dl_verified === true;
     },
-    isIDVerified() {
-      const c = this.customerData || {};
-      return !!c.id_verified;
+    kycStatus() {
+      const list = this.customerData?.kyc_verification_data || [];
+      if (list.some((k) => k.status === "verified")) return "verified";
+      if (list.some((k) => k.status === "pending")) return "pending";
+      return "not_verified";
+    },
+    kycLabel() {
+      return this.kycStatus === "verified"
+        ? "Verified"
+        : this.kycStatus === "pending"
+        ? "Pending"
+        : "Not Verified";
+    },
+    kycIcon() {
+      return this.kycStatus === "verified"
+        ? "mdi-check-circle-outline"
+        : this.kycStatus === "pending"
+        ? "mdi-clock-outline"
+        : "mdi-close-circle-outline";
+    },
+    kycColor() {
+      return this.kycStatus === "verified"
+        ? "green"
+        : this.kycStatus === "pending"
+        ? "orange"
+        : "red";
     },
     isVerifyDisabled() {
       const f = this.idForm;

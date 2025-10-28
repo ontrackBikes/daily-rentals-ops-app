@@ -279,25 +279,22 @@ export default {
   },
   computed: {
     totalRefunded() {
-      return this.payment.refund_data.reduce(
-        (sum, r) => sum + parseFloat(r.amount),
-        0
-      );
+      const refunds = this.payment?.refund_data || [];
+      return refunds.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
     },
     totalCreditNotes() {
-      return this.payment.credit_note_data.reduce(
-        (sum, c) => sum + parseFloat(c.original_amount),
+      const notes = this.payment?.credit_note_data || [];
+      return notes.reduce(
+        (sum, c) => sum + parseFloat(c.original_amount || 0),
         0
       );
     },
     netPaid() {
-      return (
-        parseFloat(this.payment.amount) -
-        this.totalRefunded -
-        this.totalCreditNotes
-      );
+      const amount = parseFloat(this.payment?.amount || 0);
+      return amount - this.totalRefunded - this.totalCreditNotes;
     },
   },
+
   methods: {
     formatDate(dateStr) {
       if (!dateStr) return "—";
