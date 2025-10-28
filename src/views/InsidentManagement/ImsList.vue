@@ -239,7 +239,13 @@ export default {
         { text: "Closed", value: "closed" },
         { text: "Resolved", value: "resolved" },
       ],
-      typeOptions: ["booking", "customer_query", "general"],
+      typeOptions: [
+        "booking",
+        "customer_query",
+        "general",
+        "expired_booking",
+        "due_expiry",
+      ],
       priorityOptions: ["low", "medium", "high"],
 
       // Dialog
